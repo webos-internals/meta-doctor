@@ -21,32 +21,49 @@ DEVICE  = pre
 VERSION = p100eww
 CARRIER = sprint
 
+ifeq (${DEVICE},pre)
+CODENAME = castle
+endif
+
 DOCTOR  = webosdoctor${VERSION}${CARRIER}.jar
 
-.PHONY: unpack-sprint
-unpack-sprint:
-	${MAKE} CARRIER=sprint unpack
+all: patch-sprint patch-bellmo
 
-.PHONY: unpack-bellmo
-unpack-bellmo:
-	${MAKE} CARRIER=bellmo unpack
+.PHONY: patch-%
+patch-%:
+	${MAKE} CARRIER=$* patch
+
+.PHONY: patch
+patch: build/${DEVICE}_${VERSION}_${CARRIER}/md5sums
+
+build/${DEVICE}_${VERSION}_${CARRIER}/md5sums: build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old
+	( cd build/${DEVICE}_${VERSION}_${CARRIER} ; find . ! -name 'md5sums*' -type f | \
+		xargs md5sum > md5sums.new )
+	./scripts/replace-md5sums.py build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old \
+				     build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.new > \
+				     build/${DEVICE}_${VERSION}_${CARRIER}/md5sums
+
+.PHONY: unpack-%
+unpack-%:
+	${MAKE} CARRIER=$* unpack
 
 .PHONY: unpack
-unpack: build/${DEVICE}_${VERSION}_${CARRIER}/META-INF/MANIFEST.MF
+unpack: build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old
 
-build/${DEVICE}_${VERSION}_${CARRIER}/META-INF/MANIFEST.MF: downloads/${DOCTOR}
+build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old: downloads/${DOCTOR}
 	rm -rf build/${DEVICE}_${VERSION}_${CARRIER}
 	mkdir -p build/${DEVICE}_${VERSION}_${CARRIER}
-	unzip -d build/${DEVICE}_${VERSION}_${CARRIER} $<
-	[ -f $@ ] && touch $@
+	unzip -p $< resources/webOS.tar | \
+	tar -O -x -f - ./nova-cust-image-castle.rootfs.tar.gz | \
+	tar -C build/${DEVICE}_${VERSION}_${CARRIER} -m -z -x -f - \
+		./usr/palm/applications/com.palm.app.firstuse \
+		./usr/lib/ipkg/info \
+		./md5sums
+	mv build/${DEVICE}_${VERSION}_${CARRIER}/md5sums $@
 
-.PHONY: download-sprint
-download-sprint:
-	${MAKE} CARRIER=sprint download
-
-.PHONY: download-bellmo
-download-bellmo:
-	${MAKE} CARRIER=bellmo download
+.PHONY: download-%
+download-%:
+	${MAKE} CARRIER=$* download
 
 .PHONY: download
 download: downloads/${DOCTOR}
