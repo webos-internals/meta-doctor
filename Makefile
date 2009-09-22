@@ -43,7 +43,7 @@ pack: build/${DEVICE}_${MODEL}_${CARRIER}/.packed
 build/${DEVICE}_${MODEL}_${CARRIER}/.packed: build/${DEVICE}_${MODEL}_${CARRIER}/.patched
 	rm -f $@
 	( cd build/${DEVICE}_${MODEL}_${CARRIER} ; \
-	  find usr/palm/applications/com.palm.app.firstuse -type f | xargs md5sum ) \
+	  find ./usr/palm/applications/com.palm.app.firstuse -type f | xargs md5sum ) \
 	    > build/${DEVICE}_${MODEL}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums.new
 	./scripts/replace-md5sums.py \
 	  build/${DEVICE}_${MODEL}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new} \
