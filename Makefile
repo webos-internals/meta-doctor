@@ -27,30 +27,54 @@ endif
 
 DOCTOR  = webosdoctor${VERSION}${CARRIER}.jar
 
-all: patch-sprint patch-bellmo
+APPLICATIONS = com.palm.app.firstuse
+
+all: pack-sprint pack-bellmo
+
+.PHONY: pack-%
+pack-%:
+	${MAKE} CARRIER=$* pack
+
+.PHONY: pack
+pack: build/${DEVICE}_${VERSION}_${CARRIER}/.packed
+
+build/${DEVICE}_${VERSION}_${CARRIER}/.packed: build/${DEVICE}_${VERSION}_${CARRIER}/.patched
+	rm -f $@
+	( cd build/${DEVICE}_${VERSION}_${CARRIER} ; \
+	  find usr/palm/applications/com.palm.app.firstuse -type f | xargs md5sum ) \
+	    > build/${DEVICE}_${VERSION}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums.new
+	./scripts/replace-md5sums.py \
+	  build/${DEVICE}_${VERSION}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new} \
+	    > build/${DEVICE}_${VERSION}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums
+#	rm -f build/${DEVICE}_${VERSION}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new}
+	( cd build/${DEVICE}_${VERSION}_${CARRIER} ; \
+	  find . ! -name 'md5sums*' -type f | xargs md5sum ) \
+	    > build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.new
+	./scripts/replace-md5sums.py build/${DEVICE}_${VERSION}_${CARRIER}/md5sums{.old,.new} > \
+				     build/${DEVICE}_${VERSION}_${CARRIER}/md5sums
+#	rm -f build/${DEVICE}_${VERSION}_${CARRIER}/md5sums{.old,.new}
+	touch $@
 
 .PHONY: patch-%
 patch-%:
 	${MAKE} CARRIER=$* patch
 
 .PHONY: patch
-patch: build/${DEVICE}_${VERSION}_${CARRIER}/md5sums
+patch: build/${DEVICE}_${VERSION}_${CARRIER}/.patched
 
-build/${DEVICE}_${VERSION}_${CARRIER}/md5sums: build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old
-	( cd build/${DEVICE}_${VERSION}_${CARRIER} ; find . ! -name 'md5sums*' -type f | \
-		xargs md5sum > md5sums.new )
-	./scripts/replace-md5sums.py build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old \
-				     build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.new > \
-				     build/${DEVICE}_${VERSION}_${CARRIER}/md5sums
+build/${DEVICE}_${VERSION}_${CARRIER}/.patched: build/${DEVICE}_${VERSION}_${CARRIER}/.unpacked
+	rm -f $@
+	# Do modifications in here.
+	touch $@
 
 .PHONY: unpack-%
 unpack-%:
 	${MAKE} CARRIER=$* unpack
 
 .PHONY: unpack
-unpack: build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old
+unpack: build/${DEVICE}_${VERSION}_${CARRIER}/.unpacked
 
-build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old: downloads/${DOCTOR}
+build/${DEVICE}_${VERSION}_${CARRIER}/.unpacked: downloads/${DOCTOR}
 	rm -rf build/${DEVICE}_${VERSION}_${CARRIER}
 	mkdir -p build/${DEVICE}_${VERSION}_${CARRIER}
 	unzip -p $< resources/webOS.tar | \
@@ -59,7 +83,9 @@ build/${DEVICE}_${VERSION}_${CARRIER}/md5sums.old: downloads/${DOCTOR}
 		./usr/palm/applications/com.palm.app.firstuse \
 		./usr/lib/ipkg/info \
 		./md5sums
-	mv build/${DEVICE}_${VERSION}_${CARRIER}/md5sums $@
+	mv build/${DEVICE}_${VERSION}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{,.old}
+	mv build/${DEVICE}_${VERSION}_${CARRIER}/md5sums{,.old}
+	touch $@
 
 .PHONY: download-%
 download-%:
