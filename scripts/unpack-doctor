@@ -1,0 +1,13 @@
+#!/bin/sh
+
+[ -f $1 ] || exit 1
+
+NAME=`basename $1 .jar`
+
+rm -rf $NAME/jar $NAME/webOS $NAME/rootfs
+mkdir -p $NAME/jar $NAME/webOS $NAME/rootfs
+unzip -q -X -d $NAME/jar $1
+tar -C $NAME/webOS -p -x -f $NAME/jar/resources/webOS.tar
+tar -C $NAME/rootfs -p -z -x -f $NAME/webOS/nova-cust-image-castle.rootfs.tar.gz
+
+exit 0

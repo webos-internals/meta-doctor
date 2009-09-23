@@ -18,44 +18,51 @@
 #
 
 DEVICE  = pre
-MODEL = p100eww
+MODEL   = p100eww
 CARRIER = sprint
-VERSION = 1.1.0
+VERSION = 1.0.3
+
+TAR = tar
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
 endif
 
-DOCTOR  = webosdoctor${MODEL}${CARRIER}.jar
+DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
+PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
 
-PATHNAMES = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info
+PATHNAMES = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./var/luna/preferences
 
-all: pack-sprint pack-bellmo
+all: pack-sprint # pack-bellmo
 
 .PHONY: pack-%
 pack-%:
 	${MAKE} CARRIER=$* pack
 
 .PHONY: pack
-pack: build/${DEVICE}_${MODEL}_${CARRIER}/.packed
+pack: build/${PATIENT}/.packed
 
-build/${DEVICE}_${MODEL}_${CARRIER}/.packed: build/${DEVICE}_${MODEL}_${CARRIER}/.patched
+build/${PATIENT}/.packed: build/${PATIENT}/.patched
 	rm -f $@
-	tar -C build/${DEVICE}_${MODEL}_${CARRIER} \
-		-f build/${DEVICE}_${MODEL}_${CARRIER}/nova-cust-image-castle.rootfs.tar \
+	${TAR} -C build/${PATIENT} \
+		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
+		--delete ${PATHNAMES} ./md5sums
+	${TAR} -C build/${PATIENT} \
+		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
+		--owner=0 --group=0 --numeric-owner \
 		-r ${PATHNAMES} ./md5sums
-	gzip -f build/${DEVICE}_${MODEL}_${CARRIER}/nova-cust-image-castle.rootfs.tar
-	tar -C build/${DEVICE}_${MODEL}_${CARRIER} \
-		-f build/${DEVICE}_${MODEL}_${CARRIER}/resources/webOS.tar \
+	gzip -f build/${PATIENT}/nova-cust-image-castle.rootfs.tar
+	${TAR} -C build/${PATIENT} \
+		-f build/${PATIENT}/resources/webOS.tar \
 		-r ./nova-cust-image-castle.rootfs.tar.gz
-	( cd build/${DEVICE}_${MODEL}_${CARRIER} ; \
+	( cd build/${PATIENT} ; \
 		zip -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar )
-	sed -i .orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
-		build/${DEVICE}_${MODEL}_${CARRIER}/META-INF/MANIFEST.MF
-	( cd build/${DEVICE}_${MODEL}_${CARRIER} ; \
+	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
+		build/${PATIENT}/META-INF/MANIFEST.MF
+	( cd build/${PATIENT} ; \
 		zip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar )
 	touch $@
 
@@ -64,25 +71,26 @@ patch-%:
 	${MAKE} CARRIER=$* patch
 
 .PHONY: patch
-patch: build/${DEVICE}_${MODEL}_${CARRIER}/.patched
+patch: build/${PATIENT}/.patched
 
-build/${DEVICE}_${MODEL}_${CARRIER}/.patched: build/${DEVICE}_${MODEL}_${CARRIER}/.unpacked
+build/${PATIENT}/.patched: build/${PATIENT}/.unpacked
 	rm -f $@
-	( cd patches/${DEVICE}_${MODEL}_${CARRIER}_${VERSION} ; cat ${PATCHES} ) | \
-	( cd build/${DEVICE}_${MODEL}_${CARRIER} ; patch -p0 )
-	( cd build/${DEVICE}_${MODEL}_${CARRIER} ; \
+	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
+	( cd build/${PATIENT} ; patch -p0 )
+	touch build/${PATIENT}/var/luna/preferences/ran-first-use
+	( cd build/${PATIENT} ; \
 	  find ./usr/palm/applications/com.palm.app.firstuse -type f | xargs md5sum ) \
-	    > build/${DEVICE}_${MODEL}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums.new
+	    > build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums.new
 	./scripts/replace-md5sums.py \
-	  build/${DEVICE}_${MODEL}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new} \
-	    > build/${DEVICE}_${MODEL}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums
-	rm -f build/${DEVICE}_${MODEL}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new}
-	( cd build/${DEVICE}_${MODEL}_${CARRIER} ; \
+	  build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new} \
+	    > build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums
+	rm -f build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new}
+	( cd build/${PATIENT} ; \
 	  find ${PATHNAMES} -type f | xargs md5sum ) \
-	    > build/${DEVICE}_${MODEL}_${CARRIER}/md5sums.new
-	./scripts/replace-md5sums.py build/${DEVICE}_${MODEL}_${CARRIER}/md5sums{.old,.new} > \
-				     build/${DEVICE}_${MODEL}_${CARRIER}/md5sums
-	rm -f build/${DEVICE}_${MODEL}_${CARRIER}/md5sums{.old,.new}
+	    > build/${PATIENT}/md5sums.new
+	./scripts/replace-md5sums.py build/${PATIENT}/md5sums{.old,.new} > \
+				     build/${PATIENT}/md5sums
+	rm -f build/${PATIENT}/md5sums{.old,.new}
 	touch $@
 
 .PHONY: unpack-%
@@ -90,23 +98,23 @@ unpack-%:
 	${MAKE} CARRIER=$* unpack
 
 .PHONY: unpack
-unpack: build/${DEVICE}_${MODEL}_${CARRIER}/.unpacked
+unpack: build/${PATIENT}/.unpacked
 
-build/${DEVICE}_${MODEL}_${CARRIER}/.unpacked: downloads/${DOCTOR}
-	rm -rf build/${DEVICE}_${MODEL}_${CARRIER}
-	mkdir -p build/${DEVICE}_${MODEL}_${CARRIER}
-	cp $< build/${DEVICE}_${MODEL}_${CARRIER}/${DOCTOR}
-	( cd build/${DEVICE}_${MODEL}_${CARRIER} ; \
+build/${PATIENT}/.unpacked: downloads/${DOCTOR}
+	rm -rf build/${PATIENT}
+	mkdir -p build/${PATIENT}
+	cp $< build/${PATIENT}/${DOCTOR}
+	( cd build/${PATIENT} ; \
 		unzip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar )
-	tar -C build/${DEVICE}_${MODEL}_${CARRIER} \
-		-f build/${DEVICE}_${MODEL}_${CARRIER}/resources/webOS.tar \
+	${TAR} -C build/${PATIENT} \
+		-f build/${PATIENT}/resources/webOS.tar \
 		-x ./nova-cust-image-castle.rootfs.tar.gz
-	gunzip -f build/${DEVICE}_${MODEL}_${CARRIER}/nova-cust-image-castle.rootfs.tar.gz
-	tar -C build/${DEVICE}_${MODEL}_${CARRIER} \
-		-f build/${DEVICE}_${MODEL}_${CARRIER}/nova-cust-image-castle.rootfs.tar \
+	gunzip -f build/${PATIENT}/nova-cust-image-castle.rootfs.tar.gz
+	${TAR} -C build/${PATIENT} \
+		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
 		-x ${PATHNAMES} ./md5sums
-	mv build/${DEVICE}_${MODEL}_${CARRIER}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{,.old}
-	mv build/${DEVICE}_${MODEL}_${CARRIER}/md5sums{,.old}
+	mv build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{,.old}
+	mv build/${PATIENT}/md5sums{,.old}
 	touch $@
 
 .PHONY: download-%
@@ -118,7 +126,7 @@ download: downloads/${DOCTOR}
 
 downloads/${DOCTOR}:
 	mkdir -p downloads
-	curl -R -L -o $@ http://palm.cdnetworks.net/rom/${DEVICE}_${MODEL}/${DOCTOR}
+	curl -R -L -o $@ http://palm.cdnetworks.net/rom/${DEVICE}_${MODEL}/webosdoctor${MODEL}${CARRIER}.jar
 
 clobber:
 	rm -rf build
