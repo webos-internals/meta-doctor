@@ -34,9 +34,10 @@ PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
 
-PATHNAMES = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./var/luna/preferences
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info
+NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget
 
-all: pack-sprint # pack-bellmo
+all: pack-bellmo pack-sprint
 
 .PHONY: pack-%
 pack-%:
@@ -49,10 +50,10 @@ build/${PATIENT}/.packed: build/${PATIENT}/.patched
 	rm -f $@
 	${TAR} -C build/${PATIENT} \
 		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
-		--delete ${PATHNAMES} ./md5sums
+		--delete ${OLDDIRS} ./md5sums
 	${TAR} -C build/${PATIENT} \
 		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
-		-r ${PATHNAMES} ./md5sums
+		-r ${NEWDIRS} ./md5sums
 	gzip -f build/${PATIENT}/nova-cust-image-castle.rootfs.tar
 	${TAR} -C build/${PATIENT} \
 		-f build/${PATIENT}/resources/webOS.tar \
@@ -79,7 +80,10 @@ build/${PATIENT}/.patched: build/${PATIENT}/.unpacked
 	rm -f $@
 	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
 	( cd build/${PATIENT} ; patch -p0 )
+	mkdir -p build/${PATIENT}/var/luna/preferences
 	touch build/${PATIENT}/var/luna/preferences/ran-first-use
+	mkdir -p build/${PATIENT}/var/gadget
+	touch build/${PATIENT}/var/gadget/novacom_enabled
 	( cd build/${PATIENT} ; \
 	  find ./usr/palm/applications/com.palm.app.firstuse -type f | xargs md5sum ) \
 	    > build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums.new
@@ -88,7 +92,7 @@ build/${PATIENT}/.patched: build/${PATIENT}/.unpacked
 	    > build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums
 	rm -f build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new}
 	( cd build/${PATIENT} ; \
-	  find ${PATHNAMES} -type f | xargs md5sum ) \
+	  find ${OLDDIRS} -type f | xargs md5sum ) \
 	    > build/${PATIENT}/md5sums.new
 	./scripts/replace-md5sums.py build/${PATIENT}/md5sums{.old,.new} > \
 				     build/${PATIENT}/md5sums
@@ -114,7 +118,7 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	gunzip -f build/${PATIENT}/nova-cust-image-castle.rootfs.tar.gz
 	${TAR} -C build/${PATIENT} \
 		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
-		-x ${PATHNAMES} ./md5sums
+		-x ${OLDDIRS} ./md5sums
 	mv build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{,.old}
 	mv build/${PATIENT}/md5sums{,.old}
 	touch $@
