@@ -20,7 +20,7 @@
 DEVICE  = pre
 MODEL   = p100eww
 CARRIER = sprint
-VERSION = 1.0.3
+VERSION = 1.1.0
 
 TAR = tar
 
@@ -52,9 +52,11 @@ build/${PATIENT}/.packed: build/${PATIENT}/.patched
 		--delete ${PATHNAMES} ./md5sums
 	${TAR} -C build/${PATIENT} \
 		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
-		--owner=0 --group=0 --numeric-owner \
 		-r ${PATHNAMES} ./md5sums
 	gzip -f build/${PATIENT}/nova-cust-image-castle.rootfs.tar
+	${TAR} -C build/${PATIENT} \
+		-f build/${PATIENT}/resources/webOS.tar \
+		--delete ./nova-cust-image-castle.rootfs.tar.gz
 	${TAR} -C build/${PATIENT} \
 		-f build/${PATIENT}/resources/webOS.tar \
 		-r ./nova-cust-image-castle.rootfs.tar.gz
