@@ -41,26 +41,27 @@ all: pack-bellmo pack-sprint
 
 .PHONY: pack-%
 pack-%:
-	${MAKE} CARRIER=$* pack
+	${MAKE} CARRIER=$* unpack patch pack
 
 .PHONY: pack
 pack: build/${PATIENT}/.packed
 
-build/${PATIENT}/.packed: build/${PATIENT}/.patched
+build/${PATIENT}/.packed:
 	rm -f $@
-	${TAR} -C build/${PATIENT} \
-		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
+	${TAR} -C build/${PATIENT}/rootfs \
+		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
 		--delete ${OLDDIRS} ./md5sums
-	${TAR} -C build/${PATIENT} \
-		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
+	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
+	${TAR} -C build/${PATIENT}/rootfs \
+		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
 		-r ${NEWDIRS} ./md5sums
-	gzip -f build/${PATIENT}/nova-cust-image-castle.rootfs.tar
-	${TAR} -C build/${PATIENT} \
+	gzip -f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar
+	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ./nova-cust-image-castle.rootfs.tar.gz
-	${TAR} -C build/${PATIENT} \
+		--delete ./nova-cust-image-castle.rootfs.tar.gz ./castle.xml ./installer.xml
+	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		-r ./nova-cust-image-castle.rootfs.tar.gz
+		-r ./nova-cust-image-castle.rootfs.tar.gz ./castle.xml ./installer.xml
 	( cd build/${PATIENT} ; \
 		zip -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar )
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
@@ -76,27 +77,33 @@ patch-%:
 .PHONY: patch
 patch: build/${PATIENT}/.patched
 
-build/${PATIENT}/.patched: build/${PATIENT}/.unpacked
+build/${PATIENT}/.patched:
 	rm -f $@
+	for app in ${APPLICATIONS} ; do \
+	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{,.old} ; \
+	done
+	mv build/${PATIENT}/rootfs/md5sums{,.old}
 	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
-	( cd build/${PATIENT} ; patch -p0 )
-	mkdir -p build/${PATIENT}/var/luna/preferences
-	touch build/${PATIENT}/var/luna/preferences/ran-first-use
-	mkdir -p build/${PATIENT}/var/gadget
-	touch build/${PATIENT}/var/gadget/novacom_enabled
-	( cd build/${PATIENT} ; \
-	  find ./usr/palm/applications/com.palm.app.firstuse -type f | xargs md5sum ) \
-	    > build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums.new
-	./scripts/replace-md5sums.py \
-	  build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new} \
-	    > build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums
-	rm -f build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{.old,.new}
-	( cd build/${PATIENT} ; \
+	( cd build/${PATIENT}/rootfs ; patch -p0 )
+	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
+	touch build/${PATIENT}/rootfs/var/luna/preferences/ran-first-use
+	mkdir -p build/${PATIENT}/rootfs/var/gadget
+	touch build/${PATIENT}/rootfs/var/gadget/novacom_enabled
+	for app in ${APPLICATIONS} ; do \
+	  ( cd build/${PATIENT}/rootfs ; \
+	    find ./usr/palm/applications/$$app -type f | xargs md5sum ) \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
+	  ./scripts/replace-md5sums.py \
+	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{.old,.new} \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$app.md5sums ; \
+	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$app.md5sums{.old,.new} ; \
+	done
+	( cd build/${PATIENT}/rootfs ; \
 	  find ${OLDDIRS} -type f | xargs md5sum ) \
-	    > build/${PATIENT}/md5sums.new
-	./scripts/replace-md5sums.py build/${PATIENT}/md5sums{.old,.new} > \
-				     build/${PATIENT}/md5sums
-	rm -f build/${PATIENT}/md5sums{.old,.new}
+	    > build/${PATIENT}/rootfs/md5sums.new
+	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums{.old,.new} > \
+				     build/${PATIENT}/rootfs/md5sums
+	rm -f build/${PATIENT}/rootfs/md5sums{.old,.new}
 	touch $@
 
 .PHONY: unpack-%
@@ -112,15 +119,15 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
 		unzip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar )
-	${TAR} -C build/${PATIENT} \
+	mkdir -p build/${PATIENT}/webOS
+	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		-x ./nova-cust-image-castle.rootfs.tar.gz
-	gunzip -f build/${PATIENT}/nova-cust-image-castle.rootfs.tar.gz
-	${TAR} -C build/${PATIENT} \
-		-f build/${PATIENT}/nova-cust-image-castle.rootfs.tar \
+		-x ./nova-cust-image-castle.rootfs.tar.gz ./castle.xml ./installer.xml
+	gunzip -f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar.gz
+	mkdir -p build/${PATIENT}/rootfs
+	${TAR} -C build/${PATIENT}/rootfs \
+		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
 		-x ${OLDDIRS} ./md5sums
-	mv build/${PATIENT}/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums{,.old}
-	mv build/${PATIENT}/md5sums{,.old}
 	touch $@
 
 .PHONY: download-%
