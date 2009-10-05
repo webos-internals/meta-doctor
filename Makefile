@@ -48,7 +48,7 @@ pack: build/${PATIENT}/.packed
 
 build/${PATIENT}/.packed:
 	rm -f $@
-	${TAR} -C build/${PATIENT}/rootfs \
+	- ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
 		--delete ${OLDDIRS} ./md5sums
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
@@ -56,7 +56,7 @@ build/${PATIENT}/.packed:
 		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
 		-r ${NEWDIRS} ./md5sums
 	gzip -f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar
-	${TAR} -C build/${PATIENT}/webOS \
+	- ${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
 		--delete ./nova-cust-image-castle.rootfs.tar.gz ./castle.xml ./installer.xml
 	${TAR} -C build/${PATIENT}/webOS \
@@ -105,6 +105,8 @@ build/${PATIENT}/.patched:
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums{.old,.new} > \
 				     build/${PATIENT}/rootfs/md5sums
 	rm -f build/${PATIENT}/rootfs/md5sums{.old,.new}
+	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/castle.xml
+	rm -f build/${PATIENT}/webOS/castle.xml.orig
 	touch $@
 
 .PHONY: unpack-%
