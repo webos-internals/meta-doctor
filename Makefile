@@ -95,8 +95,8 @@ build/${PATIENT}/.patched:
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
 	  ./scripts/replace-md5sums.py \
 	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{.old,.new} \
-	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$app.md5sums ; \
-	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$app.md5sums{.old,.new} ; \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums ; \
+	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{.old,.new} ; \
 	done
 	( cd build/${PATIENT}/rootfs ; \
 	  find ${OLDDIRS} -type f | xargs md5sum ) \
