@@ -20,7 +20,7 @@
 DEVICE  = pre
 MODEL   = p100eww
 CARRIER = sprint
-VERSION = 1.1.0
+VERSION = 1.2.0
 
 TAR = tar
 
@@ -83,6 +83,7 @@ build/${PATIENT}/.patched:
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{,.old} ; \
 	done
 	mv build/${PATIENT}/rootfs/md5sums{,.old}
+	[ -d patches/${PATIENT} ]
 	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
