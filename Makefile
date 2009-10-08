@@ -22,7 +22,8 @@ MODEL   = p100eww
 CARRIER = sprint
 VERSION = 1.2.0
 
-TAR = tar
+TAR	= tar
+MD5SUM	= md5sum
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
@@ -79,10 +80,10 @@ patch: build/${PATIENT}/.patched
 
 build/${PATIENT}/.patched:
 	rm -f $@
-	for app in ${APPLICATIONS} ; do \
-	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{,.old} ; \
+	@for app in ${APPLICATIONS} ; do \
+	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old ; \
 	done
-	mv build/${PATIENT}/rootfs/md5sums{,.old}
+	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
 	[ -d patches/${PATIENT} ]
 	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
@@ -92,19 +93,19 @@ build/${PATIENT}/.patched:
 	touch build/${PATIENT}/rootfs/var/gadget/novacom_enabled
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
-	    find ./usr/palm/applications/$$app -type f | xargs md5sum ) \
+	    find ./usr/palm/applications/$$app -type f | xargs ${MD5SUM} ) \
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
 	  ./scripts/replace-md5sums.py \
-	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{.old,.new} \
+	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new \
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums ; \
-	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums{.old,.new} ; \
+	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
 	done
 	( cd build/${PATIENT}/rootfs ; \
-	  find ${OLDDIRS} -type f | xargs md5sum ) \
+	  find ${OLDDIRS} -type f | xargs md5 ) \
 	    > build/${PATIENT}/rootfs/md5sums.new
-	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums{.old,.new} > \
+	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
-	rm -f build/${PATIENT}/rootfs/md5sums{.old,.new}
+	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
 	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/castle.xml
 	rm -f build/${PATIENT}/webOS/castle.xml.orig
 	touch $@
@@ -142,7 +143,8 @@ download: downloads/${DOCTOR}
 
 downloads/${DOCTOR}:
 	mkdir -p downloads
-	curl -R -L -o $@ http://palm.cdnetworks.net/rom/${DEVICE}_${MODEL}/webosdoctor${MODEL}${CARRIER}.jar
+	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@" && false
+	touch $@
 
 clobber:
 	rm -rf build
