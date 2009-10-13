@@ -20,7 +20,7 @@
 DEVICE  = pre
 MODEL   = p100eww
 CARRIER = sprint
-VERSION = 1.2.0
+VERSION = 1.2.1
 
 TAR	= tar
 MD5SUM	= md5sum
@@ -101,7 +101,7 @@ build/${PATIENT}/.patched:
 	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
 	done
 	( cd build/${PATIENT}/rootfs ; \
-	  find ${OLDDIRS} -type f | xargs md5 ) \
+	  find ${OLDDIRS} -type f | xargs ${MD5SUM} ) \
 	    > build/${PATIENT}/rootfs/md5sums.new
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
