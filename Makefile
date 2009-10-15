@@ -19,7 +19,11 @@
 
 DEVICE  = pre
 MODEL   = p100eww
-CARRIER = sprint
+
+# Select "sprint", "bellmo", or "wr".
+CARRIER = undefined
+
+# Latest version, will be overridden below for carriers that are behind.
 VERSION = 1.2.1
 
 TAR	= tar
@@ -30,6 +34,12 @@ CODENAME = castle
 endif
 
 DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
+
+ifeq (${CARRIER},wr)
+VERSION = 1.1.3
+DOCTOR  = webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
+endif
+
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
@@ -38,7 +48,7 @@ PATCHES = com.palm.app.firstuse.patch
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget
 
-all: pack-bellmo pack-sprint
+all: pack-bellmo pack-sprint pack-wr
 
 .PHONY: pack-%
 pack-%:
