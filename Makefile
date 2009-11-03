@@ -136,7 +136,8 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		-x ./nova-cust-image-castle.rootfs.tar.gz ./castle.xml ./installer.xml
+		-x ./nova-cust-image-castle.rootfs.tar.gz \
+		./nova-installer-image-castle.uImage ./castle.xml ./installer.xml
 	gunzip -f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs \
@@ -153,7 +154,7 @@ download: downloads/${DOCTOR}
 
 downloads/${DOCTOR}:
 	mkdir -p downloads
-	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@" && false
+	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@ (i.e. the downloads directory that was just created under the current directory)." && false
 	touch $@
 
 clobber:
