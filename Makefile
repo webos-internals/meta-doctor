@@ -90,11 +90,11 @@ patch: build/${PATIENT}/.patched
 
 build/${PATIENT}/.patched:
 	rm -f $@
+	[ -d patches/${PATIENT} ]
 	@for app in ${APPLICATIONS} ; do \
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old ; \
 	done
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
-	[ -d patches/${PATIENT} ]
 	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
