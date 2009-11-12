@@ -26,8 +26,13 @@ CARRIER = undefined
 # Latest version, will be overridden below for carriers that are behind.
 VERSION = 1.2.1
 
+ifeq ($(shell uname -s),Darwin)
+TAR	= gnutar
+MD5SUM	= md5
+else
 TAR	= tar
 MD5SUM	= md5sum
+endif
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
