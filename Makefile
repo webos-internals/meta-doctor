@@ -17,14 +17,21 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-DEVICE  = pre
-MODEL   = p100eww
+# Select "pre", or "pixi".
+# DEVICE = pre
+DEVICE = pixi
 
 # Select "sprint", "bellmo", or "wr".
-CARRIER = undefined
+# CARRIER = undefined
+CARRIER = sprint
 
 # Latest version, will be overridden below for carriers that are behind.
+ifeq (${DEVICE},pre)
 VERSION = 1.2.1
+endif
+ifeq (${DEVICE},pixi)
+VERSION = 1.2.9.1
+endif
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
@@ -36,6 +43,12 @@ endif
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
+MODEL = p100eww
+endif
+
+ifeq (${DEVICE},pixi)
+CODENAME = pixie
+MODEL = p200eww
 endif
 
 DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
@@ -53,7 +66,13 @@ PATCHES = com.palm.app.firstuse.patch
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget
 
+.PHONY: all
+ifeq (${DEVICE},pre)
 all: pack-bellmo pack-sprint pack-wr
+endif
+ifeq (${DEVICE},pixi)
+all: pack-sprint
+endif
 
 .PHONY: pack-%
 pack-%:
@@ -65,19 +84,19 @@ pack: build/${PATIENT}/.packed
 build/${PATIENT}/.packed:
 	rm -f $@
 	- ${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
+		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
 		--delete ${OLDDIRS} ./md5sums
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
+		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
 		-r ${NEWDIRS} ./md5sums
-	gzip -f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar
+	gzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar
 	- ${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ./nova-cust-image-castle.rootfs.tar.gz ./castle.xml ./installer.xml
+		--delete ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		-r ./nova-cust-image-castle.rootfs.tar.gz ./castle.xml ./installer.xml
+		-r ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
 		zip -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar )
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
@@ -121,8 +140,8 @@ build/${PATIENT}/.patched:
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
 	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
-	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/castle.xml
-	rm -f build/${PATIENT}/webOS/castle.xml.orig
+	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAME}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
 	touch $@
 
 .PHONY: unpack-%
@@ -141,12 +160,12 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		-x ./nova-cust-image-castle.rootfs.tar.gz \
-		./nova-installer-image-castle.uImage ./castle.xml ./installer.xml
-	gunzip -f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar.gz
+		-x ./nova-cust-image-${CODENAME}.rootfs.tar.gz \
+		./nova-installer-image-${CODENAME}.uImage ./${CODENAME}.xml ./installer.xml
+	gunzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/nova-cust-image-castle.rootfs.tar \
+		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
 		-x ${OLDDIRS} ./md5sums
 	touch $@
 
