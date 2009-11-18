@@ -17,13 +17,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
+# Comment out any of these lines to skip that step
+BYPASS_ACTIVATION     = 1
+INCREASE_VAR_SPACE    = 1
+ENABLE_DEVELOPER_MODE = 1
+
 # Select "pre", or "pixi".
-# DEVICE = pre
-DEVICE = pixi
+DEVICE = pre
 
 # Select "sprint", "bellmo", or "wr".
-# CARRIER = undefined
-CARRIER = sprint
+CARRIER = undefined
 
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
@@ -119,12 +122,16 @@ build/${PATIENT}/.patched:
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old ; \
 	done
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
+ifeq (${BYPASS_ACTIVATION},1)
 	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
 	touch build/${PATIENT}/rootfs/var/luna/preferences/ran-first-use
+endif
+ifeq (${ENABLE_DEVELOPER_MODE},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
 	touch build/${PATIENT}/rootfs/var/gadget/novacom_enabled
+endif
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
 	    find ./usr/palm/applications/$$app -type f | xargs ${MD5SUM} ) \
@@ -140,8 +147,10 @@ build/${PATIENT}/.patched:
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
 	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
+ifeq (${INCREASE_VAR_SPACE},1)
 	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAME}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
+endif
 	touch $@
 
 .PHONY: unpack-%
