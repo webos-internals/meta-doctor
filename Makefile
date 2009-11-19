@@ -30,10 +30,18 @@ CARRIER = undefined
 
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
-VERSION = 1.2.1
+VERSION = 1.3.1
 endif
 ifeq (${DEVICE},pixi)
 VERSION = 1.2.9.1
+endif
+
+ifeq (${CARRIER},bellmo)
+VERSION = 1.2.1
+endif
+
+ifeq (${CARRIER},wr)
+VERSION = 1.1.3
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -57,7 +65,6 @@ endif
 DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 
 ifeq (${CARRIER},wr)
-VERSION = 1.1.3
 DOCTOR  = webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
 endif
 
