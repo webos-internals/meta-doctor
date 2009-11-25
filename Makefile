@@ -36,14 +36,6 @@ ifeq (${DEVICE},pixi)
 VERSION = 1.2.9.1
 endif
 
-ifeq (${CARRIER},bellmo)
-VERSION = 1.2.1
-endif
-
-ifeq (${CARRIER},wr)
-VERSION = 1.1.3
-endif
-
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
 MD5SUM	= md5
