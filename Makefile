@@ -47,6 +47,9 @@ endif
 ifeq (${DEVICE},pre)
 CODENAME = castle
 MODEL = p100eww
+ifeq (${CARRIER},wr)
+MODEL = p100ueu
+endif
 endif
 
 ifeq (${DEVICE},pixi)
