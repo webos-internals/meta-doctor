@@ -36,6 +36,9 @@ ifeq (${DEVICE},pixi)
 VERSION = 1.2.9.1
 endif
 
+# Latest supported version is:
+# VERSION = 1.3.5
+
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
 MD5SUM	= md5
