@@ -1,0 +1,52 @@
+Name: Wifi Option In FirstUse
+Version: 1.3.1-1
+Author: Jason Robitaille
+Description: Adds wifi option to FirstUse call notification popup  (MIT license)
+
+--- usr/palm/applications/com.palm.app.firstuse/app/models/account-service.js
++++ usr/palm/applications/com.palm.app.firstuse/app/models/account-service.js
+@@ -75,6 +75,17 @@
+ 		});
+ 	},
+ 	
++	peefMode: function() {
++                return new Mojo.Service.Request("palm://com.palm.applicationManager/open", {
++                        parameters: {
++                                id: 'com.palm.app.wifi',
++                                params: {
++                                }
++                        }
++                });
++        },
++
++	
+ 	createAccount: function(Account, successCallback, errorCallback, sceneController) {
+ 		return sceneController.serviceRequest(NovaAccountService.identifier, {
+ 			method: 'createNovaAccount',
+--- usr/palm/applications/com.palm.app.firstuse/app/controllers/firstuse-util.js
++++ usr/palm/applications/com.palm.app.firstuse/app/controllers/firstuse-util.js
+@@ -181,6 +181,7 @@
+ 		}
+ 		else{
+ 			labels = [{label: $L('Emergency call'), command: 'emergency-call'}, 
++				{label: $L('Enable WiFi'), command: 'peef-hack-mode'},
+ 				{label: $L('Cancel'), command: 'cancel'}
+ 				];
+ 			if(FirstUseUtil.customerCareNumber && FirstUseUtil.customerCareNumber.length > 0) {
+@@ -186,6 +187,7 @@
+ 			if(FirstUseUtil.customerCareNumber && FirstUseUtil.customerCareNumber.length > 0) {
+ 				labels = [{label: $L('Emergency call'), command: 'emergency-call'}, 
+ 					{label: $L('Call customer service'), command: 'customer-care'},
++					{label: $L('Enable WiFi'), command: 'peef-hack-mode'},
+ 					{label: $L('Cancel'), command: 'cancel'}
+ 				];
+ 			}
+@@ -203,6 +205,8 @@
+ 		} else if (value == "customer-care") {
+ 			Mojo.Log.info("----------------- FirstUseUtil.carrierName ----------------", FirstUseUtil.carrierName());
+ 			AppAssistant.accountService.callCustomerCare(FirstUseUtil.customerCareNumber, $L(Mojo.Environment.DeviceInfo.carrierName));
++		} else if (value == "peef-hack-mode") {
++                       AppAssistant.accountService.peefMode();
+ 		} else if(value == "exit"){
+ 			new Mojo.Service.Request('palm://com.palm.oddService', {
+             	method:'closetutorial',

@@ -1,4 +1,4 @@
-# Makefile for Activation Bypass modifications
+# Makefile for webOS Doctor modifications
 #
 # Copyright (C) 2009 by Rod Whitby <rod@whitby.id.au>
 #
@@ -19,6 +19,8 @@
 
 # Comment out any of these lines to skip that step
 BYPASS_ACTIVATION     = 1
+ENABLE_FIRSTUSE_WIFI  = 1
+MAKE_FIRSTUSE_VISIBLE = 1
 INCREASE_VAR_SPACE    = 1
 ENABLE_DEVELOPER_MODE = 1
 
@@ -76,14 +78,14 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget
 
 .PHONY: all
 ifeq (${DEVICE},pre)
-all: pack-bellmo pack-sprint pack-wr
+all: all-bellmo all-sprint all-wr
 endif
 ifeq (${DEVICE},pixi)
-all: pack-sprint
+all: all-sprint
 endif
 
-.PHONY: pack-%
-pack-%:
+.PHONY: all-%
+all-%:
 	${MAKE} CARRIER=$* unpack patch pack
 
 .PHONY: pack
@@ -128,10 +130,18 @@ build/${PATIENT}/.patched:
 	done
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
 ifeq (${BYPASS_ACTIVATION},1)
-	( cd patches/${PATIENT} ; cat ${PATCHES} ) | \
+	( cd patches/${PATIENT} ; cat bypass-activation.patch ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
 	touch build/${PATIENT}/rootfs/var/luna/preferences/ran-first-use
+endif
+ifeq (${ENABLE_FIRSTUSE_WIFI},1)
+	( cd patches/${PATIENT} ; cat enable-firstuse-wifi.patch ) | \
+	( cd build/${PATIENT}/rootfs ; patch -p0 )
+endif
+ifeq (${MAKE_FIRSTUSE_VISIBLE},1)
+	( cd patches/${PATIENT} ; cat make-firstuse-visible.patch ) | \
+	( cd build/${PATIENT}/rootfs ; patch -p0 )
 endif
 ifeq (${ENABLE_DEVELOPER_MODE},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
