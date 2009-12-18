@@ -23,6 +23,7 @@ ENABLE_FIRSTUSE_WIFI  = 1
 MAKE_FIRSTUSE_VISIBLE = 1
 INCREASE_VAR_SPACE    = 1
 ENABLE_DEVELOPER_MODE = 1
+INSTALL_SSH_AUTH_KEYS = 1
 
 # Select "pre", or "pixi".
 DEVICE = pre
@@ -146,6 +147,10 @@ endif
 ifeq (${ENABLE_DEVELOPER_MODE},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
 	touch build/${PATIENT}/rootfs/var/gadget/novacom_enabled
+endif
+ifeq (${INSTALL_SSH_AUTH_KEYS},1)
+	mkdir -p build/${PATIENT}/rootfs/var/home/root/.ssh
+	cp ${HOME}/.ssh/authorized_keys build/${PATIENT}/rootfs/var/home/root/.ssh/authorized_keys
 endif
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
