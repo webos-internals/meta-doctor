@@ -28,7 +28,7 @@ INSTALL_SSH_AUTH_KEYS = 1
 # Select "pre", or "pixi".
 DEVICE = pre
 
-# Select "sprint", "bellmo", or "wr".
+# Select "sprint", "bellmo", "telcel" or "wr".
 CARRIER = undefined
 
 # Latest version, will be overridden below for carriers that are behind.
@@ -37,6 +37,10 @@ VERSION = 1.3.1
 endif
 ifeq (${DEVICE},pixi)
 VERSION = 1.2.9.1
+endif
+
+ifeq (${CARRIER},telcel)
+VERSION = 1.2.5
 endif
 
 # Latest supported version is:
@@ -79,7 +83,7 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget
 
 .PHONY: all
 ifeq (${DEVICE},pre)
-all: all-bellmo all-sprint all-wr
+all: all-bellmo all-sprint all-telcel all-wr
 endif
 ifeq (${DEVICE},pixi)
 all: all-sprint
