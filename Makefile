@@ -79,7 +79,7 @@ APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info
-NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget
+NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root
 
 .PHONY: all
 ifeq (${DEVICE},pre)
@@ -104,6 +104,7 @@ build/${PATIENT}/.packed:
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
+		--numeric-owner --owner=0 --group=0 \
 		-r ${NEWDIRS} ./md5sums
 	gzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar
 	- ${TAR} -C build/${PATIENT}/webOS \
@@ -111,6 +112,7 @@ build/${PATIENT}/.packed:
 		--delete ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
+		--numeric-owner --owner=0 --group=0 \
 		-r ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
 		zip -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar )
