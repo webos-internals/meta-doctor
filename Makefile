@@ -31,27 +31,33 @@ DEVICE = pre
 # Select "sprint", "bellmo", "telcel" or "wr".
 CARRIER = undefined
 
+# Latest supported version is:
+# VERSION = 1.3.5
+
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
-VERSION = 1.3.1
+VERSION = 1.3.5
 endif
 ifeq (${DEVICE},pixi)
-VERSION = 1.2.9.1
+VERSION = 1.3.5
+endif
+
+ifeq (${CARRIER},bellmo)
+VERSION = 1.3.1
 endif
 
 ifeq (${CARRIER},telcel)
 VERSION = 1.2.5
 endif
 
-# Latest supported version is:
-# VERSION = 1.3.5
+ifeq (${CARRIER},wr)
+VERSION = 1.3.1
+endif
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
-MD5SUM	= md5
 else
 TAR	= tar
-MD5SUM	= md5sum
 endif
 
 ifeq (${DEVICE},pre)
@@ -160,7 +166,7 @@ ifeq (${INSTALL_SSH_AUTH_KEYS},1)
 endif
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
-	    find ./usr/palm/applications/$$app -type f | xargs ${MD5SUM} ) \
+	    find ./usr/palm/applications/$$app -type f | xargs md5sum ) \
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
 	  ./scripts/replace-md5sums.py \
 	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new \
@@ -168,7 +174,7 @@ endif
 	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
 	done
 	( cd build/${PATIENT}/rootfs ; \
-	  find ${OLDDIRS} -type f | xargs ${MD5SUM} ) \
+	  find ${OLDDIRS} -type f | xargs md5sum ) \
 	    > build/${PATIENT}/rootfs/md5sums.new
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
