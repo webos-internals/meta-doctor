@@ -45,18 +45,6 @@ ifeq (${DEVICE},pixi)
 VERSION = 1.3.5
 endif
 
-ifeq (${CARRIER},bellmo)
-VERSION = 1.3.1
-endif
-
-ifeq (${CARRIER},telcel)
-VERSION = 1.2.5
-endif
-
-ifeq (${CARRIER},wr)
-VERSION = 1.3.1
-endif
-
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
 else
