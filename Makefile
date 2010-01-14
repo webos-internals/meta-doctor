@@ -36,14 +36,21 @@ DEVICE = pre
 CARRIER = undefined
 
 # Latest supported version is:
-# VERSION = 1.3.5
+# VERSION = 1.3.5.1
 
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
-VERSION = 1.3.5
+VERSION = 1.3.5.1
 endif
 ifeq (${DEVICE},pixi)
-VERSION = 1.3.5
+VERSION = 1.3.5.1
+endif
+
+ifeq (${CARRIER},wr)
+VERSION = 1.3.1
+endif
+ifeq (${CARRIER},telcel)
+VERSION = 1.2.5
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -62,7 +69,7 @@ endif
 
 ifeq (${DEVICE},pixi)
 CODENAME = pixie
-MODEL = p200eww
+MODEL = p120eww
 endif
 
 DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
