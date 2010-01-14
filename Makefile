@@ -17,16 +17,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-# Comment out any of these lines to skip that step
-BYPASS_ACTIVATION     = 1
-ENABLE_FIRSTUSE_WIFI  = 1
-MAKE_FIRSTUSE_VISIBLE = 1
-INCREASE_VAR_SPACE    = 1
-ENABLE_DEVELOPER_MODE = 1
-INSTALL_SSH_AUTH_KEYS = 1
-REMOVE_CARRIER_CHECK  = 1
-REMOVE_MODEL_CHECK    = 1
-DISABLE_MODEM_UPDATE  = 1
+# Uncomment the features that you wish to enable
+# BYPASS_ACTIVATION     = 1
+# ENABLE_FIRSTUSE_WIFI  = 1
+# MAKE_FIRSTUSE_VISIBLE = 1
+# INCREASE_VAR_SPACE    = 1
+# ENABLE_DEVELOPER_MODE = 1
+# INSTALL_SSH_AUTH_KEYS = 1
+# REMOVE_CARRIER_CHECK  = 1
+# REMOVE_MODEL_CHECK    = 1
+# DISABLE_MODEM_UPDATE  = 1
+# CHANGE_KEYBOARD_TYPE  = z
 
 # Select "pre", or "pixi".
 DEVICE = pre
@@ -188,6 +189,12 @@ ifeq (${DISABLE_MODEM_UPDATE},1)
 	sed -i.orig -e 's/ForceModemUpdate=true/ForceModemUpdate=false/' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifdef CHANGE_KEYBOARD_TYPE
+	sed -i.orig -e 's|<Section name="tokens" type="token" size="4KB">|<Section name="tokens" type="token" size="4KB">\
+<Val name="KEYoBRD" action="overwrite" value="${CHANGE_KEYBOARD_TYPE}"/>|' \
+		build/${PATIENT}/webOS/${CODENAME}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
 endif
 	touch $@
 
