@@ -24,6 +24,9 @@ MAKE_FIRSTUSE_VISIBLE = 1
 INCREASE_VAR_SPACE    = 1
 ENABLE_DEVELOPER_MODE = 1
 INSTALL_SSH_AUTH_KEYS = 1
+REMOVE_CARRIER_CHECK  = 1
+REMOVE_MODEL_CHECK    = 1
+DISABLE_MODEM_UPDATE  = 1
 
 # Select "pre", or "pixi".
 DEVICE = pre
@@ -121,11 +124,11 @@ build/${PATIENT}/.packed:
 		--numeric-owner --owner=0 --group=0 \
 		-r ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
-		zip -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar )
+		zip -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar resources/recoverytool.config )
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
 		build/${PATIENT}/META-INF/MANIFEST.MF
 	( cd build/${PATIENT} ; \
-		zip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar )
+		zip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar resources/recoverytool.config )
 	touch $@
 
 .PHONY: patch-%
@@ -183,6 +186,21 @@ ifeq (${INCREASE_VAR_SPACE},1)
 	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAME}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
 endif
+ifeq (${REMOVE_CARRIER_CHECK},1)
+	sed -i.orig -e '/ApprovalCharlieHash/d' -e '/CustomizationBuild/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifeq (${REMOVE_MODEL_CHECK},1)
+	sed -i.orig -e '/ApprovalMikeHash/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifeq (${DISABLE_MODEM_UPDATE},1)
+	sed -i.orig -e 's/ForceModemUpdate=true/ForceModemUpdate=false/' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
 	touch $@
 
 .PHONY: unpack-%
@@ -197,7 +215,7 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	mkdir -p build/${PATIENT}
 	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
-		unzip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar )
+		unzip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar resources/recoverytool.config )
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
