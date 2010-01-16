@@ -1,0 +1,14 @@
+--- usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js.orig
++++ usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
+@@ -32,6 +32,11 @@
+ 
+ function setUpFirstUse() {
+ Mojo.Log.info("---------------- setupFirstUse() --------------------");
++
++	setupSimulator();
++	isDevice = true;
++	return;
++
+ 	this.firstUseDepot = new Mojo.Depot(stateEngine, dbSetUpSuccess, dbSetupFailure);	
+ 	isInitialized = true;
+ 	attemptCount = 0;
