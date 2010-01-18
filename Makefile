@@ -49,9 +49,6 @@ endif
 ifeq (${CARRIER},wr)
 VERSION = 1.3.1
 endif
-ifeq (${CARRIER},telcel)
-VERSION = 1.2.5
-endif
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
