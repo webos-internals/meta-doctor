@@ -36,7 +36,7 @@ DEVICE = pre
 CARRIER = undefined
 
 # Latest supported version is:
-# VERSION = 1.3.5.1
+# VERSION = 1.3.5.2
 
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
@@ -47,7 +47,7 @@ VERSION = 1.3.5.1
 endif
 
 ifeq (${CARRIER},wr)
-VERSION = 1.3.1
+VERSION = 1.3.5.2
 endif
 
 ifeq ($(shell uname -s),Darwin)
