@@ -32,7 +32,7 @@
 # Select "pre", or "pixi".
 DEVICE = pre
 
-# Select "sprint", "bellmo", "telcel" or "wr".
+# Select "sprint", "bellmo", "telcel", "verizonwireless" or "wr".
 CARRIER = undefined
 
 # Latest supported version is:
@@ -62,6 +62,9 @@ MODEL = p100eww
 ifeq (${CARRIER},wr)
 MODEL = p100ueu
 endif
+ifeq (${CARRIER},verizonwireless)
+MODEL = p101eww
+endif
 endif
 
 ifeq (${DEVICE},pixi)
@@ -85,7 +88,7 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root
 
 .PHONY: all
 ifeq (${DEVICE},pre)
-all: all-bellmo all-sprint all-telcel all-wr
+all: all-bellmo all-sprint all-telcel all-verizonwireless all-wr
 endif
 ifeq (${DEVICE},pixi)
 all: all-sprint
