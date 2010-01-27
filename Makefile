@@ -70,6 +70,9 @@ endif
 ifeq (${DEVICE},pixi)
 CODENAME = pixie
 MODEL = p120eww
+ifeq (${CARRIER},verizonwireless)
+MODEL = p121eww
+endif
 endif
 
 DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
