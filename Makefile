@@ -91,7 +91,7 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root
 
 .PHONY: all
 ifeq (${DEVICE},pre)
-all: all-bellmo all-sprint all-telcel all-verizonwireless all-wr
+all: all-wr all-sprint all-bellmo all-telcel all-verizonwireless
 endif
 ifeq (${DEVICE},pixi)
 all: all-sprint
