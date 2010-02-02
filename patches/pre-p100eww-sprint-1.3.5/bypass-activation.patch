@@ -12,3 +12,18 @@
  	this.firstUseDepot = new Mojo.Depot(stateEngine, dbSetUpSuccess, dbSetupFailure);	
  	isInitialized = true;
  	attemptCount = 0;
+@@ -485,10 +490,10 @@
+ 		if (response.extended.state != undefined) {
+ 			simStatus = response.extended.state.toLowerCase();
+ 			Mojo.Log.info("SIM Status = %s ", simStatus);
+-			if (simStatus == "simnotfound") {
+-				Mojo.Controller.stageController.pushScene("nosim");
+-				return;
+-			}
++			// if (simStatus == "simnotfound") {
++			// 	Mojo.Controller.stageController.pushScene("nosim");
++			// 	return;
++			// }
+ 			checkDatabase();	
+ 		} else {
+ 			simError(response);
