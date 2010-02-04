@@ -24,6 +24,7 @@
 # INCREASE_VAR_SPACE    = 1
 # ENABLE_DEVELOPER_MODE = 1
 # ENABLE_USB_NETWORKING = 1
+# DISABLE_UPLOAD_DAEMON = 1
 # INSTALL_SSH_AUTH_KEYS = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
@@ -87,7 +88,7 @@ PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root
 
 .PHONY: all
@@ -166,6 +167,18 @@ endif
 ifeq (${ENABLE_USB_NETWORKING},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
 	touch build/${PATIENT}/rootfs/var/gadget/usbnet_enabled
+endif
+ifeq (${DISABLE_UPLOAD_DAEMON},1)
+	rm -f build/${PATIENT}/rootfs/etc/event.d/uploadd
+	sed -i.orig -e '/\/etc\/event.d\/uploadd/d' \
+		build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.md5sums
+	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.md5sums.orig
+	sed -i.orig -e '/\/etc\/event.d\/uploadd/d' \
+		build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.list
+	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.list.orig
+	sed -i.orig -e '/\/etc\/event.d\/uploadd/d' \
+		build/${PATIENT}/rootfs/md5sums.old
+	rm -f build/${PATIENT}/rootfs/md5sums.old.orig
 endif
 ifeq (${INSTALL_SSH_AUTH_KEYS},1)
 	mkdir -p build/${PATIENT}/rootfs/var/home/root/.ssh
