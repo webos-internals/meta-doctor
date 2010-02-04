@@ -23,6 +23,8 @@
 # MAKE_FIRSTUSE_VISIBLE = 1
 # INCREASE_VAR_SPACE    = 1
 # ENABLE_DEVELOPER_MODE = 1
+# ENABLE_USB_NETWORKING = 1
+# DISABLE_UPLOAD_DAEMON = 1
 # INSTALL_SSH_AUTH_KEYS = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
@@ -86,7 +88,7 @@ PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root
 
 .PHONY: all
@@ -161,6 +163,13 @@ endif
 ifeq (${ENABLE_DEVELOPER_MODE},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
 	touch build/${PATIENT}/rootfs/var/gadget/novacom_enabled
+endif
+ifeq (${ENABLE_USB_NETWORKING},1)
+	mkdir -p build/${PATIENT}/rootfs/var/gadget
+	touch build/${PATIENT}/rootfs/var/gadget/usbnet_enabled
+endif
+ifeq (${DISABLE_UPLOAD_DAEMON},1)
+	# %%% Do stuff here %%%
 endif
 ifeq (${INSTALL_SSH_AUTH_KEYS},1)
 	mkdir -p build/${PATIENT}/rootfs/var/home/root/.ssh
