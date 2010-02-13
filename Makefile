@@ -17,7 +17,72 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-# Uncomment the features that you wish to enable
+# BYPASS_ACTIVATION removes the Palm activation process that normally
+# runs on the first boot of the device.  This allows users to use the
+# device even if they do not have access to cellular connectivity or
+# would prefer not to go through the activation process.  Uncomment
+# the corresponding line below to enable this patch.
+
+# ENABLE_FIRSTUSE_WIFI enables WiFi connectivity during the Palm
+# activation process during the first use.  The user can then complete
+# the activation process via WiFi if cellular connectivity is not
+# available.  Uncomment the corresponding line below to enable this
+# patch.
+
+# MAKE_FIRSTUSE_VISIBLE places a First Use launcher in the main menu.
+# It allows the user to activate a Palm account or change accounts
+# after the first use of the device.  Uncomment the corresponding line
+# below to enable this patch.
+
+# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
+# This allows more space for the installation of Linux applications.
+# Uncomment the corresponding line below to enable this patch.
+
+# ENABLE_DEVELOPER_MODE puts the phone in Developer mode.  This allows
+# installation and testing of applications on the device.  Uncomment
+# the corresponding line below to enable this patch.
+
+# ENABLE_USB_NETWORKING activates USB networking functionality.  The
+# device can then be accessed via USB networking (usbnet drivers are
+# required on the host).  Uncomment the corresponding line below to
+# enable this patch.
+
+# DISABLE_UPLOAD_DAEMON disables a background process that
+# automatically uploads usage information to Palm on a daily basis.
+# It uploads users' GPS information, along with data on every
+# application used, and for how long it was used.  Uncomment the line
+# below to enable this patch.
+
+# INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
+# user's home directory to the device.  The user can then connect to
+# the device from their computer as soon as an SSH daemon is
+# installed.  Uncomment the corresponding line below to enable this
+# patch.
+
+# REMOVE_CARRIER_CHECK prevents the webOS Doctor from verifying that
+# it is installing a software version from the same provider through
+# which the device was distributed.  The webOS Doctor can then be used
+# to update the core software using a release from a different
+# provider (excluding any provider-specific functionality).  Uncomment
+# the corresponding line below the enable this patch.
+
+# REMOVE_MODEL_CHECK prevents the webOS Doctor from verifying that it
+# is installing a software version for the intended device.  The webOS
+# Doctor can then be used to update the core software using a release
+# from a different device (e.g. EU device vs US device).  Uncomment
+# the corresponding line below to enable this patch.
+
+# DISABLE_MODEM_UPDATE prevents the device from forcing a modem
+# software update even if the versions are the same.  This saves some
+# time during the webOS Doctor process.  Uncomment the corresponding
+# line below to enable this patch.
+
+# CHANGE_KEYBOARD_TYPE permanently changes the keyboard layout using
+# the manufacturing software token area.  You only need to do this
+# once.  Uncomment the corresponding line below to enable this patch
+# ('z' means QWERTY).
+
+# Uncomment the features that you wish to enable below:
 # BYPASS_ACTIVATION     = 1
 # ENABLE_FIRSTUSE_WIFI  = 1
 # MAKE_FIRSTUSE_VISIBLE = 1
