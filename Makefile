@@ -111,13 +111,15 @@ VERSION = 1.3.5.1
 ifeq (${CARRIER},sprint)
 VERSION = 1.4.0
 endif
+ifeq (${CARRIER},wr)
+VERSION = 1.4.0
+endif
 endif
 ifeq (${DEVICE},pixi)
 VERSION = 1.3.5.1
+ifeq (${CARRIER},sprint)
+VERSION = 1.4.0
 endif
-
-ifeq (${CARRIER},wr)
-VERSION = 1.3.5.2
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -139,7 +141,11 @@ endif
 
 ifeq (${DEVICE},pixi)
 CODENAME = pixie
+ifeq (${VERSION},1.3.5.1)
 MODEL = p120eww
+else
+MODEL = p200eww
+endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
 endif
