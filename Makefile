@@ -103,11 +103,14 @@ DEVICE = pre
 CARRIER = undefined
 
 # Latest supported version is:
-# VERSION = 1.3.5.2
+# VERSION = 1.4.0
 
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
 VERSION = 1.3.5.1
+ifeq (${CARRIER},sprint)
+VERSION = 1.4.0
+endif
 endif
 ifeq (${DEVICE},pixi)
 VERSION = 1.3.5.1
