@@ -118,15 +118,15 @@ VERSION = 1.3.5.1
 ifeq (${CARRIER},sprint)
 VERSION = 1.4.0
 endif
+ifeq (${CARRIER},verizonwireless)
+VERSION = 1.4.0
+endif
 ifeq (${CARRIER},wr)
 VERSION = 1.4.0
 endif
 endif
 ifeq (${DEVICE},pixi)
-VERSION = 1.3.5.1
-ifeq (${CARRIER},sprint)
 VERSION = 1.4.0
-endif
 endif
 
 ifeq ($(shell uname -s),Darwin)
