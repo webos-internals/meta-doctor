@@ -116,6 +116,12 @@
 # DISABLE_MODEM_UPDATE  = 1
 # CHANGE_KEYBOARD_TYPE  = z
 
+# Select "pre", or "pixi".
+DEVICE = pre
+
+# Select "sprint", "bellmo", "telcel", "verizonwireless" or "wr".
+CARRIER = undefined
+
 ######################################
 ## END OF AREA FOR END USER CHANGES ##
 ######################################
@@ -123,12 +129,6 @@
 ##############################################################################
 ## DO NOT MODIFY ANYTHING PAST THIS POINT, UNLESS YOU ARE A MAKEFILE EXPERT ##
 ##############################################################################
-
-# Select "pre", or "pixi".
-DEVICE = pre
-
-# Select "sprint", "bellmo", "telcel", "verizonwireless" or "wr".
-CARRIER = undefined
 
 # Latest supported version is:
 # VERSION = 1.4.0
