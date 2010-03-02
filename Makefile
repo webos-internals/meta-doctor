@@ -17,6 +17,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
+############################
+## START OF DOCUMENTATION ##
+############################
+
 # BYPASS_ACTIVATION removes the Palm activation process that normally
 # runs on the first boot of the device.  This allows users to use the
 # device even if they do not have access to cellular connectivity or
@@ -67,10 +71,11 @@
 
 # REMOVE_CARRIER_CHECK prevents the webOS Doctor from verifying that
 # it is installing a software version from the same provider through
-# which the device was distributed.  The webOS Doctor can then be used
-# to update the core software using a release from a different
-# provider (excluding any provider-specific functionality).  Uncomment
-# the corresponding line below the enable this feature.
+# which the device was distributed.  It also removes any and all
+# carrier-specific applications and features. The webOS Doctor can
+# then be used to update the core software using a release from a
+# different provider (excluding any provider-specific functionality).
+# Uncomment the corresponding line below the enable this feature.
 
 # REMOVE_MODEL_CHECK prevents the webOS Doctor from verifying that it
 # is installing a software version for the intended device.  The webOS
@@ -88,6 +93,14 @@
 # once.  Uncomment the corresponding line below to enable this feature
 # ('z' means QWERTY).
 
+##########################
+## END OF DOCUMENTATION ##
+##########################
+
+########################################
+## START OF AREA FOR END USER CHANGES ##
+########################################
+
 # Uncomment the features that you wish to enable below:
 # BYPASS_ACTIVATION     = 1
 # TOUCH_RAN_FIRST_USE   = 1
@@ -102,6 +115,14 @@
 # REMOVE_MODEL_CHECK    = 1
 # DISABLE_MODEM_UPDATE  = 1
 # CHANGE_KEYBOARD_TYPE  = z
+
+######################################
+## END OF AREA FOR END USER CHANGES ##
+######################################
+
+##############################################################################
+## DO NOT MODIFY ANYTHING PAST THIS POINT, UNLESS YOU ARE A MAKEFILE EXPERT ##
+##############################################################################
 
 # Select "pre", or "pixi".
 DEVICE = pre
