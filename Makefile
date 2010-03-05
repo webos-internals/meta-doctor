@@ -136,9 +136,6 @@ CARRIER = undefined
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
 VERSION = 1.4.0
-ifeq (${CARRIER},telcel)
-VERSION = 1.3.5.1
-endif
 endif
 ifeq (${DEVICE},pixi)
 VERSION = 1.4.0
