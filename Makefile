@@ -24,50 +24,57 @@
 # BYPASS_ACTIVATION removes the Palm activation process that normally
 # runs on the first boot of the device.  This allows users to use the
 # device even if they do not have access to cellular connectivity or
-# would prefer not to go through the activation process.  Uncomment
-# the corresponding line below to enable this feature.
-
-# TOUCH_RAN_FIRST_USE allows the Palm to start without running the
-# First Use application.  This allows users who can activate to enable
-# wifi service first to save all the profile data going over the
-# cellular connection.  Uncomment the corresponding line below to
-# enable this feature.
-
-# ENABLE_FIRSTUSE_WIFI enables WiFi connectivity during the Palm
-# activation process during the first use.  The user can then complete
-# the activation process via WiFi if cellular connectivity is not
-# available.  Uncomment the corresponding line below to enable this
-# feature.
-
-# MAKE_FIRSTUSE_VISIBLE places a First Use launcher in the main menu.
-# It allows the user to activate a Palm account or change accounts
-# after the first use of the device.  Uncomment the corresponding line
-# below to enable this feature.
-
-# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
-# This allows more space for the installation of Linux applications.
+# would prefer not to go through the activation process.  Only use this
+# if you are never going to use cellular connectivity on this device.
+# Bypassing activation may prevent you from creating a Palm profile.
+# This is not a method to use a device on a different cellular carrier.
 # Uncomment the corresponding line below to enable this feature.
 
-# ENABLE_DEVELOPER_MODE puts the phone in Developer mode.  This allows
-# installation and testing of applications on the device.  Uncomment
-# the corresponding line below to enable this feature.
+# BYPASS_FIRST_USE_APP allows the device to start without running the
+# First Use application.  This allows users to enable wifi service
+# first and use that for Palm profile creation and restoring of all
+# the profile data.  Note that to create a Palm profile you may still
+# need to activate the cellular connection.  This will also make the
+# First Use application visible in the launcher.
+# This is not a method to use a device on a different cellular carrier.
+# Uncomment the corresponding line below to enable this feature.
 
-# ENABLE_USB_NETWORKING activates USB networking functionality.  The
-# device can then be accessed via USB networking (usbnet drivers are
-# required on the host).  Uncomment the corresponding line below to
-# enable this feature.
+# ENABLE_DEVELOPER_MODE puts the phone in Developer Mode.  This allows
+# installation and testing of applications on the device without
+# needing to type the developer mode activation code.  There are no
+# known security implications of leaving a phone in developer mode.
+# Uncomment the corresponding line below to enable this feature.
 
 # DISABLE_UPLOAD_DAEMON disables a background process that
 # automatically uploads usage information to Palm on a daily basis.
-# It uploads users' GPS information, along with data on every
-# application used, and for how long it was used.  Uncomment the line
-# below to enable this feature.
+# It uploads debug information related to operating system or
+# application crashes, users' GPS information, along with data on
+# every application used, and for how long it was used.  You may wish
+# to disable this on privacy grounds, or if you do not have an
+# unlimited data plan and will be paying exorbitant data charges.
+# Uncomment the corresponding line below to enable this feature.
+
+# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
+# This allows more space for the installation of Linux applications
+# and the storage of huge amounts of email and attachments on the
+# device.  The extra space is taken away from the USB drive.
+# Uncomment the corresponding line below to enable this feature.
+
+# ENABLE_USB_NETWORKING activates USB networking functionality.  The
+# device can then be accessed via USB networking (usbnet drivers are
+# required on the host).  This is not a tethering mechanism.
+# Uncomment the corresponding line below to enable this feature.
 
 # INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
 # user's home directory to the device.  The user can then connect to
 # the device from their computer as soon as an SSH daemon is
-# installed.  Uncomment the corresponding line below to enable this
-# feature.
+# installed.  You must already have a valid openssh authorized_keys
+# file in ~/.ssh/authorized_keys before enabling this feature, or it
+# will cause a fatal error.  You then need to install the OpenSSH SFTP
+# Server application in Preware to actually access the device using
+# the openssh private key that matches the openssh public key listed
+# in your authorized_keys file.
+# Uncomment the corresponding line below to enable this feature.
 
 # REMOVE_CARRIER_CHECK prevents the webOS Doctor from verifying that
 # it is installing a software version from the same provider through
@@ -75,23 +82,31 @@
 # carrier-specific applications and features. The webOS Doctor can
 # then be used to update the core software using a release from a
 # different provider (excluding any provider-specific functionality).
+# This is not a method to use a device on a different cellular carrier.
 # Uncomment the corresponding line below the enable this feature.
 
 # REMOVE_MODEL_CHECK prevents the webOS Doctor from verifying that it
 # is installing a software version for the intended device.  The webOS
 # Doctor can then be used to update the core software using a release
-# from a different device (e.g. EU device vs US device).  Uncomment
-# the corresponding line below to enable this feature.
+# from a different device (e.g. EU device vs US device).
+# This is not a method to use a device on a different cellular carrier.
+# Uncomment the corresponding line below to enable this feature.
 
 # DISABLE_MODEM_UPDATE prevents the device from forcing a modem
 # software update even if the versions are the same.  This saves some
-# time during the webOS Doctor process.  Uncomment the corresponding
-# line below to enable this feature.
+# time during the webOS Doctor process.  Note that if the webOS Doctor
+# contains an updated version of the firmware, a modem software update
+# will still occur irrespective of this setting.
+# This is not a method to use a device on a different cellular carrier.
+# Uncomment the corresponding line below to enable this feature.
 
 # CHANGE_KEYBOARD_TYPE permanently changes the keyboard layout using
 # the manufacturing software token area.  You only need to do this
-# once.  Uncomment the corresponding line below to enable this feature
-# ('z' means QWERTY).
+# once.  Future uses of the webOS Doctor without this feature enabled
+# will not change the setting.  You can use this feature again in the
+# future at any time to reverse this change.
+# Uncomment the corresponding line below to enable this feature.
+# ('z' means QWERTY, 'y' means QWERTZ).
 
 ##########################
 ## END OF DOCUMENTATION ##
@@ -102,14 +117,12 @@
 ########################################
 
 # Uncomment the features that you wish to enable below:
-# BYPASS_ACTIVATION     = 1
-# TOUCH_RAN_FIRST_USE   = 1
-# ENABLE_FIRSTUSE_WIFI  = 1
-# MAKE_FIRSTUSE_VISIBLE = 1
+BYPASS_ACTIVATION     = 1
+BYPASS_FIRST_USE_APP  = 1
+ENABLE_DEVELOPER_MODE = 1
+DISABLE_UPLOAD_DAEMON = 1
 # INCREASE_VAR_SPACE    = 1
-# ENABLE_DEVELOPER_MODE = 1
 # ENABLE_USB_NETWORKING = 1
-# DISABLE_UPLOAD_DAEMON = 1
 # INSTALL_SSH_AUTH_KEYS = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
@@ -243,15 +256,9 @@ ifeq (${BYPASS_ACTIVATION},1)
 	( cd patches/${PATIENT} ; cat bypass-activation.patch ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 endif
-ifeq (${TOUCH_RAN_FIRST_USE},1)
+ifeq (${BYPASS_FIRST_USE_APP},1)
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
 	touch build/${PATIENT}/rootfs/var/luna/preferences/ran-first-use
-endif
-ifeq (${ENABLE_FIRSTUSE_WIFI},1)
-	( cd patches/${PATIENT} ; cat enable-firstuse-wifi.patch ) | \
-	( cd build/${PATIENT}/rootfs ; patch -p0 )
-endif
-ifeq (${MAKE_FIRSTUSE_VISIBLE},1)
 	( cd patches/${PATIENT} ; cat make-firstuse-visible.patch ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 endif
