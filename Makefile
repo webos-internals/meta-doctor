@@ -117,10 +117,10 @@
 ########################################
 
 # Uncomment the features that you wish to enable below:
-BYPASS_ACTIVATION     = 1
-BYPASS_FIRST_USE_APP  = 1
-ENABLE_DEVELOPER_MODE = 1
-DISABLE_UPLOAD_DAEMON = 1
+# BYPASS_ACTIVATION     = 1
+# BYPASS_FIRST_USE_APP  = 1
+# ENABLE_DEVELOPER_MODE = 1
+# DISABLE_UPLOAD_DAEMON = 1
 # INCREASE_VAR_SPACE    = 1
 # ENABLE_USB_NETWORKING = 1
 # INSTALL_SSH_AUTH_KEYS = 1
