@@ -60,11 +60,6 @@
 # device.  The extra space is taken away from the USB drive.
 # Uncomment the corresponding line below to enable this feature.
 
-# ENABLE_USB_NETWORKING activates USB networking functionality.  The
-# device can then be accessed via USB networking (usbnet drivers are
-# required on the host).  This is not a tethering mechanism.
-# Uncomment the corresponding line below to enable this feature.
-
 # INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
 # user's home directory to the device.  The user can then connect to
 # the device from their computer as soon as an SSH daemon is
@@ -74,6 +69,11 @@
 # Server application in Preware to actually access the device using
 # the openssh private key that matches the openssh public key listed
 # in your authorized_keys file.
+# Uncomment the corresponding line below to enable this feature.
+
+# ENABLE_USB_NETWORKING activates USB networking functionality.  The
+# device can then be accessed via USB networking (usbnet drivers are
+# required on the host).  This is not a tethering mechanism.
 # Uncomment the corresponding line below to enable this feature.
 
 # REMOVE_CARRIER_CHECK prevents the webOS Doctor from verifying that
@@ -122,8 +122,8 @@
 # ENABLE_DEVELOPER_MODE = 1
 # DISABLE_UPLOAD_DAEMON = 1
 # INCREASE_VAR_SPACE    = 1
-# ENABLE_USB_NETWORKING = 1
 # INSTALL_SSH_AUTH_KEYS = 1
+# ENABLE_USB_NETWORKING = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
 # DISABLE_MODEM_UPDATE  = 1
@@ -202,7 +202,7 @@ ifeq (${DEVICE},pre)
 all: all-wr all-sprint all-bellmo all-telcel all-verizonwireless
 endif
 ifeq (${DEVICE},pixi)
-all: all-sprint
+all: all-sprint all-verizonwireless
 endif
 
 .PHONY: all-%
