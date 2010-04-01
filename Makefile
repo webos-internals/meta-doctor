@@ -144,10 +144,10 @@ CARRIER = undefined
 
 # Latest version, will be overridden below for carriers that are behind.
 ifeq (${DEVICE},pre)
-VERSION = 1.4.0
+VERSION = 1.4.1.1
 endif
 ifeq (${DEVICE},pixi)
-VERSION = 1.4.0
+VERSION = 1.4.1.1
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -161,9 +161,17 @@ CODENAME = castle
 MODEL = p100eww
 ifeq (${CARRIER},wr)
 MODEL = p100ueu
+VERSION=1.4.1
+endif
+ifeq (${CARRIER},bellmo)
+VERSION=1.4.0
+endif
+ifeq (${CARRIER},telcel)
+VERSION=1.4.0
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p101eww
+VERSION=1.4.0
 endif
 endif
 
@@ -176,6 +184,7 @@ MODEL = p200eww
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
+VERSION=1.4.0
 endif
 endif
 
