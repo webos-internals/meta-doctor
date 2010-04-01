@@ -45,21 +45,6 @@
 # known security implications of leaving a phone in developer mode.
 # Uncomment the corresponding line below to enable this feature.
 
-# DISABLE_UPLOAD_DAEMON disables a background process that
-# automatically uploads usage information to Palm on a daily basis.
-# It uploads debug information related to operating system or
-# application crashes, users' GPS information, along with data on
-# every application used, and for how long it was used.  You may wish
-# to disable this on privacy grounds, or if you do not have an
-# unlimited data plan and will be paying exorbitant data charges.
-# Uncomment the corresponding line below to enable this feature.
-
-# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
-# This allows more space for the installation of Linux applications
-# and the storage of huge amounts of email and attachments on the
-# device.  The extra space is taken away from the USB drive.
-# Uncomment the corresponding line below to enable this feature.
-
 # INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
 # user's home directory to the device.  The user can then connect to
 # the device from their computer as soon as an SSH daemon is
@@ -69,6 +54,25 @@
 # Server application in Preware to actually access the device using
 # the openssh private key that matches the openssh public key listed
 # in your authorized_keys file.
+# Uncomment the corresponding line below to enable this feature.
+
+# DISABLE_UPLOAD_DAEMON disables a background process that
+# automatically uploads usage information to Palm on a daily basis.
+# It uploads debug information related to operating system or
+# application crashes, users' GPS information, along with data on
+# every application used, and for how long it was used.  You may wish
+# to disable this on privacy grounds, or if you do not have an
+# unlimited data plan and will be paying exorbitant data charges.
+# Uncomment the corresponding line below to enable this feature.
+
+# DISABLE_MODEM_UPDATE prevents the device from reflashing the modem
+# software.  This saves some time during the webOS Doctor process.
+# Uncomment the corresponding line below to enable this feature.
+
+# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
+# This allows more space for the installation of Linux applications
+# and the storage of huge amounts of email and attachments on the
+# device.  The extra space is taken away from the USB drive.
 # Uncomment the corresponding line below to enable this feature.
 
 # ENABLE_USB_NETWORKING activates USB networking functionality.  The
@@ -92,14 +96,6 @@
 # This is not a method to use a device on a different cellular carrier.
 # Uncomment the corresponding line below to enable this feature.
 
-# DISABLE_MODEM_UPDATE prevents the device from forcing a modem
-# software update even if the versions are the same.  This saves some
-# time during the webOS Doctor process.  Note that if the webOS Doctor
-# contains an updated version of the firmware, a modem software update
-# will still occur irrespective of this setting.
-# This is not a method to use a device on a different cellular carrier.
-# Uncomment the corresponding line below to enable this feature.
-
 # CHANGE_KEYBOARD_TYPE permanently changes the keyboard layout using
 # the manufacturing software token area.  You only need to do this
 # once.  Future uses of the webOS Doctor without this feature enabled
@@ -120,13 +116,13 @@
 # BYPASS_ACTIVATION     = 1
 # BYPASS_FIRST_USE_APP  = 1
 # ENABLE_DEVELOPER_MODE = 1
-# DISABLE_UPLOAD_DAEMON = 1
-# INCREASE_VAR_SPACE    = 1
 # INSTALL_SSH_AUTH_KEYS = 1
+# DISABLE_UPLOAD_DAEMON = 1
+# DISABLE_MODEM_UPDATE  = 1
+# INCREASE_VAR_SPACE    = 1
 # ENABLE_USB_NETWORKING = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
-# DISABLE_MODEM_UPDATE  = 1
 # CHANGE_KEYBOARD_TYPE  = z
 
 # Select "pre", or "pixi".
@@ -316,9 +312,9 @@ ifeq (${REMOVE_MODEL_CHECK},1)
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
 ifeq (${DISABLE_MODEM_UPDATE},1)
-	sed -i.orig -e 's/ForceModemUpdate=true/ForceModemUpdate=false/' \
-		build/${PATIENT}/resources/recoverytool.config
-	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	sed -i.orig -e '/ModemUpdater/d' \
+		build/${PATIENT}/webOS/installer.xml
+	rm -f build/${PATIENT}/webOS/installer.xml.orig
 endif
 ifdef CHANGE_KEYBOARD_TYPE
 	sed -i.orig -e 's|<Section name="tokens" type="token" size="4KB">|<Section name="tokens" type="token" size="4KB">\
