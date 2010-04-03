@@ -86,6 +86,7 @@
 # carrier-specific applications and features. The webOS Doctor can
 # then be used to update the core software using a release from a
 # different provider (excluding any provider-specific functionality).
+# This is likely to break access to the App Catalog and Updates apps.
 # This is not a method to use a device on a different cellular carrier.
 # Uncomment the corresponding line below the enable this feature.
 
