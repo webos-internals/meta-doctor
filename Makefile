@@ -164,14 +164,13 @@ ifeq (${CARRIER},wr)
 MODEL = p100ueu
 VERSION=1.4.1
 endif
-ifeq (${CARRIER},bellmo)
-VERSION=1.4.0
-endif
-ifeq (${CARRIER},telcel)
-VERSION=1.4.0
-endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p101eww
+endif
+ifeq (${CARRIER},bellmo)
+VERSION=1.4.1
+endif
+ifeq (${CARRIER},telcel)
 VERSION=1.4.0
 endif
 endif
@@ -204,12 +203,9 @@ OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./et
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root
 
 .PHONY: all
-ifeq (${DEVICE},pre)
-all: all-wr all-sprint all-bellmo all-telcel all-verizonwireless
-endif
-ifeq (${DEVICE},pixi)
-all: all-sprint all-verizonwireless
-endif
+all:
+	${MAKE} DEVICE=pre all-wr all-sprint all-bellmo all-telcel all-verizonwireless
+	${MAKE} DEVICE=pixi all-sprint all-verizonwireless
 
 .PHONY: all-%
 all-%:
