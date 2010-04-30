@@ -56,6 +56,15 @@
 # in your authorized_keys file.
 # Uncomment the corresponding line below to enable this feature.
 
+# INSTALL_WIFI_PROFILES imports a wifi preferences database file from
+# the user's home directory to the device.  The device will then be
+# set up to use wifi immediately after the webOS Doctor has completed.
+# You must already have copied a correctly configured prefsDB.sl file
+# from the /var/preferences/com.palm.wifi/ directory on the device to
+# ~/.ssh/com.palm.wifi.prefsDB.sl on your host machine before enabling
+# this feature, or it will cause a fatal error.
+# Uncomment the corresponding line below to enable this feature.
+
 # DISABLE_UPLOAD_DAEMON disables a background process that
 # automatically uploads usage information to Palm on a daily basis.
 # It uploads debug information related to operating system or
@@ -118,6 +127,7 @@
 # BYPASS_FIRST_USE_APP  = 1
 # ENABLE_DEVELOPER_MODE = 1
 # INSTALL_SSH_AUTH_KEYS = 1
+# INSTALL_WIFI_PROFILES = 1
 # DISABLE_UPLOAD_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
 # INCREASE_VAR_SPACE    = 1
@@ -287,6 +297,10 @@ endif
 ifeq (${INSTALL_SSH_AUTH_KEYS},1)
 	mkdir -p build/${PATIENT}/rootfs/var/home/root/.ssh
 	cp ${HOME}/.ssh/authorized_keys build/${PATIENT}/rootfs/var/home/root/.ssh/authorized_keys
+endif
+ifeq (${INSTALL_WIFI_PROFILES},1)
+	mkdir -p build/${PATIENT}/rootfs/var/preferences/com.palm.wifi
+	cp ${HOME}/.ssh/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl
 endif
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
