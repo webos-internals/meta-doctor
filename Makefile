@@ -210,7 +210,7 @@ APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d
-NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root
+NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences
 
 .PHONY: all
 all:
