@@ -194,7 +194,6 @@ MODEL = p200eww
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
-VERSION=1.4.0
 endif
 endif
 
