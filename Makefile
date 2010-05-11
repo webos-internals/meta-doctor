@@ -146,6 +146,23 @@ CARRIER = undefined
 ## END OF AREA FOR END USER CHANGES ##
 ######################################
 
+###################################
+## START OF AREA FOR MY USE ONLY ##
+###################################
+
+ifeq (${LOGNAME},rwhitby)
+BYPASS_ACTIVATION     = 1
+BYPASS_FIRST_USE_APP  = 1
+ENABLE_DEVELOPER_MODE = 1
+INSTALL_SSH_AUTH_KEYS = 1
+INSTALL_WIFI_PROFILES = 1
+DISABLE_UPLOAD_DAEMON = 1
+endif
+
+#################################
+## END OF AREA FOR MY USE ONLY ##
+#################################
+
 ##############################################################################
 ## DO NOT MODIFY ANYTHING PAST THIS POINT, UNLESS YOU ARE A MAKEFILE EXPERT ##
 ##############################################################################
@@ -154,12 +171,7 @@ CARRIER = undefined
 # VERSION = 1.4.0
 
 # Latest version, will be overridden below for carriers that are behind.
-ifeq (${DEVICE},pre)
 VERSION = 1.4.1.1
-endif
-ifeq (${DEVICE},pixi)
-VERSION = 1.4.1.1
-endif
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
