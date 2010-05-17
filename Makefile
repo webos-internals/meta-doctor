@@ -139,7 +139,7 @@
 # Select "pre", or "pixi".
 DEVICE = pre
 
-# Select "sprint", "bellmo", "telcel", "verizonwireless" or "wr".
+# Select "sprint", "bellmo", "telcel", "verizonwireless", "sfr", "wr" or "att".
 CARRIER = undefined
 
 ######################################
@@ -195,6 +195,14 @@ endif
 ifeq (${CARRIER},telcel)
 VERSION=1.4.0
 endif
+ifeq (${CARRIER},sfr)
+MODEL = p101ueu
+VERSION=1.4.1
+endif
+ifeq (${CARRIER},att)
+MODEL = p101eww
+VERSION=1.4.2
+endif
 endif
 
 ifeq (${DEVICE},pixi)
@@ -207,12 +215,20 @@ endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
 endif
+ifeq (${CARRIER},sfr)
+MODEL = p121ueu
+VERSION=1.4.1
+endif
 endif
 
 DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 
 ifeq (${CARRIER},wr)
 DOCTOR  = webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
+endif
+
+ifeq (${CARRIER},sfr)
+DOCTOR  = webosdoctor${MODEL}-wr-${VERSION}.jar
 endif
 
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
@@ -225,8 +241,8 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/p
 
 .PHONY: all
 all:
-	${MAKE} DEVICE=pre all-wr all-sprint all-bellmo all-telcel all-verizonwireless
-	${MAKE} DEVICE=pixi all-sprint all-verizonwireless
+	${MAKE} DEVICE=pre all-wr all-att all-sprint all-bellmo all-telcel all-verizonwireless all-sfr
+	${MAKE} DEVICE=pixi all-sprint all-verizonwireless all-sfr
 
 .PHONY: all-%
 all-%:
