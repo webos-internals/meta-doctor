@@ -112,7 +112,7 @@
 # will not change the setting.  You can use this feature again in the
 # future at any time to reverse this change.
 # Uncomment the corresponding line below to enable this feature.
-# ('z' means QWERTY, 'y' means QWERTZ).
+# ('z' means QWERTY, 'y' means QWERTZ, 'w1' means AZERTY).
 
 ##########################
 ## END OF DOCUMENTATION ##
