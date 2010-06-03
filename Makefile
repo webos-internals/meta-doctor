@@ -45,6 +45,11 @@
 # known security implications of leaving a phone in developer mode.
 # Uncomment the corresponding line below to enable this feature.
 
+# ENABLE_TESTING_FEEDS installs a flag file which tells Preware to
+# automatically install testing feeds for all WebOS Internals
+# packages.  You must, of course, install Preware as well to use them.
+# Uncomment the corresponding line below to enable this feature.
+
 # INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
 # user's home directory to the device.  The user can then connect to
 # the device from their computer as soon as an SSH daemon is
@@ -126,6 +131,7 @@
 # BYPASS_ACTIVATION     = 1
 # BYPASS_FIRST_USE_APP  = 1
 # ENABLE_DEVELOPER_MODE = 1
+# ENABLE_TESTING_FEEDS  = 1
 # INSTALL_SSH_AUTH_KEYS = 1
 # INSTALL_WIFI_PROFILES = 1
 # DISABLE_UPLOAD_DAEMON = 1
@@ -154,6 +160,7 @@ ifeq (${LOGNAME},rwhitby)
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
+ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
@@ -304,6 +311,10 @@ endif
 ifeq (${ENABLE_DEVELOPER_MODE},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
 	touch build/${PATIENT}/rootfs/var/gadget/novacom_enabled
+endif
+ifeq (${ENABLE_TESTING_FEEDS},1)
+	mkdir -p build/${PATIENT}/rootfs/var/preferences/org.webosinternals.preware
+	touch build/${PATIENT}/rootfs/var/preferences/org.webosinternals.preware/enable-testing-feeds
 endif
 ifeq (${ENABLE_USB_NETWORKING},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
