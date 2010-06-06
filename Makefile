@@ -182,8 +182,10 @@ VERSION = 1.4.1.1
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
+JAD	= build/tools/jad-macosx/jad
 else
 TAR	= tar
+JAD	= build/tools/jad-linux/jad
 endif
 
 ifeq (${DEVICE},pre)
@@ -242,6 +244,7 @@ PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
+CLASSES = com/palm/nova/installer/core/FlasherThread
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences
@@ -293,19 +296,19 @@ patch: build/${PATIENT}/.patched
 
 build/${PATIENT}/.patched:
 	rm -f $@
-	[ -d patches/${PATIENT} ]
+	[ -d patches/webos-${VERSION} ]
 	@for app in ${APPLICATIONS} ; do \
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old ; \
 	done
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
 ifeq (${BYPASS_ACTIVATION},1)
-	( cd patches/${PATIENT} ; cat bypass-activation.patch ) | \
+	( cd patches/webos-${VERSION} ; cat bypass-activation.patch ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 endif
 ifeq (${BYPASS_FIRST_USE_APP},1)
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
 	touch build/${PATIENT}/rootfs/var/luna/preferences/ran-first-use
-	( cd patches/${PATIENT} ; cat make-firstuse-visible.patch ) | \
+	( cd patches/webos-${VERSION} ; cat make-firstuse-visible.patch ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p0 )
 endif
 ifeq (${ENABLE_DEVELOPER_MODE},1)
@@ -382,6 +385,33 @@ ifdef CHANGE_KEYBOARD_TYPE
 endif
 	touch $@
 
+.PHONY: compile-%
+compile-%:
+	${MAKE} CARRIER=$* compile
+
+.PHONY: compile
+compile: build/${PATIENT}/.compiled
+
+build/${PATIENT}/.compiled: build/${PATIENT}/.decompiled
+	rm -f $@
+	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
+	touch $@
+
+.PHONY: decompile-%
+decompile-%:
+	${MAKE} CARRIER=$* decompile
+
+.PHONY: decompile
+decompile: build/${PATIENT}/.decompiled
+
+build/${PATIENT}/.decompiled: build/${PATIENT}/.unpacked ${JAD}
+	rm -f $@
+	( cd build/${PATIENT} ; ../../${JAD} -b -ff -o -r -space -s java ${CLASSES:%=%.class} )
+	for f in ${CLASSES:%=%.java} ; do \
+	  [ -f build/${PATIENT}/$$f ] || exit ; \
+	done
+	touch $@
+
 .PHONY: unpack-%
 unpack-%:
 	${MAKE} CARRIER=$* unpack
@@ -394,7 +424,7 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	mkdir -p build/${PATIENT}
 	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
-		unzip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar resources/recoverytool.config )
+		unzip ${DOCTOR} META-INF/MANIFEST.MF com/* resources/webOS.tar resources/recoverytool.config )
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
@@ -418,6 +448,27 @@ downloads/${DOCTOR}:
 	mkdir -p downloads
 	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@ (i.e. the downloads directory that was just created under the current directory)." && false
 	touch $@
+
+.PHONY: jad
+jad: ${JAD}
+
+build/tools/jad-macosx/jad: downloads/jad158g.mac.intel.zip
+	mkdir -p build/tools/jad-macosx
+	( cd build/tools/jad-macosx ; unzip ../../../$< jad )
+	touch $@
+
+downloads/jad158g.mac.intel.zip:
+	mkdir -p downloads
+	curl -L -o $@ http://www.varaneckas.com/sites/default/files/jad/jad158g.mac.intel.zip
+
+build/tools/jad-linux/jad: downloads/jad158e.linux.static.zip
+	mkdir -p build/tools/jad-linux
+	( cd build/tools/jad-linux ; unzip ../../../$< jad )
+	touch $@
+
+downloads/jad158e.linux.static.zip:
+	mkdir -p downloads
+	curl -L -o $@ http://www.varaneckas.com/sites/default/files/jad/jad158e.linux.static.zip
 
 clobber:
 	rm -rf build

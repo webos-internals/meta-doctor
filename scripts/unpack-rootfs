@@ -1,0 +1,18 @@
+#!/bin/sh
+
+[ -f $1 ] || exit 1
+
+mkdir unpack
+
+unzip -q -X -d unpack $1
+tar -C unpack -p -x -f unpack/resources/webOS.tar
+if [ -f unpack/nova-cust-image-castle.rootfs.tar.gz ] ; then
+    tar -p -z -x -f unpack/nova-cust-image-castle.rootfs.tar.gz
+fi
+if [ -f unpack/nova-cust-image-pixie.rootfs.tar.gz ] ; then
+    tar -p -z -x -f unpack/nova-cust-image-pixie.rootfs.tar.gz
+fi
+
+rm -rf unpack home mnt var/tmp
+
+exit 0
