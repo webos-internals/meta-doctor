@@ -243,7 +243,15 @@ PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
 PATCHES = com.palm.app.firstuse.patch
-CLASSES = com/palm/nova/installer/core/FlasherThread
+CLASSES = com/palm/nova/installer/core/FlasherThread \
+	  com/palm/nova/installer/core/stages/AppFolderDeletionStage \
+	  com/palm/nova/installer/core/stages/BypassFirstUseStage \
+	  com/palm/nova/installer/core/stages/CustomizationStage \
+	  com/palm/nova/installer/core/stages/EnableNovacomUsbByDefaultStage \
+	  com/palm/nova/installer/core/stages/ModemUpdateStage \
+	  com/palm/nova/installer/core/stages/TouchPanelUpdateStage \
+	  com/palm/nova/installer/core/stages/TrenchcoatStage \
+	  com/palm/nova/installer/core/stages/VerifyRomStage
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences
