@@ -175,18 +175,17 @@ endif
 ##############################################################################
 
 # Latest supported version is:
-# VERSION = 1.4.0
+# VERSION = 1.4.5
 
-# Latest version, will be overridden below for carriers that are behind.
+# Latest version, will be overridden below for carriers that are ahead or behind.
 VERSION = 1.4.1.1
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
-JAD	= build/tools/jad-macosx/jad
 else
 TAR	= tar
-JAD	= build/tools/jad-linux/jad
 endif
+JODE= downloads/jode-1.1.2-pre1.jar
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
@@ -280,11 +279,11 @@ build/${PATIENT}/.packed:
 		--numeric-owner --owner=0 --group=0 \
 		-r ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
-		zip -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar resources/recoverytool.config )
+		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar resources/recoverytool.config )
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
 		build/${PATIENT}/META-INF/MANIFEST.MF
 	( cd build/${PATIENT} ; \
-		zip ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar resources/recoverytool.config )
+		zip -q ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar resources/recoverytool.config )
 	touch $@
 
 .PHONY: patch-%
@@ -404,9 +403,9 @@ decompile-%:
 .PHONY: decompile
 decompile: build/${PATIENT}/.decompiled
 
-build/${PATIENT}/.decompiled: build/${PATIENT}/.unpacked ${JAD}
+build/${PATIENT}/.decompiled: build/${PATIENT}/.unpacked ${JODE}
 	rm -f $@
-	( cd build/${PATIENT} ; ../../${JAD} -b -ff -o -r -space -s java ${CLASSES:%=%.class} )
+	( cd build/${PATIENT} ; java -cp ../../${JODE} jode.decompiler.Main -c . -d . `echo ${CLASSES} | tr '/' '.'` )
 	for f in ${CLASSES:%=%.java} ; do \
 	  [ -f build/${PATIENT}/$$f ] || exit ; \
 	done
@@ -424,7 +423,7 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	mkdir -p build/${PATIENT}
 	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
-		unzip ${DOCTOR} META-INF/MANIFEST.MF com/* resources/webOS.tar resources/recoverytool.config )
+		unzip -q ${DOCTOR} META-INF/MANIFEST.MF com/* resources/webOS.tar resources/recoverytool.config )
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
@@ -449,26 +448,9 @@ downloads/${DOCTOR}:
 	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@ (i.e. the downloads directory that was just created under the current directory)." && false
 	touch $@
 
-.PHONY: jad
-jad: ${JAD}
-
-build/tools/jad-macosx/jad: downloads/jad158g.mac.intel.zip
-	mkdir -p build/tools/jad-macosx
-	( cd build/tools/jad-macosx ; unzip ../../../$< jad )
-	touch $@
-
-downloads/jad158g.mac.intel.zip:
+${JODE}:
 	mkdir -p downloads
-	curl -L -o $@ http://www.varaneckas.com/sites/default/files/jad/jad158g.mac.intel.zip
-
-build/tools/jad-linux/jad: downloads/jad158e.linux.static.zip
-	mkdir -p build/tools/jad-linux
-	( cd build/tools/jad-linux ; unzip ../../../$< jad )
-	touch $@
-
-downloads/jad158e.linux.static.zip:
-	mkdir -p downloads
-	curl -L -o $@ http://www.varaneckas.com/sites/default/files/jad/jad158e.linux.static.zip
+	curl -L -o $@ http://sourceforge.net/projects/jode/files/jode/1.1.2-pre1/jode-1.1.2-pre1.jar/download
 
 clobber:
 	rm -rf build
