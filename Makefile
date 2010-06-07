@@ -227,6 +227,10 @@ ifeq (${CARRIER},sfr)
 MODEL = p121ueu
 VERSION=1.4.1
 endif
+ifeq (${CARRIER},wr)
+MODEL = p121eww
+VERSION=1.4.1
+endif
 endif
 
 DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
