@@ -263,7 +263,7 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/p
 .PHONY: all
 all:
 	${MAKE} DEVICE=pre all-wr all-att all-sprint all-bellmo all-telcel all-verizonwireless all-sfr
-	${MAKE} DEVICE=pixi all-sprint all-verizonwireless all-sfr
+	${MAKE} DEVICE=pixi all-wr all-sprint all-verizonwireless all-sfr
 
 .PHONY: all-%
 all-%:
@@ -422,6 +422,18 @@ build/${PATIENT}/.decompiled: build/${PATIENT}/.unpacked ${JODE}
 	  [ -f build/${PATIENT}/$$f ] || exit ; \
 	done
 	touch $@
+
+.PHONY: memboot-%
+memboot-%:
+	${MAKE} CARRIER=$* memboot
+
+.PHONY: memboot
+memboot: build/${PATIENT}/.unpacked
+	novacom -w run file://sbin/tellbootie recover || true
+	sleep 5
+	novacom -w boot mem:// < build/${PATIENT}/webOS/nova-installer-image-${CODENAME}.uImage
+	sleep 5
+	novacom -w run file://bin/date
 
 .PHONY: unpack-%
 unpack-%:
