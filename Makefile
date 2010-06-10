@@ -146,7 +146,7 @@
 DEVICE = pre
 
 # Select "sprint", "bellmo", "telcel", "verizonwireless", "sfr", "wr" or "att".
-CARRIER = undefined
+CARRIER = wr
 
 ######################################
 ## END OF AREA FOR END USER CHANGES ##
@@ -423,6 +423,33 @@ build/${PATIENT}/.decompiled: build/${PATIENT}/.unpacked ${JODE}
 	done
 	touch $@
 
+.PHONY: backup
+backup: mount
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	mkdir -p clones/$$id ; \
+	for f in var root media ; do \
+	  echo "Creating clones/$$id/store-$$f.tar.gz" ; \
+	  ( novacom -w run file://bin/tar -- -C /tmp/$$f/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/store-$$f.tar.gz ; \
+	done
+
+.PHONY: mount
+mount: unmount
+	novacom -w run file://usr/sbin/lvm.static -- vgscan --ignorelockingfailure 2> /dev/null
+	novacom -w run file://usr/sbin/lvm.static -- vgchange -ay --ignorelockingfailure 2> /dev/null
+	@for f in var root media ; do \
+	  echo "Mounting /dev/mapper/store-$$f" ; \
+	  novacom -w run file://bin/mkdir -- -p /tmp/$$f ; \
+	  novacom -w run file://bin/mount -- /dev/mapper/store-$$f /tmp/$$f -o ro ; \
+	done
+
+.PHONY: unmount
+unmount:
+	@for f in var root media ; do \
+	  echo "Unmounting /dev/mapper/store-$$f" ; \
+	  ( novacom -w run file://bin/umount -- /tmp/$$f 2> /dev/null || true ) ; \
+	done
+
 .PHONY: memboot-%
 memboot-%:
 	${MAKE} CARRIER=$* memboot
@@ -430,10 +457,14 @@ memboot-%:
 .PHONY: memboot
 memboot: build/${PATIENT}/.unpacked
 	novacom -w run file://sbin/tellbootie recover || true
-	sleep 5
+	@sleep 5
 	novacom -w boot mem:// < build/${PATIENT}/webOS/nova-installer-image-${CODENAME}.uImage
-	sleep 5
-	novacom -w run file://bin/date
+	@sleep 5
+
+.PHONY: reboot
+reboot:
+	novacom -w run file://sbin/tellbootie || true
+	@sleep 5
 
 .PHONY: unpack-%
 unpack-%:
@@ -477,4 +508,4 @@ ${JODE}:
 	curl -L -o $@ http://sourceforge.net/projects/jode/files/jode/1.1.2-pre1/jode-1.1.2-pre1.jar/download
 
 clobber:
-	rm -rf build
+	rm -rf build clones
