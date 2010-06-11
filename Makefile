@@ -228,8 +228,12 @@ MODEL = p121ueu
 VERSION=1.4.1
 endif
 ifeq (${CARRIER},wr)
-MODEL = p121eww
+MODEL = p121ewweu
 VERSION=1.4.1
+endif
+ifeq (${CARRIER},att)
+MODEL = p121eww
+VERSION=1.4.3
 endif
 endif
 
@@ -488,7 +492,7 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
-		-x ${OLDDIRS} ./md5sums
+		-x ${OLDDIRS} ./md5sums ./etc/palm-build-info
 	touch $@
 
 .PHONY: download-%
