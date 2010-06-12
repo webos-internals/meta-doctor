@@ -1,0 +1,28 @@
+--- com/palm/nova/installer/core/TrenchcoatModel.java.orig
++++ com/palm/nova/installer/core/TrenchcoatModel.java
+@@ -25,12 +25,9 @@
+         public final String name;
+         public final String value;
+         public final boolean overwrite;
+-        final TrenchcoatModel this$0;
+ 
+         public EnvVar(String name, String value, boolean overwrite)
+         {
+-            this$0 = TrenchcoatModel.this;
+-            super();
+             this.name = name;
+             this.value = value;
+             this.overwrite = overwrite;
+@@ -43,12 +40,9 @@
+         public final String name;
+         public final String value;
+         public final boolean overwrite;
+-        final TrenchcoatModel this$0;
+ 
+         public Token(String name, String value, boolean overwrite)
+         {
+-            this$0 = TrenchcoatModel.this;
+-            super();
+             this.name = name;
+             this.value = value;
+             this.overwrite = overwrite;

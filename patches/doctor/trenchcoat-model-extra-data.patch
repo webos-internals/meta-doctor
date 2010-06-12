@@ -1,0 +1,56 @@
+--- com/palm/nova/installer/core/TrenchcoatModel.java.orig
++++ com/palm/nova/installer/core/TrenchcoatModel.java
+@@ -167,6 +167,42 @@
+         }
+     }
+ 
++    private void setupUserStorageData(InstallerModel model)
++        throws IOException
++    {
++        userStorageData = (new StringBuilder()).append(model.getImage()).append("-").append(model.getTarget()).append(".varfs.tar.gz").toString();
++        long filesize = model.getFileSize(userStorageData);
++        if (isLvmInUse)
++        {
++            NodeList flashEntries = document.getElementsByTagName("File");
++            for (int i = 0; i < flashEntries.getLength(); i++)
++            {
++                Element element = (Element)flashEntries.item(i);
++                if (element.getAttribute("file").equals("${USERTGZ}"))
++                {
++                    element.setAttribute("file", "stdin.tar.gz");
++                    element.setAttribute("fileSize", Long.toString(filesize));
++                }
++            }
++
++            setupLvmRootFilesystemSize();
++        } else
++        {
++            NodeList flashEntries = document.getElementsByTagName("Entry");
++            for (int i = 0; i < flashEntries.getLength(); i++)
++            {
++                Element element = (Element)flashEntries.item(i);
++                if (element.getAttribute("file").equals("${USERTGZ}"))
++                {
++                    element.setAttribute("file", "stdin.tar.gz");
++                    element.setAttribute("fileSize", Long.toString(filesize));
++                    continue;
++                }
++            }
++
++        }
++    }
++
+     private void setupImageFiles(InstallerModel model)
+         throws IOException
+     {
+@@ -295,9 +367,8 @@
+ 
+         setupBootloader(baseModel);
+         setupRootTarball(baseModel);
++        setupUserStorageData(baseModel);
+         setupImageFiles(baseModel);
+-        massStorageData = "";
+-        userStorageData = "";
+     }
+ 
+     public String toXMLString()

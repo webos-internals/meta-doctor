@@ -22,7 +22,7 @@
 ############################
 
 # BYPASS_ACTIVATION removes the Palm activation process that normally
-# runs on the first boot of the device.  This allows users to use the
+# runs on the first boot of the device.	 This allows users to use the
 # device even if they do not have access to cellular connectivity or
 # would prefer not to go through the activation process.  Only use this
 # if you are never going to use cellular connectivity on this device.
@@ -51,7 +51,7 @@
 # Uncomment the corresponding line below to enable this feature.
 
 # INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
-# user's home directory to the device.  The user can then connect to
+# user's home directory to the device.	The user can then connect to
 # the device from their computer as soon as an SSH daemon is
 # installed.  You must already have a valid openssh authorized_keys
 # file in ~/.ssh/authorized_keys before enabling this feature, or it
@@ -70,11 +70,16 @@
 # this feature, or it will cause a fatal error.
 # Uncomment the corresponding line below to enable this feature.
 
+# INSTALL_PREWARE_CERTS installs the preware.org x509 Certification
+# Authority certificate, allowing packages signed by WebOS Internals
+# to be installed using the applicationManager install service.
+# Uncomment the corresponding line below to enable this feature.
+
 # DISABLE_UPLOAD_DAEMON disables a background process that
 # automatically uploads usage information to Palm on a daily basis.
 # It uploads debug information related to operating system or
 # application crashes, users' GPS information, along with data on
-# every application used, and for how long it was used.  You may wish
+# every application used, and for how long it was used.	 You may wish
 # to disable this on privacy grounds, or if you do not have an
 # unlimited data plan and will be paying exorbitant data charges.
 # Uncomment the corresponding line below to enable this feature.
@@ -89,7 +94,7 @@
 # device.  The extra space is taken away from the USB drive.
 # Uncomment the corresponding line below to enable this feature.
 
-# ENABLE_USB_NETWORKING activates USB networking functionality.  The
+# ENABLE_USB_NETWORKING activates USB networking functionality.	 The
 # device can then be accessed via USB networking (usbnet drivers are
 # required on the host).  This is not a tethering mechanism.
 # Uncomment the corresponding line below to enable this feature.
@@ -113,8 +118,8 @@
 
 # CHANGE_KEYBOARD_TYPE permanently changes the keyboard layout using
 # the manufacturing software token area.  You only need to do this
-# once.  Future uses of the webOS Doctor without this feature enabled
-# will not change the setting.  You can use this feature again in the
+# once.	 Future uses of the webOS Doctor without this feature enabled
+# will not change the setting.	You can use this feature again in the
 # future at any time to reverse this change.
 # Uncomment the corresponding line below to enable this feature.
 # ('z' means QWERTY, 'y' means QWERTZ, 'w1' means AZERTY).
@@ -128,19 +133,20 @@
 ########################################
 
 # Uncomment the features that you wish to enable below:
-# BYPASS_ACTIVATION     = 1
-# BYPASS_FIRST_USE_APP  = 1
+# BYPASS_ACTIVATION	= 1
+# BYPASS_FIRST_USE_APP	= 1
 # ENABLE_DEVELOPER_MODE = 1
-# ENABLE_TESTING_FEEDS  = 1
+# ENABLE_TESTING_FEEDS	= 1
 # INSTALL_SSH_AUTH_KEYS = 1
 # INSTALL_WIFI_PROFILES = 1
+# INSTALL_PREWARE_CERTS = 1
 # DISABLE_UPLOAD_DAEMON = 1
-# DISABLE_MODEM_UPDATE  = 1
-# INCREASE_VAR_SPACE    = 1
+# DISABLE_MODEM_UPDATE	= 1
+# INCREASE_VAR_SPACE	= 1
 # ENABLE_USB_NETWORKING = 1
-# REMOVE_CARRIER_CHECK  = 1
-# REMOVE_MODEL_CHECK    = 1
-# CHANGE_KEYBOARD_TYPE  = z
+# REMOVE_CARRIER_CHECK	= 1
+# REMOVE_MODEL_CHECK	= 1
+# CHANGE_KEYBOARD_TYPE	= z
 
 # Select "pre", or "pixi".
 DEVICE = pre
@@ -163,7 +169,11 @@ ENABLE_DEVELOPER_MODE = 1
 ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
+INSTALL_PREWARE_CERTS = 1
 DISABLE_UPLOAD_DAEMON = 1
+# CUSTOM_ROOT_PARTITION = 1
+# CUSTOM_VAR_PARTITION  = 1
+# CLONE = 55caa500
 endif
 
 #################################
@@ -182,8 +192,10 @@ VERSION = 1.4.1.1
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
+JAD	= build/tools/jad-macosx/jad
 else
 TAR	= tar
+JAD	= build/tools/jad-linux/jad
 endif
 JODE= downloads/jode-1.1.2-pre1.jar
 
@@ -193,6 +205,9 @@ MODEL = p100eww
 ifeq (${CARRIER},wr)
 MODEL = p100ueu
 VERSION=1.4.1
+ifeq (${VERSION},1.1.3)
+MODEL = p100eww
+endif
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p101eww
@@ -237,31 +252,26 @@ VERSION=1.4.3
 endif
 endif
 
-DOCTOR  = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
+DOCTOR	= webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 
 ifeq (${CARRIER},wr)
-DOCTOR  = webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
+DOCTOR	= webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
 endif
 
 ifeq (${CARRIER},sfr)
-DOCTOR  = webosdoctor${MODEL}-wr-${VERSION}.jar
+DOCTOR	= webosdoctor${MODEL}-wr-${VERSION}.jar
 endif
 
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
-PATCHES = com.palm.app.firstuse.patch
-CLASSES = com/palm/nova/installer/core/FlasherThread \
-	  com/palm/nova/installer/core/stages/AppFolderDeletionStage \
-	  com/palm/nova/installer/core/stages/BypassFirstUseStage \
-	  com/palm/nova/installer/core/stages/CustomizationStage \
-	  com/palm/nova/installer/core/stages/EnableNovacomUsbByDefaultStage \
-	  com/palm/nova/installer/core/stages/ModemUpdateStage \
-	  com/palm/nova/installer/core/stages/TouchPanelUpdateStage \
-	  com/palm/nova/installer/core/stages/TrenchcoatStage \
-	  com/palm/nova/installer/core/stages/VerifyRomStage
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d
+ifeq (${CUSTOM_VAR_PARTITION},1)
+CLASSES = com/palm/nova/installer/core/TrenchcoatModel
+DOCTOR_PATCHES = trenchcoat-model-fixup.patch trenchcoat-model-extra-data.patch
+endif
+
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d ./etc/ssl
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences
 
 .PHONY: all
@@ -273,33 +283,45 @@ all:
 all-%:
 	${MAKE} CARRIER=$* unpack patch pack
 
+.PHONY: pack-%
+pack-%:
+	${MAKE} CARRIER=$* pack
+
 .PHONY: pack
 pack: build/${PATIENT}/.packed
 
+NOVATGZ = ./nova-cust-image-${CODENAME}.rootfs.tar.gz
+
+ifeq (${CUSTOM_VAR_PARTITION},1)
+USERTGZ = ./nova-cust-image-${CODENAME}.varfs.tar.gz
+endif
+
 build/${PATIENT}/.packed:
 	rm -f $@
+ifneq (${CUSTOM_ROOT_PARTITION},1)
 	- ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
 		--delete ${OLDDIRS} ./md5sums
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
-		--numeric-owner --owner=0 --group=0 \
-		-r ${NEWDIRS} ./md5sums
+		--numeric-owner --owner=0 --group=0 -h \
+		--append ${NEWDIRS} ./md5sums
 	gzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar
+endif
 	- ${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
+		--delete ${NOVATGZ} ./${CODENAME}.xml ./installer.xml
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		--numeric-owner --owner=0 --group=0 \
-		-r ./nova-cust-image-${CODENAME}.rootfs.tar.gz ./${CODENAME}.xml ./installer.xml
+		--numeric-owner --owner=0 --group=0 -h \
+		--append ${NOVATGZ} ${USERTGZ} ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
-		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* resources/webOS.tar resources/recoverytool.config )
+		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} resources/webOS.tar resources/recoverytool.config )
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
 		build/${PATIENT}/META-INF/MANIFEST.MF
 	( cd build/${PATIENT} ; \
-		zip -q ${DOCTOR} META-INF/MANIFEST.MF resources/webOS.tar resources/recoverytool.config )
+		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} resources/webOS.tar resources/recoverytool.config )
 	touch $@
 
 .PHONY: patch-%
@@ -309,7 +331,7 @@ patch-%:
 .PHONY: patch
 patch: build/${PATIENT}/.patched
 
-build/${PATIENT}/.patched:
+build/${PATIENT}/.patched: ${JAD}
 	rm -f $@
 	[ -d patches/webos-${VERSION} ]
 	@for app in ${APPLICATIONS} ; do \
@@ -358,6 +380,19 @@ ifeq (${INSTALL_WIFI_PROFILES},1)
 	mkdir -p build/${PATIENT}/rootfs/var/preferences/com.palm.wifi
 	cp ${HOME}/.ssh/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl
 endif
+ifeq (${INSTALL_PREWARE_CERTS},1)
+	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums \
+	   build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old
+	cat scripts/preware-ca-bundle.crt >> build/${PATIENT}/rootfs/etc/ssl/certs/appsigning-bundle.crt
+	( cd build/${PATIENT}/rootfs ; md5sum ./etc/ssl/certs/appsigning-bundle.crt ) > \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new
+	./scripts/replace-md5sums.py \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums
+	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
+		build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new
+endif
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
 	    find ./usr/palm/applications/$$app -type f | xargs md5sum ) \
@@ -398,44 +433,47 @@ ifdef CHANGE_KEYBOARD_TYPE
 		build/${PATIENT}/webOS/${CODENAME}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
 endif
-	touch $@
-
-.PHONY: compile-%
-compile-%:
-	${MAKE} CARRIER=$* compile
-
-.PHONY: compile
-compile: build/${PATIENT}/.compiled
-
-build/${PATIENT}/.compiled: build/${PATIENT}/.decompiled
-	rm -f $@
-	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
-	touch $@
-
-.PHONY: decompile-%
-decompile-%:
-	${MAKE} CARRIER=$* decompile
-
-.PHONY: decompile
-decompile: build/${PATIENT}/.decompiled
-
-build/${PATIENT}/.decompiled: build/${PATIENT}/.unpacked ${JODE}
-	rm -f $@
-	( cd build/${PATIENT} ; java -cp ../../${JODE} jode.decompiler.Main -c . -d . `echo ${CLASSES} | tr '/' '.'` )
+ifeq (${CUSTOM_ROOT_PARTITION},1)
+	rm -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar.gz
+	ln -s ../../../clones/${CLONE}/nova-cust-image-${CODENAME}.rootfs.tar.gz build/${PATIENT}/webOS/
+endif
+ifeq (${CUSTOM_VAR_PARTITION},1)
+	sed -i.orig -e 's|<File file="$${NOVATGZ}" target="/"/>|<File file="$${NOVATGZ}" target="/"/>\
+<File file="$${USERTGZ}" target="/var"/>|' \
+		build/${PATIENT}/webOS/${CODENAME}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
+	rm -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.varfs.tar.gz
+	ln -s ../../../clones/${CLONE}/nova-cust-image-${CODENAME}.varfs.tar.gz build/${PATIENT}/webOS/
+endif
+ifeq (${CUSTOM_VAR_PARTITION},1)
+	[ -d patches/doctor ]
+	( cd build/${PATIENT} ; ../../${JAD} -b -ff -o -r -space -s java ${CLASSES:%=%.class} )
 	for f in ${CLASSES:%=%.java} ; do \
 	  [ -f build/${PATIENT}/$$f ] || exit ; \
 	done
+	( cd patches/doctor ; cat ${DOCTOR_PATCHES} ) | \
+	( cd build/${PATIENT} ; patch -p0 )
+	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
+endif
 	touch $@
+
+.PHONY: backup-%
+backup-%:
+	${MAKE} CARRIER=$* backup
 
 .PHONY: backup
 backup: mount
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	mkdir -p clones/$$id ; \
-	for f in var root media ; do \
-	  echo "Creating clones/$$id/store-$$f.tar.gz" ; \
-	  ( novacom -w run file://bin/tar -- -C /tmp/$$f/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/store-$$f.tar.gz ; \
-	done
+	echo "Creating clones/$$id/nova-cust-image-${CODENAME}-varfs.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}-varfs.tar.gz ; \
+	echo "Creating clones/$$id/nova-cust-image-${CODENAME}-rootfs.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/root/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}-rootfs.tar.gz ; \
+	echo "Creating clones/$$id/nova-cust-image-${CODENAME}-media.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}-media.tar.gz ; \
 
 .PHONY: mount
 mount: unmount
@@ -454,6 +492,15 @@ unmount:
 	  ( novacom -w run file://bin/umount -- /tmp/$$f 2> /dev/null || true ) ; \
 	done
 
+.PHONY: memload-%
+memload-%:
+	${MAKE} CARRIER=$* memload
+
+.PHONY: memload
+memload: build/${PATIENT}/.unpacked
+	novacom -w boot mem:// < build/${PATIENT}/webOS/nova-installer-image-${CODENAME}.uImage
+	@sleep 5
+
 .PHONY: memboot-%
 memboot-%:
 	${MAKE} CARRIER=$* memboot
@@ -468,6 +515,11 @@ memboot: build/${PATIENT}/.unpacked
 .PHONY: reboot
 reboot:
 	novacom -w run file://sbin/tellbootie || true
+	@sleep 5
+
+.PHONY: recover
+recover:
+	novacom -w run file://sbin/tellbootie recover || true
 	@sleep 5
 
 .PHONY: unpack-%
@@ -507,9 +559,36 @@ downloads/${DOCTOR}:
 	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@ (i.e. the downloads directory that was just created under the current directory)." && false
 	touch $@
 
+.PHONY: jad
+jad: ${JAD}
+
+build/tools/jad-macosx/jad: downloads/jad158g.mac.intel.zip
+	mkdir -p build/tools/jad-macosx
+	( cd build/tools/jad-macosx ; unzip ../../../$< jad )
+	touch $@
+
+downloads/jad158g.mac.intel.zip:
+	mkdir -p downloads
+	curl -L -o $@ http://www.varaneckas.com/sites/default/files/jad/jad158g.mac.intel.zip
+
+build/tools/jad-linux/jad: downloads/jad158e.linux.static.zip
+	mkdir -p build/tools/jad-linux
+	( cd build/tools/jad-linux ; unzip ../../../$< jad )
+	touch $@
+
+downloads/jad158e.linux.static.zip:
+	mkdir -p downloads
+	curl -L -o $@ http://www.varaneckas.com/sites/default/files/jad/jad158e.linux.static.zip
+
 ${JODE}:
 	mkdir -p downloads
 	curl -L -o $@ http://sourceforge.net/projects/jode/files/jode/1.1.2-pre1/jode-1.1.2-pre1.jar/download
 
 clobber:
 	rm -rf build clones
+
+clobber-%:
+	make CARRIER=$* clobber-build
+
+clobber-build:
+	rm -rf build/${PATIENT}
