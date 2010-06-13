@@ -90,17 +90,6 @@
 # software.  This saves some time during the webOS Doctor process.
 # Uncomment the corresponding line below to enable this feature.
 
-# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
-# This allows more space for the installation of Linux applications
-# and the storage of huge amounts of email and attachments on the
-# device.  The extra space is taken away from the USB drive.
-# Uncomment the corresponding line below to enable this feature.
-
-# ADD_EXT3FS_PARTITION adds a spare LVM partition formatted as ext3.
-# This allows space for experimentation that requires an additional
-# ext3 filesytem.  The extra space is taken away from the USB drive.
-# Uncomment the corresponding line below to enable this feature.
-
 # ENABLE_USB_NETWORKING activates USB networking functionality.	 The
 # device can then be accessed via USB networking (usbnet drivers are
 # required on the host).  This is not a tethering mechanism.
@@ -121,6 +110,17 @@
 # Doctor can then be used to update the core software using a release
 # from a different device (e.g. EU device vs US device).
 # This is not a method to use a device on a different cellular carrier.
+# Uncomment the corresponding line below to enable this feature.
+
+# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
+# This allows more space for the installation of Linux applications
+# and the storage of huge amounts of email and attachments on the
+# device.  The extra space is taken away from the USB drive.
+# Uncomment the corresponding line below to enable this feature.
+
+# ADD_EXT3FS_PARTITION adds a spare LVM partition formatted as ext3.
+# This allows space for experimentation that requires an additional
+# ext3 filesytem.  The extra space is taken away from the USB drive.
 # Uncomment the corresponding line below to enable this feature.
 
 # CHANGE_KEYBOARD_TYPE permanently changes the keyboard layout using
@@ -149,10 +149,10 @@
 # INSTALL_WIFI_PROFILES = 1
 # DISABLE_UPLOAD_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
-# INCREASE_VAR_SPACE    = 1
 # ENABLE_USB_NETWORKING = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
+# INCREASE_VAR_SPACE    = 1
 # CHANGE_KEYBOARD_TYPE  = z
 # ADD_EXT3FS_PARTITION  = 2GB
 
@@ -180,6 +180,7 @@ INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
 DISABLE_MODEM_UPDATE  = 1
+INCREASE_VAR_SPACE    = 1
 ADD_EXT3FS_PARTITION  = 2GB
 # CUSTOM_ROOT_PARTITION = 1
 # CUSTOM_VAR_PARTITION  = 1
