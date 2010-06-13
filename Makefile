@@ -70,9 +70,11 @@
 # this feature, or it will cause a fatal error.
 # Uncomment the corresponding line below to enable this feature.
 
-# INSTALL_PREWARE_CERTS installs the preware.org x509 Certification
+# AUTO_INSTALL_PREWARE automatically queues the installation of
+# Preware as soon as a network connection is available after first
+# boot.  This feature also installs the preware.org x509 Certification
 # Authority certificate, allowing packages signed by WebOS Internals
-# to be installed using the applicationManager install service.
+# to be installed via the appInstallService installHistory database.
 # Uncomment the corresponding line below to enable this feature.
 
 # DISABLE_UPLOAD_DAEMON disables a background process that
@@ -92,6 +94,11 @@
 # This allows more space for the installation of Linux applications
 # and the storage of huge amounts of email and attachments on the
 # device.  The extra space is taken away from the USB drive.
+# Uncomment the corresponding line below to enable this feature.
+
+# ADD_EXT3FS_PARTITION adds a spare LVM partition formatted as ext3.
+# This allows space for experimentation that requires an additional
+# ext3 filesytem.  The extra space is taken away from the USB drive.
 # Uncomment the corresponding line below to enable this feature.
 
 # ENABLE_USB_NETWORKING activates USB networking functionality.	 The
@@ -133,20 +140,21 @@
 ########################################
 
 # Uncomment the features that you wish to enable below:
-# BYPASS_ACTIVATION	= 1
-# BYPASS_FIRST_USE_APP	= 1
+# BYPASS_ACTIVATION     = 1
+# BYPASS_FIRST_USE_APP  = 1
 # ENABLE_DEVELOPER_MODE = 1
-# ENABLE_TESTING_FEEDS	= 1
+# AUTO_INSTALL_PREWARE  = 1
+# ENABLE_TESTING_FEEDS  = 1
 # INSTALL_SSH_AUTH_KEYS = 1
 # INSTALL_WIFI_PROFILES = 1
-# INSTALL_PREWARE_CERTS = 1
 # DISABLE_UPLOAD_DAEMON = 1
-# DISABLE_MODEM_UPDATE	= 1
-# INCREASE_VAR_SPACE	= 1
+# DISABLE_MODEM_UPDATE  = 1
+# INCREASE_VAR_SPACE    = 1
 # ENABLE_USB_NETWORKING = 1
-# REMOVE_CARRIER_CHECK	= 1
-# REMOVE_MODEL_CHECK	= 1
-# CHANGE_KEYBOARD_TYPE	= z
+# REMOVE_CARRIER_CHECK  = 1
+# REMOVE_MODEL_CHECK    = 1
+# CHANGE_KEYBOARD_TYPE  = z
+# ADD_EXT3FS_PARTITION  = 2GB
 
 # Select "pre", or "pixi".
 DEVICE = pre
@@ -166,11 +174,13 @@ ifeq (${LOGNAME},rwhitby)
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
+AUTO_INSTALL_PREWARE  = 1
 ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
-INSTALL_PREWARE_CERTS = 1
 DISABLE_UPLOAD_DAEMON = 1
+DISABLE_MODEM_UPDATE  = 1
+ADD_EXT3FS_PARTITION  = 2GB
 # CUSTOM_ROOT_PARTITION = 1
 # CUSTOM_VAR_PARTITION  = 1
 # CLONE = 55caa500
@@ -272,7 +282,7 @@ DOCTOR_PATCHES = trenchcoat-model-fixup.patch trenchcoat-model-extra-data.patch
 endif
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d ./etc/ssl
-NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences
+NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
 
 .PHONY: all
 all:
@@ -380,7 +390,7 @@ ifeq (${INSTALL_WIFI_PROFILES},1)
 	mkdir -p build/${PATIENT}/rootfs/var/preferences/com.palm.wifi
 	cp ${HOME}/.ssh/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl
 endif
-ifeq (${INSTALL_PREWARE_CERTS},1)
+ifeq (${AUTO_INSTALL_PREWARE},1)
 	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums \
 	   build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old
 	cat scripts/preware-ca-bundle.crt >> build/${PATIENT}/rootfs/etc/ssl/certs/appsigning-bundle.crt
@@ -392,6 +402,9 @@ ifeq (${INSTALL_PREWARE_CERTS},1)
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums
 	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
 		build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new
+	mkdir -p build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/
+	cp scripts/preware-install.db \
+	  build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/installHistory.db
 endif
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
@@ -426,6 +439,15 @@ ifeq (${DISABLE_MODEM_UPDATE},1)
 	sed -i.orig -e '/ModemUpdater/d' \
 		build/${PATIENT}/webOS/installer.xml
 	rm -f build/${PATIENT}/webOS/installer.xml.orig
+endif
+ifdef ADD_EXT3FS_PARTITION
+	sed -i.orig \
+	  -e 's|<Volume id="media"|<Volume id="ext3fs" type="ext3" size="${ADD_EXT3FS_PARTITION}" mount="/media/ext3fs"/>\
+<Volume id="media"|' \
+	  -e 's|<Mount id="media"|<Mount id="ext3fs" options="noatime,data=writeback" freq="0" passno="0"/>\
+<Mount id="media"|' \
+		build/${PATIENT}/webOS/${CODENAME}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
 endif
 ifdef CHANGE_KEYBOARD_TYPE
 	sed -i.orig -e 's|<Section name="tokens" type="token" size="4KB">|<Section name="tokens" type="token" size="4KB">\
