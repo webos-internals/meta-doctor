@@ -180,6 +180,7 @@ INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
 DISABLE_MODEM_UPDATE  = 1
+REMOVE_CARRIER_CHECK  = 1
 INCREASE_VAR_SPACE    = 1
 ADD_EXT3FS_PARTITION  = 2GB
 # CUSTOM_ROOT_PARTITION = 1
@@ -200,15 +201,6 @@ endif
 
 # Latest version, will be overridden below for carriers that are ahead or behind.
 VERSION = 1.4.1.1
-
-ifeq ($(shell uname -s),Darwin)
-TAR	= gnutar
-JAD	= build/tools/jad-macosx/jad
-else
-TAR	= tar
-JAD	= build/tools/jad-linux/jad
-endif
-JODE= downloads/jode-1.1.2-pre1.jar
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
@@ -284,6 +276,19 @@ endif
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d ./etc/ssl
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
+
+ifeq ($(shell uname -s),Darwin)
+TAR	= gnutar
+ifeq (${CUSTOM_VAR_PARTITION},1)
+JAD	= build/tools/jad-macosx/jad
+endif
+else
+TAR	= tar
+ifeq (${CUSTOM_VAR_PARTITION},1)
+JAD	= build/tools/jad-linux/jad
+endif
+endif
+JODE= downloads/jode-1.1.2-pre1.jar
 
 .PHONY: all
 all:
