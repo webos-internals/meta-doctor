@@ -179,13 +179,14 @@ ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
-DISABLE_MODEM_UPDATE  = 1
-REMOVE_CARRIER_CHECK  = 1
-INCREASE_VAR_SPACE    = 1
-ADD_EXT3FS_PARTITION  = 2GB
+# DISABLE_MODEM_UPDATE  = 1
+# REMOVE_CARRIER_CHECK  = 1
+# INCREASE_VAR_SPACE    = 1
+# ADD_EXT3FS_PARTITION  = 2GB
 # CUSTOM_ROOT_PARTITION = 1
 # CUSTOM_VAR_PARTITION  = 1
 # CLONE = 55caa500
+# CHANGE_KEYBOARD_TYPE  = z
 endif
 
 #################################
@@ -321,7 +322,7 @@ ifneq (${CUSTOM_ROOT_PARTITION},1)
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
-		--numeric-owner --owner=0 --group=0 -h \
+		--numeric-owner --owner=0 --group=0 \
 		--append ${NEWDIRS} ./md5sums
 	gzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar
 endif
