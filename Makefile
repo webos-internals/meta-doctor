@@ -156,10 +156,10 @@
 # CHANGE_KEYBOARD_TYPE  = z
 # ADD_EXT3FS_PARTITION  = 2GB
 
-# Select "pre", or "pixi".
+# Select "pre", "preplus", "pixi" or "pixiplus".
 DEVICE = pre
 
-# Select "sprint", "bellmo", "telcel", "verizonwireless", "sfr", "wr" or "att".
+# Select "wr", "sprint", "verizonwireless", "sfr", "bellmo", "telcel" or "att".
 CARRIER = wr
 
 ######################################
@@ -200,12 +200,8 @@ endif
 # Latest supported version is:
 # VERSION = 1.4.5
 
-# Latest version, will be overridden below for carriers that are ahead or behind.
-VERSION = 1.4.1.1
-
 ifeq (${DEVICE},pre)
 CODENAME = castle
-MODEL = p100eww
 ifeq (${CARRIER},wr)
 MODEL = p100ueu
 VERSION=1.4.1
@@ -213,14 +209,29 @@ ifeq (${VERSION},1.1.3)
 MODEL = p100eww
 endif
 endif
-ifeq (${CARRIER},verizonwireless)
-MODEL = p101eww
+ifeq (${CARRIER},sprint)
+MODEL = p100eww
+VERSION = 1.4.1.1
 endif
 ifeq (${CARRIER},bellmo)
+MODEL = p100eww
 VERSION=1.4.1
 endif
 ifeq (${CARRIER},telcel)
+MODEL = p100eww
 VERSION=1.4.0
+endif
+endif
+
+ifeq (${DEVICE},preplus)
+CODENAME = castle
+ifeq (${CARRIER},wr)
+MODEL = p101ueu
+VERSION=1.4.1
+endif
+ifeq (${CARRIER},verizonwireless)
+MODEL = p101eww
+VERSION=1.4.1.1
 endif
 ifeq (${CARRIER},sfr)
 MODEL = p101ueu
@@ -234,20 +245,27 @@ endif
 
 ifeq (${DEVICE},pixi)
 CODENAME = pixie
+ifeq (${CARRIER},sprint)
+MODEL = p200eww
+VERSION=1.4.1.1
 ifeq (${VERSION},1.3.5.1)
 MODEL = p120eww
-else
-MODEL = p200eww
+endif
+endif
+endif
+
+ifeq (${DEVICE},pixiplus)
+CODENAME = pixie
+ifeq (${CARRIER},wr)
+MODEL = p121ewweu
+VERSION=1.4.1
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
+VERSION=1.4.1.1
 endif
 ifeq (${CARRIER},sfr)
 MODEL = p121ueu
-VERSION=1.4.1
-endif
-ifeq (${CARRIER},wr)
-MODEL = p121ewweu
 VERSION=1.4.1
 endif
 ifeq (${CARRIER},att)
@@ -293,8 +311,10 @@ JODE= downloads/jode-1.1.2-pre1.jar
 
 .PHONY: all
 all:
-	${MAKE} DEVICE=pre all-wr all-att all-sprint all-bellmo all-telcel all-verizonwireless all-sfr
-	${MAKE} DEVICE=pixi all-wr all-sprint all-verizonwireless all-sfr
+	${MAKE} DEVICE=pre all-wr all-sprint all-bellmo all-telcel
+	${MAKE} DEVICE=preplus all-wr all-verizonwireless all-sfr all-att
+	${MAKE} DEVICE=pixi all-sprint
+	${MAKE} DEVICE=pixiplus all-wr all-verizonwireless all-sfr all-att
 
 .PHONY: all-%
 all-%:
@@ -614,10 +634,13 @@ ${JODE}:
 	curl -L -o $@ http://sourceforge.net/projects/jode/files/jode/1.1.2-pre1/jode-1.1.2-pre1.jar/download
 
 clobber:
-	rm -rf build clones
+	rm -rf build
 
 clobber-%:
 	make CARRIER=$* clobber-build
 
 clobber-build:
 	rm -rf build/${PATIENT}
+
+reallyclobber: clobber
+	rm -rf clones
