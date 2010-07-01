@@ -204,7 +204,7 @@ ifeq (${DEVICE},pre)
 CODENAME = castle
 ifeq (${CARRIER},wr)
 MODEL = p100ueu
-VERSION=1.4.1
+VERSION=1.4.5
 ifeq (${VERSION},1.1.3)
 MODEL = p100eww
 endif
@@ -258,7 +258,7 @@ ifeq (${DEVICE},pixiplus)
 CODENAME = pixie
 ifeq (${CARRIER},wr)
 MODEL = p121ewweu
-VERSION=1.4.1
+VERSION=1.4.5
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
