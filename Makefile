@@ -159,7 +159,7 @@
 # Select "pre", "preplus", "pixi" or "pixiplus".
 DEVICE = pre
 
-# Select "wr", "sprint", "verizonwireless", "sfr", "bellmo", "telcel" or "att".
+# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel" or "att".
 CARRIER = wr
 
 ######################################
@@ -227,15 +227,11 @@ ifeq (${DEVICE},preplus)
 CODENAME = castle
 ifeq (${CARRIER},wr)
 MODEL = p101ueu
-VERSION=1.4.1
+VERSION=1.4.5
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p101eww
 VERSION=1.4.1.1
-endif
-ifeq (${CARRIER},sfr)
-MODEL = p101ueu
-VERSION=1.4.1
 endif
 ifeq (${CARRIER},att)
 MODEL = p101eww
@@ -264,10 +260,6 @@ ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
 VERSION=1.4.1.1
 endif
-ifeq (${CARRIER},sfr)
-MODEL = p121ueu
-VERSION=1.4.1
-endif
 ifeq (${CARRIER},att)
 MODEL = p121eww
 VERSION=1.4.3
@@ -278,10 +270,6 @@ DOCTOR	= webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 
 ifeq (${CARRIER},wr)
 DOCTOR	= webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
-endif
-
-ifeq (${CARRIER},sfr)
-DOCTOR	= webosdoctor${MODEL}-wr-${VERSION}.jar
 endif
 
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
@@ -312,9 +300,9 @@ JODE= downloads/jode-1.1.2-pre1.jar
 .PHONY: all
 all:
 	${MAKE} DEVICE=pre all-wr all-sprint all-bellmo all-telcel
-	${MAKE} DEVICE=preplus all-wr all-verizonwireless all-sfr all-att
+	${MAKE} DEVICE=preplus all-wr all-verizonwireless all-att
 	${MAKE} DEVICE=pixi all-sprint
-	${MAKE} DEVICE=pixiplus all-wr all-verizonwireless all-sfr all-att
+	${MAKE} DEVICE=pixiplus all-wr all-verizonwireless all-att
 
 .PHONY: all-%
 all-%:
@@ -514,15 +502,15 @@ backup-%:
 backup: mount
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	mkdir -p clones/$$id ; \
-	echo "Creating clones/$$id/nova-cust-image-${CODENAME}-varfs.tar.gz" ; \
+	echo "Creating clones/$$id/nova-cust-image-${CODENAME}.varfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}-varfs.tar.gz ; \
-	echo "Creating clones/$$id/nova-cust-image-${CODENAME}-rootfs.tar.gz" ; \
+	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}.varfs.tar.gz ; \
+	echo "Creating clones/$$id/nova-cust-image-${CODENAME}.rootfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/root/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}-rootfs.tar.gz ; \
-	echo "Creating clones/$$id/nova-cust-image-${CODENAME}-media.tar.gz" ; \
+	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}.rootfs.tar.gz ; \
+	echo "Creating clones/$$id/nova-cust-image-${CODENAME}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}-media.tar.gz ; \
+	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}.media.tar.gz ; \
 
 .PHONY: mount
 mount: unmount
