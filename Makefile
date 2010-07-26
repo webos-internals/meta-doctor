@@ -215,7 +215,7 @@ VERSION = 1.4.1.1
 endif
 ifeq (${CARRIER},bellmo)
 MODEL = p100eww
-VERSION=1.4.1
+VERSION=1.4.5
 endif
 ifeq (${CARRIER},telcel)
 MODEL = p100eww
