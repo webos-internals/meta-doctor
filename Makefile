@@ -157,10 +157,10 @@
 # ADD_EXT3FS_PARTITION  = 2GB
 
 # Select "pre", "preplus", "pixi" or "pixiplus".
-DEVICE = pre
+DEVICE = undefined
 
 # Select "wr", "sprint", "verizonwireless", "bellmo", "telcel" or "att".
-CARRIER = wr
+CARRIER = undefined
 
 ######################################
 ## END OF AREA FOR END USER CHANGES ##
@@ -299,10 +299,25 @@ JODE= downloads/jode-1.1.2-pre1.jar
 
 .PHONY: all
 all:
+ifneq (${DEVICE},undefined)
+ifneq (${CARRIER},undefined)
+	@if [ "${MODEL}" == "" ] || [ "${VERSION}" == "" ] ; then \
+	  echo You have specified an invalid DEVICE and CARRIER combination ; false ; \
+	fi
+	${MAKE} unpack patch pack
+else
+	@echo You must set the DEVICE and CARRIER variables ; false
+endif
+else
+ifneq (${CARRIER},undefined)
+	@echo You must set the DEVICE and CARRIER variables ; false
+else
 	${MAKE} DEVICE=pre all-wr all-sprint all-bellmo all-telcel
 	${MAKE} DEVICE=preplus all-wr all-verizonwireless all-att
 	${MAKE} DEVICE=pixi all-sprint
 	${MAKE} DEVICE=pixiplus all-wr all-verizonwireless all-att
+endif
+endif
 
 .PHONY: all-%
 all-%:
