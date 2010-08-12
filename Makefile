@@ -204,22 +204,22 @@ ifeq (${DEVICE},pre)
 CODENAME = castle
 ifeq (${CARRIER},wr)
 MODEL = p100ueu
-VERSION=1.4.5
+VERSION = 1.4.5
 ifeq (${VERSION},1.1.3)
 MODEL = p100eww
 endif
 endif
 ifeq (${CARRIER},sprint)
 MODEL = p100eww
-VERSION = 1.4.1.1
+VERSION = 1.4.5
 endif
 ifeq (${CARRIER},bellmo)
 MODEL = p100eww
-VERSION=1.4.5
+VERSION = 1.4.5
 endif
 ifeq (${CARRIER},telcel)
 MODEL = p100eww
-VERSION=1.4.0
+VERSION = 1.4.0
 endif
 endif
 
@@ -227,15 +227,15 @@ ifeq (${DEVICE},preplus)
 CODENAME = castle
 ifeq (${CARRIER},wr)
 MODEL = p101ueu
-VERSION=1.4.5
+VERSION = 1.4.5
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p101eww
-VERSION=1.4.1.1
+VERSION = 1.4.1.1
 endif
 ifeq (${CARRIER},att)
 MODEL = p101eww
-VERSION=1.4.2
+VERSION = 1.4.2
 endif
 endif
 
@@ -243,7 +243,7 @@ ifeq (${DEVICE},pixi)
 CODENAME = pixie
 ifeq (${CARRIER},sprint)
 MODEL = p200eww
-VERSION=1.4.1.1
+VERSION = 1.4.5
 ifeq (${VERSION},1.3.5.1)
 MODEL = p120eww
 endif
@@ -254,15 +254,15 @@ ifeq (${DEVICE},pixiplus)
 CODENAME = pixie
 ifeq (${CARRIER},wr)
 MODEL = p121ewweu
-VERSION=1.4.5
+VERSION = 1.4.5
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
-VERSION=1.4.1.1
+VERSION = 1.4.1.1
 endif
 ifeq (${CARRIER},att)
 MODEL = p121eww
-VERSION=1.4.3
+VERSION = 1.4.3
 endif
 endif
 
