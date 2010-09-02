@@ -179,14 +179,16 @@ ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
-# DISABLE_MODEM_UPDATE  = 1
+DISABLE_MODEM_UPDATE  = 1
 # REMOVE_CARRIER_CHECK  = 1
+# REMOVE_MODEL_CHECK    = 1
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
 # CUSTOM_ROOT_PARTITION = 1
 # CUSTOM_VAR_PARTITION  = 1
 # CLONE = 55caa500
 # CHANGE_KEYBOARD_TYPE  = z
+# CUSTOM_WEBOS_TARBALL = webOS.tar
 endif
 
 #################################
@@ -385,8 +387,14 @@ endif
 ifeq (${BYPASS_FIRST_USE_APP},1)
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
 	touch build/${PATIENT}/rootfs/var/luna/preferences/ran-first-use
-	( cd patches/webos-${VERSION} ; cat make-firstuse-visible.patch ) | \
-	( cd build/${PATIENT}/rootfs ; patch -p0 )
+	sed -i.orig -e 's/"visible": "false"/"visible": "true"/' \
+		build/${PATIENT}/rootfs/usr/palm/applications/com.palm.app.firstuse/appinfo.json
+	rm -f build/${PATIENT}/rootfs/usr/palm/applications/com.palm.app.firstuse/appinfo.json.orig
+	for f in build/${PATIENT}/rootfs/usr/palm/applications/com.palm.app.firstuse/resources/*/appinfo.json ; do \
+	  if [ -f $$f ] ; then \
+	    sed -i.orig -e 's/"visible": "false"/"visible": "true"/' $$f ; rm -f $$f.orig ; \
+	  fi ; \
+	done
 endif
 ifeq (${ENABLE_DEVELOPER_MODE},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
@@ -587,6 +595,9 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
 		unzip -q ${DOCTOR} META-INF/MANIFEST.MF com/* resources/webOS.tar resources/recoverytool.config )
+ifdef CUSTOM_WEBOS_TARBALL
+	cp ${CUSTOM_WEBOS_TARBALL} build/${PATIENT}/resources/webOS.tar
+endif
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
