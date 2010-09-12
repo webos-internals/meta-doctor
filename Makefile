@@ -202,6 +202,8 @@ endif
 ## DO NOT MODIFY ANYTHING PAST THIS POINT, UNLESS YOU ARE A MAKEFILE EXPERT ##
 ##############################################################################
 
+CARRIER_TARBALL = ${CARRIER}.tar
+
 # Latest supported version is:
 # VERSION = 1.4.5
 
@@ -225,6 +227,7 @@ endif
 ifeq (${CARRIER},telcel)
 MODEL = p100eww
 VERSION = 1.4.0
+CARRIER_TARBALL = wr.tar
 endif
 endif
 
@@ -233,10 +236,12 @@ CODENAME = castle
 ifeq (${CARRIER},wr)
 MODEL = p101ueu
 VERSION = 1.4.5
+CARRIER_TARBALL = wr-castle-plus.tar
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p101eww
 VERSION = 1.4.1.1
+CARRIER_TARBALL = verizon.tar
 endif
 ifeq (${CARRIER},att)
 MODEL = p101eww
@@ -264,6 +269,7 @@ endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
 VERSION = 1.4.5
+CARRIER_TARBALL = verizon.tar
 endif
 ifeq (${CARRIER},att)
 MODEL = p121eww
@@ -278,12 +284,6 @@ DOCTOR	= webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
 endif
 
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
-
-CARRIER_TARBALL = ${CARRIER}.tar
-
-ifeq (${CARRIER},telcel)
-CARRIER_TARBALL = wr.tar
-endif
 
 APPLICATIONS = com.palm.app.firstuse
 
