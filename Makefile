@@ -171,8 +171,8 @@ CARRIER = undefined
 ###################################
 
 ifeq (${LOGNAME},rwhitby)
-# DEVICE = pre
-# CARRIER = wr
+DEVICE = pre
+CARRIER = wr
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
