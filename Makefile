@@ -171,6 +171,8 @@ CARRIER = undefined
 ###################################
 
 ifeq (${LOGNAME},rwhitby)
+# DEVICE = pre
+# CARRIER = wr
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
@@ -341,14 +343,22 @@ endif
 build/${PATIENT}/.packed:
 	rm -f $@
 ifneq (${CUSTOM_ROOT_PARTITION},1)
-	- ${TAR} -C build/${PATIENT}/rootfs \
+	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
-		--delete ${OLDDIRS} ./md5sums
+		--delete ${OLDDIRS} ./md5sums*
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
-	${TAR} -C build/${PATIENT}/rootfs \
+	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
+	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
+	  ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ./md5sums
+		--append ${NEWDIRS} ./md5sums.gz ; \
+	else \
+	  ${TAR} -C build/${PATIENT}/rootfs \
+		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
+		--numeric-owner --owner=0 --group=0 \
+		--append ${NEWDIRS} ./md5sums ; \
+	fi
 	gzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar
 endif
 	- ${TAR} -C build/${PATIENT}/webOS \
@@ -379,6 +389,9 @@ build/${PATIENT}/.patched: ${JAD}
 	@for app in ${APPLICATIONS} ; do \
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old ; \
 	done
+	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
+	  gunzip -c < build/${PATIENT}/rootfs/md5sums.gz > build/${PATIENT}/rootfs/md5sums ; \
+	fi
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
 ifeq (${BYPASS_ACTIVATION},1)
 	( cd patches/webos-${VERSION} ; cat bypass-activation.patch ) | \
@@ -605,9 +618,9 @@ endif
 		./nova-installer-image-${CODENAME}.uImage ./${CODENAME}.xml ./installer.xml
 	gunzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
-	${TAR} -C build/${PATIENT}/rootfs \
+	${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
-		-x ${OLDDIRS} ./md5sums ./etc/palm-build-info
+		-x ${OLDDIRS} ./md5sums* ./etc/palm-build-info
 	touch $@
 
 .PHONY: download-%
