@@ -171,8 +171,8 @@ CARRIER = undefined
 ###################################
 
 ifeq (${LOGNAME},rwhitby)
-DEVICE = pre
-CARRIER = wr
+# DEVICE = pre
+# CARRIER = wr
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
@@ -191,6 +191,7 @@ DISABLE_MODEM_UPDATE  = 1
 # CLONE = 55caa500
 # CHANGE_KEYBOARD_TYPE  = z
 # CUSTOM_WEBOS_TARBALL = webOS.tar
+# CUSTOM_CARRIER_TARBALL = wr.tar
 endif
 
 #################################
@@ -262,7 +263,7 @@ VERSION = 1.4.5
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
-VERSION = 1.4.1.1
+VERSION = 1.4.5
 endif
 ifeq (${CARRIER},att)
 MODEL = p121eww
@@ -369,11 +370,13 @@ endif
 		--numeric-owner --owner=0 --group=0 -h \
 		--append ${NOVATGZ} ${USERTGZ} ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
-		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} resources/webOS.tar resources/recoverytool.config )
+		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
+			resources/webOS.tar resources/${CARRIER}.tar resources/recoverytool.config )
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
 		build/${PATIENT}/META-INF/MANIFEST.MF
 	( cd build/${PATIENT} ; \
-		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} resources/webOS.tar resources/recoverytool.config )
+		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
+			resources/webOS.tar resources/${CARRIER}.tar resources/recoverytool.config )
 	touch $@
 
 .PHONY: patch-%
@@ -607,9 +610,14 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	mkdir -p build/${PATIENT}
 	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
-		unzip -q ${DOCTOR} META-INF/MANIFEST.MF com/* resources/webOS.tar resources/recoverytool.config )
+		unzip -q ${DOCTOR} META-INF/MANIFEST.MF com/* \
+			resources/webOS.tar resources/${CARRIER}.tar \
+			resources/recoverytool.config )
 ifdef CUSTOM_WEBOS_TARBALL
 	cp ${CUSTOM_WEBOS_TARBALL} build/${PATIENT}/resources/webOS.tar
+endif
+ifdef CUSTOM_CARRIER_TARBALL
+	cp ${CUSTOM_CARRIER_TARBALL} build/${PATIENT}/resources/${CARRIER}.tar
 endif
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
