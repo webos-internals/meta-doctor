@@ -292,7 +292,7 @@ CLASSES = com/palm/nova/installer/core/TrenchcoatModel
 DOCTOR_PATCHES = trenchcoat-model-fixup.patch trenchcoat-model-extra-data.patch
 endif
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/event.d ./etc/ssl
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
 
 ifeq ($(shell uname -s),Darwin)
