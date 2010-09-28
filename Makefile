@@ -431,16 +431,9 @@ ifeq (${ENABLE_USB_NETWORKING},1)
 	touch build/${PATIENT}/rootfs/var/gadget/usbnet_enabled
 endif
 ifeq (${DISABLE_UPLOAD_DAEMON},1)
-	rm -f build/${PATIENT}/rootfs/etc/event.d/uploadd
-	sed -i.orig -e '/\/etc\/event.d\/uploadd/d' \
-		build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.md5sums
-	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.md5sums.orig
-	sed -i.orig -e '/\/etc\/event.d\/uploadd/d' \
-		build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.list
-	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/uploadd.list.orig
-	sed -i.orig -e '/\/etc\/event.d\/uploadd/d' \
-		build/${PATIENT}/rootfs/md5sums.old
-	rm -f build/${PATIENT}/rootfs/md5sums.old.orig
+	chmod -x build/${PATIENT}/rootfs/usr/bin/uploadd
+	chmod -x build/${PATIENT}/rootfs/usr/bin/contextupload
+	chmod -x build/${PATIENT}/rootfs/usr/bin/rdxd
 endif
 ifeq (${INSTALL_SSH_AUTH_KEYS},1)
 	mkdir -p build/${PATIENT}/rootfs/var/home/root/.ssh
