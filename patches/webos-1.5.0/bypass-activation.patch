@@ -1,6 +1,6 @@
 --- usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js.orig
 +++ usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
-@@ -53,6 +53,11 @@
+@@ -52,6 +52,11 @@
  
  function setUpFirstUse() {
  Mojo.Log.info("---------------- setupFirstUse() --------------------");
@@ -12,7 +12,7 @@
  	this.firstUseDepot = new Mojo.Depot(stateEngine, dbSetUpSuccess, dbSetupFailure);	
  	isInitialized = true;
  	attemptCount = 0;
-@@ -526,10 +531,10 @@
+@@ -518,10 +523,10 @@
  		if (response.extended.state != undefined) {
  			simStatus = response.extended.state.toLowerCase();
  			Mojo.Log.info("SIM Status = %s ", simStatus);
