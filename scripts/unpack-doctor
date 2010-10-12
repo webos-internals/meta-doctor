@@ -14,6 +14,9 @@ fi
 if [ -f $NAME/webOS/nova-cust-image-pixie.rootfs.tar.gz ] ; then
     tar -C $NAME/rootfs -p -z -x -f $NAME/webOS/nova-cust-image-pixie.rootfs.tar.gz
 fi
+if [ -f $NAME/webOS/nova-cust-image-roadrunner.rootfs.tar.gz ] ; then
+    tar -C $NAME/rootfs -p -z -x -f $NAME/webOS/nova-cust-image-roadrunner.rootfs.tar.gz
+fi
 for carrier in $NAME/jar/resources/*.tar ; do
   if [ "$carrier" != "$NAME/jar/resources/webOS.tar" ] ; then
     tar -C $NAME/carrier -p -x -f $carrier

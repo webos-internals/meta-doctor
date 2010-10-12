@@ -1,6 +1,6 @@
 # Makefile for webOS Doctor modifications
 #
-# Copyright (C) 2009 by Rod Whitby <rod@whitby.id.au>
+# Copyright (C) 2009,2010 by Rod Whitby <rod@whitby.id.au>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -156,7 +156,7 @@
 # CHANGE_KEYBOARD_TYPE  = z
 # ADD_EXT3FS_PARTITION  = 2GB
 
-# Select "pre", "preplus", "pixi" or "pixiplus".
+# Select "pre", "preplus", "pixi", "pixiplus" or "roadrunner".
 DEVICE = undefined
 
 # Select "wr", "sprint", "verizonwireless", "bellmo", "telcel" or "att".
@@ -273,7 +273,7 @@ CARRIER_TARBALL = verizon.tar
 endif
 ifeq (${CARRIER},att)
 MODEL = p121eww
-VERSION = 1.4.3
+VERSION = 1.4.5
 endif
 endif
 
