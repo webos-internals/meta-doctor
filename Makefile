@@ -505,6 +505,11 @@ ifeq (${REMOVE_MODEL_CHECK},1)
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
+ifeq (${REMOVE_DEVICETYPE_CHECK},1)
+	sed -i.orig -e '/DeviceType/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
 ifeq (${DISABLE_MODEM_UPDATE},1)
 	sed -i.orig -e '/ModemUpdater/d' \
 		build/${PATIENT}/webOS/installer.xml
