@@ -377,12 +377,20 @@ endif
 		--append ${NOVATGZ} ${USERTGZ} ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
-			resources/webOS.tar resources/${CARRIER_TARBALL} resources/recoverytool.config )
+			resources/webOS.tar resources/recoverytool.config )
+ifndef REMOVE_CARRIER_CHECK
+	( cd build/${PATIENT} ; \
+		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
+endif
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
 		build/${PATIENT}/META-INF/MANIFEST.MF
 	( cd build/${PATIENT} ; \
 		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
-			resources/webOS.tar resources/${CARRIER_TARBALL} resources/recoverytool.config )
+			resources/webOS.tar resources/recoverytool.config )
+ifndef REMOVE_CARRIER_CHECK
+	( cd build/${PATIENT} ; \
+		zip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
+endif
 	touch $@
 
 .PHONY: patch-%
@@ -610,8 +618,11 @@ build/${PATIENT}/.unpacked: downloads/${DOCTOR}
 	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
 		unzip -q ${DOCTOR} META-INF/MANIFEST.MF com/* \
-			resources/webOS.tar resources/${CARRIER_TARBALL} \
-			resources/recoverytool.config )
+			resources/webOS.tar resources/recoverytool.config )
+ifndef REMOVE_CARRIER_CHECK
+	( cd build/${PATIENT} ; \
+		unzip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
+endif
 ifdef CUSTOM_WEBOS_TARBALL
 	cp ${CUSTOM_WEBOS_TARBALL} build/${PATIENT}/resources/webOS.tar
 endif
