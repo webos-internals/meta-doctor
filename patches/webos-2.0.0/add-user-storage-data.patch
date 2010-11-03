@@ -1,0 +1,44 @@
+--- com/palm/nova/installer/core/FlasherThread.java	2010-06-06 22:00:20.000000000 +0930
++++ com/palm/nova/installer/core/FlasherThread.java.orig	2010-06-06 22:07:14.000000000 +0930
+@@ -31,6 +31,7 @@
+     InstallerModel baseModel;
+     TarredInstallerModel customizationModel;
+     String massStorageData;
++    String userStorageData;
+     String softwareUpdateSite;
+     String softwareUpdateUrl;
+     String postFlashScript;
+@@ -72,6 +73,7 @@
+         this.baseModel = null;
+         this.customizationModel = null;
+         massStorageData = null;
++        userStorageData = null;
+         softwareUpdateSite = null;
+         softwareUpdateUrl = null;
+         postFlashScript = null;
+@@ -228,6 +230,10 @@
+             {
+                 tcmodel.doPreserveMsmContents(doSaveMsm);
+             }
++            if (null != userStorageData && 0 != userStorageData.length())
++            {
++                tcmodel.addUserStorageData(userStorageData);
++            }
+             TrenchcoatStage trenchcoat = new TrenchcoatStage(tcmodel, device);
+             trenchcoat.setProgressHandler(this);
+             for (retries = 3; retries > 0;)
+@@ -569,6 +575,14 @@
+         }
+     }
+ 
++    public void setUserStorageData(String data)
++    {
++        if (null != data && 0 != data.trim().length())
++        {
++            userStorageData = data.trim();
++        }
++    }
++
+     public void doVerifyRom(boolean doVerifyRom)
+     {
+         doVerifyRomImage = doVerifyRom;

@@ -156,7 +156,7 @@
 # CHANGE_KEYBOARD_TYPE  = z
 # ADD_EXT3FS_PARTITION  = 2GB
 
-# Select "pre", "preplus", "pixi", "pixiplus" or "roadrunner".
+# Select "pre", "preplus", "pixi", "pixiplus" or "pre2".
 DEVICE = undefined
 
 # Select "wr", "sprint", "verizonwireless", "bellmo", "telcel" or "att".
@@ -274,6 +274,15 @@ endif
 ifeq (${CARRIER},att)
 MODEL = p121eww
 VERSION = 1.4.5
+endif
+endif
+
+ifeq (${DEVICE},pre2)
+CODENAME = roadrunner
+ifeq (${CARRIER},wr)
+MODEL = p103ueu
+VERSION = 2.0.0
+CARRIER_TARBALL = wr.tar
 endif
 endif
 
