@@ -192,7 +192,8 @@ DISABLE_MODEM_UPDATE  = 1
 # CHANGE_KEYBOARD_TYPE  = z
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
-CUSTOM_DEVICETYPE = castle
+# CUSTOM_DEVICETYPE = castle
+# CUSTOM_BOOTLOADER = boot.bin
 endif
 
 #################################
@@ -302,7 +303,7 @@ CLASSES = com/palm/nova/installer/core/TrenchcoatModel
 DOCTOR_PATCHES = trenchcoat-model-fixup.patch trenchcoat-model-extra-data.patch
 endif
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
 
 ifeq ($(shell uname -s),Darwin)
@@ -351,11 +352,15 @@ pack-%:
 .PHONY: pack
 pack: build/${PATIENT}/.packed
 
-NOVATGZ = ./nova-cust-image-${CODENAME}.rootfs.tar.gz
+INSTIMAGE = ./nova-installer-image-${CODENAME}.uImage
+
+CUSTIMAGE = ./nova-cust-image-${CODENAME}.rootfs.tar.gz
 
 ifeq (${CUSTOM_VAR_PARTITION},1)
 USERTGZ = ./nova-cust-image-${CODENAME}.varfs.tar.gz
 endif
+
+BOOTLOADER = boot-${CODENAME}.bin
 
 build/${PATIENT}/.packed:
 	rm -f $@
@@ -380,11 +385,11 @@ ifneq (${CUSTOM_ROOT_PARTITION},1)
 endif
 	- ${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ${NOVATGZ} ./${CODENAME}.xml ./installer.xml
+		--delete ${CUSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
 		--numeric-owner --owner=0 --group=0 -h \
-		--append ${NOVATGZ} ${USERTGZ} ./${CODENAME}.xml ./installer.xml
+		--append ${CUSTIMAGE} ${USERTGZ} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
@@ -647,13 +652,18 @@ endif
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		-x ./nova-cust-image-${CODENAME}.rootfs.tar.gz \
-		./nova-installer-image-${CODENAME}.uImage ./${CODENAME}.xml ./installer.xml
+		-x ${CUSTIMAGE} ${INSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
+ifdef CUSTOM_BOOTLOADER
+	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/webOS/${BOOTLOADER}
+endif
 	gunzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
 		-x ${OLDDIRS} ./md5sums* ./etc/palm-build-info
+ifdef CUSTOM_BOOTLOADER
+	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/rootfs/boot/boot.bin
+endif
 	touch $@
 
 .PHONY: download-%
