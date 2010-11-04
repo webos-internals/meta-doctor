@@ -186,14 +186,14 @@ DISABLE_MODEM_UPDATE  = 1
 # REMOVE_MODEL_CHECK    = 1
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
-# CUSTOM_ROOT_PARTITION = 1
-# CUSTOM_VAR_PARTITION  = 1
 # CLONE = 55caa500
 # CHANGE_KEYBOARD_TYPE  = z
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
+# CUSTOM_INSTALLER = nova-installer-image-castle.uImage
+# CUSTOM_KERNEL_DIR = rootfs
 endif
 
 #################################
@@ -298,9 +298,17 @@ PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
 
-ifeq (${CUSTOM_VAR_PARTITION},1)
-CLASSES = com/palm/nova/installer/core/TrenchcoatModel
-DOCTOR_PATCHES = trenchcoat-model-fixup.patch trenchcoat-model-extra-data.patch
+ifdef CUSTOM_DEVICETYPE
+DISABLE_UPLOAD_DAEMON = 1
+DISABLE_MODEM_UPDATE  = 1
+REMOVE_CARRIER_CHECK  = 1
+REMOVE_MODEL_CHECK    = 1
+PATCH_DOCTOR          = 1
+endif
+
+ifeq (${PATCH_DOCTOR},1)
+CLASSES = com/palm/nova/installer/recoverytool/MainFlasher
+DOCTOR_PATCHES = flasher-disable-everything.patch
 endif
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules
@@ -308,12 +316,12 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/p
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
-ifeq (${CUSTOM_VAR_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
 JAD	= build/tools/jad-macosx/jad
 endif
 else
 TAR	= tar
-ifeq (${CUSTOM_VAR_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
 JAD	= build/tools/jad-linux/jad
 endif
 endif
@@ -352,44 +360,52 @@ pack-%:
 .PHONY: pack
 pack: build/${PATIENT}/.packed
 
-INSTIMAGE = ./nova-installer-image-${CODENAME}.uImage
+CODENAMEOLD = ${CODENAME}
+INSTIMAGEOLD = nova-installer-image-${CODENAMEOLD}
+CUSTIMAGEOLD = nova-cust-image-${CODENAMEOLD}
+BOOTLOADEROLD = boot-${CODENAMEOLD}
 
-CUSTIMAGE = ./nova-cust-image-${CODENAME}.rootfs.tar.gz
-
-ifeq (${CUSTOM_VAR_PARTITION},1)
-USERTGZ = ./nova-cust-image-${CODENAME}.varfs.tar.gz
+ifdef CUSTOM_DEVICETYPE
+CODENAMENEW = ${CUSTOM_DEVICETYPE}
+else
+CODENAMENEW = ${CODENAMEOLD}
 endif
 
-BOOTLOADER = ./boot-${CODENAME}.bin
+INSTIMAGENEW = nova-installer-image-${CODENAMENEW}
+CUSTIMAGENEW = nova-cust-image-${CODENAMENEW}
+BOOTLOADERNEW = boot-${CODENAMENEW}
+
 
 build/${PATIENT}/.packed:
 	rm -f $@
-ifneq (${CUSTOM_ROOT_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
+	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
+endif
 	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
-		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--delete ${OLDDIRS} ./md5sums*
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
 	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
 	  ${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
 		--append ${NEWDIRS} ./md5sums.gz ; \
 	else \
 	  ${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
 		--append ${NEWDIRS} ./md5sums ; \
 	fi
-	gzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar
-endif
+	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
 	- ${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ${CUSTIMAGE} ${INSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
+		--delete ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
 		--numeric-owner --owner=0 --group=0 -h \
-		--append ${CUSTIMAGE} ${INSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml ${USERTGZ} 
+		--append ./${CUSTIMAGENEW}.rootfs.tar.gz ./${INSTIMAGENEW}.uImage ./${BOOTLOADERNEW}.bin ./${CODENAMENEW}.xml ./installer.xml \
+			 ${USERTGZ} 
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
@@ -498,8 +514,8 @@ endif
 				     build/${PATIENT}/rootfs/md5sums
 	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
 ifeq (${INCREASE_VAR_SPACE},1)
-	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAME}.xml
-	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
+	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAMENEW}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
 ifeq (${REMOVE_CARRIER_CHECK},1)
 	sed -i.orig -e '/ApprovalCharlieHash/d' -e '/CustomizationBuild/d' \
@@ -523,7 +539,7 @@ ifeq (${DISABLE_MODEM_UPDATE},1)
 endif
 ifdef CUSTOM_DEVICETYPE
 	sed -i.orig -e 's/target="[^"]*"/target="${CUSTOM_DEVICETYPE}"/' \
-		    -e 's/bootfile="[^"]*"/bootfile="boot-${CUSTOM_DEVICETYPE}.bin"/' \
+		    -e 's/bootfile="[^"]*"/bootfile="${BOOTLOADERNEW}.bin"/' \
 		build/${PATIENT}/webOS/installer.xml
 	rm -f build/${PATIENT}/webOS/installer.xml.orig
 endif
@@ -533,28 +549,16 @@ ifdef ADD_EXT3FS_PARTITION
 <Volume id="media"|' \
 	  -e 's|<Mount id="media"|<Mount id="ext3fs" options="noatime,data=writeback" freq="0" passno="0"/>\
 <Mount id="media"|' \
-		build/${PATIENT}/webOS/${CODENAME}.xml
-	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
+		build/${PATIENT}/webOS/${CODENAMENEW}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
 ifdef CHANGE_KEYBOARD_TYPE
 	sed -i.orig -e 's|<Section name="tokens" type="token" size="4KB">|<Section name="tokens" type="token" size="4KB">\
 <Val name="KEYoBRD" action="overwrite" value="${CHANGE_KEYBOARD_TYPE}"/>|' \
-		build/${PATIENT}/webOS/${CODENAME}.xml
-	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
+		build/${PATIENT}/webOS/${CODENAMENEW}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
-ifeq (${CUSTOM_ROOT_PARTITION},1)
-	rm -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar.gz
-	ln -s ../../../clones/${CLONE}/nova-cust-image-${CODENAME}.rootfs.tar.gz build/${PATIENT}/webOS/
-endif
-ifeq (${CUSTOM_VAR_PARTITION},1)
-	sed -i.orig -e 's|<File file="$${NOVATGZ}" target="/"/>|<File file="$${NOVATGZ}" target="/"/>\
-<File file="$${USERTGZ}" target="/var"/>|' \
-		build/${PATIENT}/webOS/${CODENAME}.xml
-	rm -f build/${PATIENT}/webOS/${CODENAME}.xml.orig
-	rm -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.varfs.tar.gz
-	ln -s ../../../clones/${CLONE}/nova-cust-image-${CODENAME}.varfs.tar.gz build/${PATIENT}/webOS/
-endif
-ifeq (${CUSTOM_VAR_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
 	[ -d patches/doctor ]
 	( cd build/${PATIENT} ; ../../${JAD} -b -ff -o -r -space -s java ${CLASSES:%=%.class} )
 	for f in ${CLASSES:%=%.java} ; do \
@@ -562,7 +566,6 @@ ifeq (${CUSTOM_VAR_PARTITION},1)
 	done
 	( cd patches/doctor ; cat ${DOCTOR_PATCHES} ) | \
 	( cd build/${PATIENT} ; patch -p0 )
-	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
 endif
 	touch $@
 
@@ -574,15 +577,18 @@ backup-%:
 backup: mount
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	mkdir -p clones/$$id ; \
-	echo "Creating clones/$$id/nova-cust-image-${CODENAME}.varfs.tar.gz" ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}.varfs.tar.gz ; \
-	echo "Creating clones/$$id/nova-cust-image-${CODENAME}.rootfs.tar.gz" ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/root/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}.rootfs.tar.gz ; \
-	echo "Creating clones/$$id/nova-cust-image-${CODENAME}.media.tar.gz" ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/boot/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/nova-cust-image-${CODENAME}.media.tar.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz ; \
 
 .PHONY: mount
 mount: unmount
@@ -593,11 +599,14 @@ mount: unmount
 	  novacom -w run file://bin/mkdir -- -p /tmp/$$f ; \
 	  novacom -w run file://bin/mount -- /dev/mapper/store-$$f /tmp/$$f -o ro ; \
 	done
+	@echo "Mounting /dev/mmcblk0p2"
+	@novacom -w run file://bin/mkdir -- -p /tmp/boot
+	@novacom -w run file://bin/mount -- /dev/mmcblk0p2 /tmp/boot -o ro
 
 .PHONY: unmount
 unmount:
-	@for f in var root media ; do \
-	  echo "Unmounting /dev/mapper/store-$$f" ; \
+	@for f in var root media boot ; do \
+	  echo "Unmounting /tmp/$$f" ; \
 	  ( novacom -w run file://bin/umount -- /tmp/$$f 2> /dev/null || true ) ; \
 	done
 
@@ -607,7 +616,7 @@ memload-%:
 
 .PHONY: memload
 memload: build/${PATIENT}/.unpacked
-	novacom -w boot mem:// < build/${PATIENT}/webOS/nova-installer-image-${CODENAME}.uImage
+	novacom -w boot mem:// < build/${PATIENT}/webOS/${INSTIMAGEOLD}.uImage
 	@sleep 5
 
 .PHONY: memboot-%
@@ -618,7 +627,7 @@ memboot-%:
 memboot: build/${PATIENT}/.unpacked
 	novacom -w run file://sbin/tellbootie recover || true
 	@sleep 5
-	novacom -w boot mem:// < build/${PATIENT}/webOS/nova-installer-image-${CODENAME}.uImage
+	novacom -w boot mem:// < build/${PATIENT}/webOS/${INSTIMAGEOLD}.uImage
 	@sleep 5
 
 .PHONY: reboot
@@ -658,18 +667,28 @@ endif
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		-x ${CUSTIMAGE} ${INSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
+		-x ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
+ifdef CUSTOM_DEVICETYPE
+	mv build/${PATIENT}/webOS/${CUSTIMAGEOLD}.rootfs.tar.gz build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
+	mv build/${PATIENT}/webOS/${INSTIMAGEOLD}.uImage build/${PATIENT}/webOS/${INSTIMAGENEW}.uImage
+	mv build/${PATIENT}/webOS/${BOOTLOADEROLD}.bin build/${PATIENT}/webOS/${BOOTLOADERNEW}.bin
+	mv build/${PATIENT}/webOS/${CODENAMEOLD}.xml build/${PATIENT}/webOS/${CODENAMENEW}.xml
+endif
 ifdef CUSTOM_INSTALLER
-	cp ${CUSTOM_INSTALLER} build/${PATIENT}/webOS/${INSTIMAGE}
+	cp ${CUSTOM_INSTALLER} build/${PATIENT}/webOS/${INSTIMAGENEW}.uImage
 endif
 ifdef CUSTOM_BOOTLOADER
-	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/webOS/${BOOTLOADER}
+	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/webOS/${BOOTLOADERNEW}.bin
 endif
-	gunzip -f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar.gz
+	gunzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs --wildcards \
-		-f build/${PATIENT}/webOS/nova-cust-image-${CODENAME}.rootfs.tar \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		-x ${OLDDIRS} ./md5sums* ./etc/palm-build-info
+ifdef CUSTOM_KERNEL_DIR
+	( cd ${CUSTOM_KERNEL_DIR}/boot ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/ ; tar xf - )
+	( cd ${CUSTOM_KERNEL_DIR}/lib/modules ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/lib/ ; tar xf - )
+endif
 ifdef CUSTOM_BOOTLOADER
 	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/rootfs/boot/boot.bin
 endif
