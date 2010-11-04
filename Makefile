@@ -303,7 +303,7 @@ CLASSES = com/palm/nova/installer/core/TrenchcoatModel
 DOCTOR_PATCHES = trenchcoat-model-fixup.patch trenchcoat-model-extra-data.patch
 endif
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
 
 ifeq ($(shell uname -s),Darwin)
@@ -360,7 +360,7 @@ ifeq (${CUSTOM_VAR_PARTITION},1)
 USERTGZ = ./nova-cust-image-${CODENAME}.varfs.tar.gz
 endif
 
-BOOTLOADER = boot-${CODENAME}.bin
+BOOTLOADER = ./boot-${CODENAME}.bin
 
 build/${PATIENT}/.packed:
 	rm -f $@
