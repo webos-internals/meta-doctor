@@ -385,11 +385,11 @@ ifneq (${CUSTOM_ROOT_PARTITION},1)
 endif
 	- ${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ${CUSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
+		--delete ${CUSTIMAGE} ${INSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
 		--numeric-owner --owner=0 --group=0 -h \
-		--append ${CUSTIMAGE} ${USERTGZ} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
+		--append ${CUSTIMAGE} ${INSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml ${USERTGZ} 
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
@@ -518,6 +518,12 @@ ifdef CUSTOM_DEVICETYPE
 endif
 ifeq (${DISABLE_MODEM_UPDATE},1)
 	sed -i.orig -e '/ModemUpdater/d' \
+		build/${PATIENT}/webOS/installer.xml
+	rm -f build/${PATIENT}/webOS/installer.xml.orig
+endif
+ifdef CUSTOM_DEVICETYPE
+	sed -i.orig -e 's/target="[^"]*"/target="${CUSTOM_DEVICETYPE}"/' \
+		    -e 's/bootfile="[^"]*"/bootfile="boot-${CUSTOM_DEVICETYPE}.bin"/' \
 		build/${PATIENT}/webOS/installer.xml
 	rm -f build/${PATIENT}/webOS/installer.xml.orig
 endif
@@ -653,6 +659,9 @@ endif
 	${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
 		-x ${CUSTIMAGE} ${INSTIMAGE} ${BOOTLOADER} ./${CODENAME}.xml ./installer.xml
+ifdef CUSTOM_INSTALLER
+	cp ${CUSTOM_INSTALLER} build/${PATIENT}/webOS/${INSTIMAGE}
+endif
 ifdef CUSTOM_BOOTLOADER
 	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/webOS/${BOOTLOADER}
 endif
