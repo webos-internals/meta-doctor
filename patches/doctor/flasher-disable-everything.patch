@@ -1,0 +1,32 @@
+--- com/palm/nova/installer/recoverytool/MainFlasher.java~	2010-11-04 18:34:12.000000000 +1030
++++ com/palm/nova/installer/recoverytool/MainFlasher.java	2010-11-04 18:35:26.000000000 +1030
+@@ -222,19 +222,19 @@
+             url.append("palm.com/location-dir/getdomain/");
+             flashRunner.setSoftwareUpdateSite(ConfigFileMgr.getInstance().getSoftwareUpdateSite(), url.toString().replace("mypretty@golum", sri));
+         }
+-        flashRunner.doVerifyRom(true);
+-        flashRunner.doForceModemUpdate(ConfigFileMgr.getInstance().doForceModemUpdate().booleanValue());
+-        flashRunner.docheckCloud(ConfigFileMgr.getInstance().doCloudCheck().booleanValue());
++        flashRunner.doVerifyRom(false);
++        flashRunner.doForceModemUpdate(false);
++        flashRunner.docheckCloud(false);
+         flashRunner.doSaveMsmPartition(true);
+         flashRunner.setDevice(device);
+         flashRunner.setMainWindow(flashEventHandler);
+-        flashRunner.doVerifyRfsSize(true);
++        flashRunner.doVerifyRfsSize(false);
+         flashRunner.setBuildNumber(buildNumber);
+-        flashRunner.setDelAppDir(true);
++        flashRunner.setDelAppDir(false);
+         flashRunner.setCheckFlash(false);
+-        flashRunner.setSaveLogsStage(true);
+-        flashRunner.setRestoreLogsStage(true);
+-        flashRunner.setDataMigrationStages(true);
++        flashRunner.setSaveLogsStage(false);
++        flashRunner.setRestoreLogsStage(false);
++        flashRunner.setDataMigrationStages(false);
+         if (prevCustModel != null && prevBaseModel != null)
+         {
+             flashRunner.setPrevBaseAndCust(prevBaseModel, prevCustModel);
+
+Diff finished.  Thu Nov  4 18:35:40 2010

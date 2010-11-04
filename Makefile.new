@@ -186,14 +186,14 @@ DISABLE_MODEM_UPDATE  = 1
 # REMOVE_MODEL_CHECK    = 1
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
-# CUSTOM_ROOT_PARTITION = 1
-# CUSTOM_VAR_PARTITION  = 1
 # CLONE = 55caa500
 # CHANGE_KEYBOARD_TYPE  = z
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
+# CUSTOM_INSTALLER = nova-installer-image-castle.uImage
+# CUSTOM_KERNEL_DIR = rootfs
 endif
 
 #################################
@@ -298,9 +298,17 @@ PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
 
-ifeq (${CUSTOM_VAR_PARTITION},1)
-CLASSES = com/palm/nova/installer/core/TrenchcoatModel
-DOCTOR_PATCHES = trenchcoat-model-fixup.patch trenchcoat-model-extra-data.patch
+ifdef CUSTOM_DEVICETYPE
+DISABLE_UPLOAD_DAEMON = 1
+DISABLE_MODEM_UPDATE  = 1
+REMOVE_CARRIER_CHECK  = 1
+REMOVE_MODEL_CHECK    = 1
+PATCH_DOCTOR          = 1
+endif
+
+ifeq (${PATCH_DOCTOR},1)
+CLASSES = com/palm/nova/installer/recoverytool/MainFlasher
+DOCTOR_PATCHES = flasher-disable-everything.patch
 endif
 
 OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules
@@ -308,12 +316,12 @@ NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/p
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
-ifeq (${CUSTOM_VAR_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
 JAD	= build/tools/jad-macosx/jad
 endif
 else
 TAR	= tar
-ifeq (${CUSTOM_VAR_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
 JAD	= build/tools/jad-linux/jad
 endif
 endif
@@ -368,14 +376,11 @@ CUSTIMAGENEW = nova-cust-image-${CODENAMENEW}
 BOOTLOADERNEW = boot-${CODENAMENEW}
 
 
-ifeq (${CUSTOM_VAR_PARTITION},1)
-USERTGZ = ./{CUSTIMAGENEW}.varfs.tar.gz
-endif
-
-
 build/${PATIENT}/.packed:
 	rm -f $@
-ifneq (${CUSTOM_ROOT_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
+	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
+endif
 	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--delete ${OLDDIRS} ./md5sums*
@@ -393,7 +398,6 @@ ifneq (${CUSTOM_ROOT_PARTITION},1)
 		--append ${NEWDIRS} ./md5sums ; \
 	fi
 	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
-endif
 	- ${TAR} -C build/${PATIENT}/webOS \
 		-f build/${PATIENT}/resources/webOS.tar \
 		--delete ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
@@ -554,19 +558,7 @@ ifdef CHANGE_KEYBOARD_TYPE
 		build/${PATIENT}/webOS/${CODENAMENEW}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
-ifeq (${CUSTOM_ROOT_PARTITION},1)
-	rm -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
-	ln -s ../../../clones/${CLONE}/${CUSTIMAGENEW}.rootfs.tar.gz build/${PATIENT}/webOS/
-endif
-ifeq (${CUSTOM_VAR_PARTITION},1)
-	sed -i.orig -e 's|<File file="$${NOVATGZ}" target="/"/>|<File file="$${NOVATGZ}" target="/"/>\
-<File file="$${USERTGZ}" target="/var"/>|' \
-		build/${PATIENT}/webOS/${CODENAMENEW}.xml
-	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
-	rm -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.varfs.tar.gz
-	ln -s ../../../clones/${CLONE}/${CUSTIMAGENEW}.varfs.tar.gz build/${PATIENT}/webOS/
-endif
-ifeq (${CUSTOM_VAR_PARTITION},1)
+ifeq (${PATCH_DOCTOR},1)
 	[ -d patches/doctor ]
 	( cd build/${PATIENT} ; ../../${JAD} -b -ff -o -r -space -s java ${CLASSES:%=%.class} )
 	for f in ${CLASSES:%=%.java} ; do \
@@ -574,7 +566,6 @@ ifeq (${CUSTOM_VAR_PARTITION},1)
 	done
 	( cd patches/doctor ; cat ${DOCTOR_PATCHES} ) | \
 	( cd build/${PATIENT} ; patch -p0 )
-	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
 endif
 	touch $@
 
@@ -586,15 +577,18 @@ backup-%:
 backup: mount
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	mkdir -p clones/$$id ; \
-	echo "Creating clones/$$id/${CUSTIMAGENEW}.varfs.tar.gz" ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGENEW}.varfs.tar.gz ; \
-	echo "Creating clones/$$id/${CUSTIMAGENEW}.rootfs.tar.gz" ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/root/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGENEW}.rootfs.tar.gz ; \
-	echo "Creating clones/$$id/${CUSTIMAGENEW}.media.tar.gz" ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/boot/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGENEW}.media.tar.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz ; \
 
 .PHONY: mount
 mount: unmount
@@ -605,11 +599,14 @@ mount: unmount
 	  novacom -w run file://bin/mkdir -- -p /tmp/$$f ; \
 	  novacom -w run file://bin/mount -- /dev/mapper/store-$$f /tmp/$$f -o ro ; \
 	done
+	@echo "Mounting /dev/mmcblk0p2"
+	@novacom -w run file://bin/mkdir -- -p /tmp/boot
+	@novacom -w run file://bin/mount -- /dev/mmcblk0p2 /tmp/boot -o ro
 
 .PHONY: unmount
 unmount:
-	@for f in var root media ; do \
-	  echo "Unmounting /dev/mapper/store-$$f" ; \
+	@for f in var root media boot ; do \
+	  echo "Unmounting /tmp/$$f" ; \
 	  ( novacom -w run file://bin/umount -- /tmp/$$f 2> /dev/null || true ) ; \
 	done
 
@@ -688,6 +685,12 @@ endif
 	${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		-x ${OLDDIRS} ./md5sums* ./etc/palm-build-info
+ifdef CUSTOM_KERNEL_DIR
+	rm -rf build/${PATIENT}/rootfs/boot
+	cp -rp ${CUSTOM_KERNEL_DIR}/boot build/${PATIENT}/rootfs/
+	rm -rf build/${PATIENT}/rootfs/lib/modules
+	cp -rp ${CUSTOM_KERNEL_DIR}/lib/modules build/${PATIENT}/rootfs/lib/
+endif
 ifdef CUSTOM_BOOTLOADER
 	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/rootfs/boot/boot.bin
 endif
