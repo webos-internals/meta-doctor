@@ -171,7 +171,7 @@ CARRIER = undefined
 ###################################
 
 ifeq (${LOGNAME},rwhitby)
-DEVICE = pre2
+DEVICE = pre
 CARRIER = wr
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
@@ -194,6 +194,8 @@ DISABLE_MODEM_UPDATE  = 1
 # CUSTOM_BOOTLOADER = boot.bin
 # CUSTOM_INSTALLER = nova-installer-image-castle.uImage
 # CUSTOM_KERNEL_DIR = rootfs
+# CUSTOM_ROOTFS = nova-cust-image-castle.rootfs.tar.gz
+# CUSTOM_XML = castle.xml
 endif
 
 #################################
@@ -303,7 +305,6 @@ DISABLE_UPLOAD_DAEMON = 1
 DISABLE_MODEM_UPDATE  = 1
 REMOVE_CARRIER_CHECK  = 1
 REMOVE_MODEL_CHECK    = 1
-PATCH_DOCTOR          = 1
 endif
 
 ifeq (${PATCH_DOCTOR},1)
@@ -679,6 +680,12 @@ ifdef CUSTOM_INSTALLER
 endif
 ifdef CUSTOM_BOOTLOADER
 	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/webOS/${BOOTLOADERNEW}.bin
+endif
+ifdef CUSTOM_ROOTFS
+	cp ${CUSTOM_ROOTFS} build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
+endif
+ifdef CUSTOM_XML
+	cp ${CUSTOM_XML} build/${PATIENT}/webOS/${CODENAMENEW}.xml
 endif
 	gunzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
