@@ -693,8 +693,8 @@ endif
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		-x ${OLDDIRS} ./md5sums* ./etc/palm-build-info
 ifdef CUSTOM_KERNEL_DIR
-	( cd ${CUSTOM_KERNEL_DIR}/boot ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/ ; tar xf - )
-	( cd ${CUSTOM_KERNEL_DIR}/lib/modules ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/lib/ ; tar xf - )
+	( cd ${CUSTOM_KERNEL_DIR}/boot ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/boot ; tar xf - )
+	( cd ${CUSTOM_KERNEL_DIR}/lib/modules ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/lib/modules ; tar xf - )
 endif
 ifdef CUSTOM_BOOTLOADER
 	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/rootfs/boot/boot.bin
