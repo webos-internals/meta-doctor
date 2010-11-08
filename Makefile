@@ -184,6 +184,8 @@ DISABLE_UPLOAD_DAEMON = 1
 DISABLE_MODEM_UPDATE  = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
+# REMOVE_BUILD_CHECK    = 1
+# REMOVE_RELEASE_CHECK  = 1
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
 # CLONE = 55caa500
@@ -196,6 +198,10 @@ DISABLE_MODEM_UPDATE  = 1
 # CUSTOM_KERNEL_DIR = rootfs
 # CUSTOM_ROOTFS = nova-cust-image-castle.rootfs.tar.gz
 # CUSTOM_XML = castle.xml
+# CUSTOM_BUILD_CHECK   = 
+# CUSTOM_RELEASE_CHECK = 
+# CUSTOM_CARRIER_CHECK = 
+# CUSTOM_MODEL_CHECK   = 
 endif
 
 #################################
@@ -521,13 +527,43 @@ ifeq (${INCREASE_VAR_SPACE},1)
 	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAMENEW}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
+ifdef CUSTOM_CARRIER_CHECK
+	sed -i.orig -e 's/ApprovalCharlieHash=.*/ApprovalCharlieHash=${CUSTOM_CARRIER_CHECK}/' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
 ifeq (${REMOVE_CARRIER_CHECK},1)
 	sed -i.orig -e '/ApprovalCharlieHash/d' -e '/CustomizationBuild/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
+ifdef CUSTOM_MODEL_CHECK
+	sed -i.orig -e 's/ApprovalMikeHash=.*/ApprovalCharlieHash=${CUSTOM_MODEL_CHECK}/' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
 ifeq (${REMOVE_MODEL_CHECK},1)
 	sed -i.orig -e '/ApprovalMikeHash/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifdef CUSTOM_RELEASE_CHECK
+	sed -i.orig -e 's/ApprovalReleaseHash=.*/ApprovalReleaseHash=${CUSTOM_RELEASE_CHECK}/' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifeq (${REMOVE_RELEASE_CHECK},1)
+	sed -i.orig -e '/ApprovalReleaseHash/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifdef CUSTOM_BUILD_CHECK
+	sed -i.orig -e 's/ApprovalBuildName=.*/ApprovalBuildName=${CUSTOM_BUILD_CHECK}/' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifeq (${REMOVE_BUILD_CHECK},1)
+	sed -i.orig -e '/ApprovalBuildName/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
