@@ -173,15 +173,15 @@ CARRIER = undefined
 ifeq (${LOGNAME},rwhitby)
 DEVICE = pre
 CARRIER = wr
+# BYPASS_ACTIVATION     = 1
+# BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
 AUTO_INSTALL_PREWARE  = 1
 ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
-DISABLE_MODEM_UPDATE  = 1
-# BYPASS_ACTIVATION     = 1
-# BYPASS_FIRST_USE_APP  = 1
+# DISABLE_MODEM_UPDATE  = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
 # REMOVE_BUILD_CHECK    = 1
@@ -193,6 +193,7 @@ DISABLE_MODEM_UPDATE  = 1
 # CUSTOM_CARRIER_TARBALL = wr.tar
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
+# CUSTOM_BUILD_INFO = palm-build-info
 # CUSTOM_INSTALLER = nova-installer-image-castle.uImage
 # CUSTOM_KERNEL_DIR = rootfs
 # CUSTOM_ROOTFS = nova-cust-image-castle.rootfs.tar.gz
@@ -393,19 +394,19 @@ ifeq (${PATCH_DOCTOR},1)
 endif
 	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--delete ${OLDDIRS} ./md5sums*
+		--delete ${OLDDIRS} ./md5sums* ./etc/palm-build-info
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
 	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
 	  ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ./md5sums.gz ; \
+		--append ${NEWDIRS} ./md5sums.gz ./etc/palm-build-info ; \
 	else \
 	  ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ./md5sums ; \
+		--append ${NEWDIRS} ./md5sums ./etc-palm-build-info ; \
 	fi
 	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
 	- ${TAR} -C build/${PATIENT}/webOS \
@@ -453,7 +454,7 @@ build/${PATIENT}/.patched: ${JAD}
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
 ifeq (${BYPASS_ACTIVATION},1)
 	( cd patches/webos-${VERSION} ; cat bypass-activation.patch ) | \
-	( cd build/${PATIENT}/rootfs ; patch -p0 )
+	( cd build/${PATIENT}/rootfs ; patch -p0 --no-backup-if-mismatch )
 endif
 ifeq (${BYPASS_FIRST_USE_APP},1)
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
@@ -620,7 +621,7 @@ ifeq (${PATCH_DOCTOR},1)
 	  [ -f build/${PATIENT}/$$f ] || exit ; \
 	done
 	( cd patches/doctor ; cat ${DOCTOR_PATCHES} ) | \
-	( cd build/${PATIENT} ; patch -p0 )
+	( cd build/${PATIENT} ; patch -p0 --no-backup-if-mismatch )
 endif
 	touch $@
 
@@ -752,6 +753,9 @@ ifdef CUSTOM_KERNEL_DIR
 endif
 ifdef CUSTOM_BOOTLOADER
 	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/rootfs/boot/boot.bin
+endif
+ifdef CUSTOM_BUILD_INFO
+	cp ${CUSTOM_BUILD_INFO} build/${PATIENT}/rootfs/etc/palm-build-info
 endif
 	touch $@
 
