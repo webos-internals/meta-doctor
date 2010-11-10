@@ -173,8 +173,6 @@ CARRIER = undefined
 ifeq (${LOGNAME},rwhitby)
 DEVICE = pre
 CARRIER = wr
-BYPASS_ACTIVATION     = 1
-BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
 AUTO_INSTALL_PREWARE  = 1
 ENABLE_TESTING_FEEDS  = 1
@@ -182,13 +180,14 @@ INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
 DISABLE_MODEM_UPDATE  = 1
+# BYPASS_ACTIVATION     = 1
+# BYPASS_FIRST_USE_APP  = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
 # REMOVE_BUILD_CHECK    = 1
 # REMOVE_RELEASE_CHECK  = 1
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
-# CLONE = 55caa500
 # CHANGE_KEYBOARD_TYPE  = z
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
@@ -202,6 +201,7 @@ DISABLE_MODEM_UPDATE  = 1
 # CUSTOM_RELEASE_CHECK = 
 # CUSTOM_CARRIER_CHECK = 
 # CUSTOM_MODEL_CHECK   = 
+# CUSTOM_UPDATE_SITE   = 
 endif
 
 #################################
@@ -528,9 +528,11 @@ ifeq (${INCREASE_VAR_SPACE},1)
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
 ifdef CUSTOM_CARRIER_CHECK
-	sed -i.orig -e 's/ApprovalCharlieHash=.*/ApprovalCharlieHash=${CUSTOM_CARRIER_CHECK}/' \
+	sed -i.orig -e '/ApprovalCharlieHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	echo "ApprovalCharlieHash=${CUSTOM_CARRIER_CHECK}" >> \
+		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_CARRIER_CHECK},1)
 	sed -i.orig -e '/ApprovalCharlieHash/d' -e '/CustomizationBuild/d' \
@@ -538,9 +540,11 @@ ifeq (${REMOVE_CARRIER_CHECK},1)
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
 ifdef CUSTOM_MODEL_CHECK
-	sed -i.orig -e 's/ApprovalMikeHash=.*/ApprovalCharlieHash=${CUSTOM_MODEL_CHECK}/' \
+	sed -i.orig -e '/ApprovalMikeHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	echo "ApprovalCharlieHash=${CUSTOM_MODEL_CHECK}" >> \
+		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_MODEL_CHECK},1)
 	sed -i.orig -e '/ApprovalMikeHash/d' \
@@ -548,9 +552,11 @@ ifeq (${REMOVE_MODEL_CHECK},1)
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
 ifdef CUSTOM_RELEASE_CHECK
-	sed -i.orig -e 's/ApprovalReleaseHash=.*/ApprovalReleaseHash=${CUSTOM_RELEASE_CHECK}/' \
+	sed -i.orig -e '/ApprovalReleaseHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	echo "ApprovalReleaseHash=${CUSTOM_RELEASE_CHECK}" >> \
+		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_RELEASE_CHECK},1)
 	sed -i.orig -e '/ApprovalReleaseHash/d' \
@@ -558,14 +564,23 @@ ifeq (${REMOVE_RELEASE_CHECK},1)
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
 ifdef CUSTOM_BUILD_CHECK
-	sed -i.orig -e 's/ApprovalBuildName=.*/ApprovalBuildName=${CUSTOM_BUILD_CHECK}/' \
+	sed -i.orig -e '/ApprovalBuildName/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	echo "ApprovalBuildName=${CUSTOM_BUILD_CHECK}" >> \
+		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_BUILD_CHECK},1)
 	sed -i.orig -e '/ApprovalBuildName/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifdef CUSTOM_UPDATE_SITE
+	sed -i.orig -e '/SoftwareUpdateSite/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	echo "SoftwareUpdateSite=${CUSTOM_UPDATE_SITE}" >> \
+		build/${PATIENT}/resources/recoverytool.config
 endif
 ifdef CUSTOM_DEVICETYPE
 	sed -i.orig -e 's/DeviceType=.*/DeviceType=${CUSTOM_DEVICETYPE}/' \
