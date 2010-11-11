@@ -173,8 +173,8 @@ CARRIER = undefined
 ifeq (${LOGNAME},rwhitby)
 DEVICE = pre
 CARRIER = wr
-# BYPASS_ACTIVATION     = 1
-# BYPASS_FIRST_USE_APP  = 1
+BYPASS_ACTIVATION     = 1
+BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
 AUTO_INSTALL_PREWARE  = 1
 ENABLE_TESTING_FEEDS  = 1
@@ -406,7 +406,7 @@ endif
 	  ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ./md5sums ./etc-palm-build-info ; \
+		--append ${NEWDIRS} ./md5sums ./etc/palm-build-info ; \
 	fi
 	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
 	- ${TAR} -C build/${PATIENT}/webOS \
