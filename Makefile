@@ -54,11 +54,11 @@
 # user's home directory to the device.	The user can then connect to
 # the device from their computer as soon as an SSH daemon is
 # installed.  You must already have a valid openssh authorized_keys
-# file in ~/.ssh/authorized_keys before enabling this feature, or it
-# will cause a fatal error.  You then need to install the OpenSSH SFTP
-# Server application in Preware to actually access the device using
-# the openssh private key that matches the openssh public key listed
-# in your authorized_keys file.
+# file in ~/.ssh/authorized_keys or in ./config/authorized_keys before 
+# enabling this feature, or it will cause a fatal error.  You then 
+# need to install the OpenSSH SFTP Server application in Preware to 
+# actually access the device using the openssh private key that matches 
+# the openssh public key listed in your authorized_keys file.
 # Uncomment the corresponding line below to enable this feature.
 
 # INSTALL_WIFI_PROFILES imports a wifi preferences database file from
@@ -66,8 +66,9 @@
 # set up to use wifi immediately after the webOS Doctor has completed.
 # You must already have copied a correctly configured prefsDB.sl file
 # from the /var/preferences/com.palm.wifi/ directory on the device to
-# ~/.ssh/com.palm.wifi.prefsDB.sl on your host machine before enabling
-# this feature, or it will cause a fatal error.
+# ~/.ssh/com.palm.wifi.prefsDB.sl or to ./config/com.palm.wifi.prefsDB.sl
+# on your host machine before enabling this feature, or it will cause a 
+# fatal error.  
 # Uncomment the corresponding line below to enable this feature.
 
 # AUTO_INSTALL_PREWARE automatically queues the installation of
@@ -84,6 +85,9 @@
 # every application used, and for how long it was used.	 You may wish
 # to disable this on privacy grounds, or if you do not have an
 # unlimited data plan and will be paying exorbitant data charges.
+# Uncomment the corresponding line below to enable this feature.
+
+# DISABLE_UPDATE_DAEMON disables the Palm's Over The Air update daemon.
 # Uncomment the corresponding line below to enable this feature.
 
 # DISABLE_MODEM_UPDATE prevents the device from reflashing the modem
@@ -131,6 +135,10 @@
 # Uncomment the corresponding line below to enable this feature.
 # ('z' means QWERTY, 'y' & 'y1' mean QWERTZ, 'w1' means AZERTY).
 
+# ADD_EXTRA_CARRIERS adds extra carrier information from the files in
+# the ./patches/carriers directory (currently only for WebOS 2.0.0). 
+# Uncomment the corresponding line below to enable this feature.
+
 ##########################
 ## END OF DOCUMENTATION ##
 ##########################
@@ -148,6 +156,7 @@
 # INSTALL_SSH_AUTH_KEYS = 1
 # INSTALL_WIFI_PROFILES = 1
 # DISABLE_UPLOAD_DAEMON = 1
+# DISABLE_UPDATE_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
 # ENABLE_USB_NETWORKING = 1
 # REMOVE_CARRIER_CHECK  = 1
@@ -155,6 +164,7 @@
 # INCREASE_VAR_SPACE    = 1
 # CHANGE_KEYBOARD_TYPE  = z
 # ADD_EXT3FS_PARTITION  = 2GB
+# ADD_EXTRA_CARRIERS    = 1
 
 # Select "pre", "preplus", "pixi", "pixiplus" or "pre2".
 DEVICE = undefined
@@ -322,8 +332,12 @@ CLASSES = com/palm/nova/installer/recoverytool/MainFlasher
 DOCTOR_PATCHES = flasher-disable-everything.patch
 endif
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules 
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
+
+ifeq (${ADD_EXTRA_CARRIERS},1)
+	OLDDIRS += ./etc/carrierdb
+endif
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
@@ -480,6 +494,9 @@ ifeq (${ENABLE_USB_NETWORKING},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
 	touch build/${PATIENT}/rootfs/var/gadget/usbnet_enabled
 endif
+ifeq (${DISABLE_UPDATE_DAEMON},1)
+	chmod -x build/${PATIENT}/rootfs/usr/bin/UpdateDaemon
+endif
 ifeq (${DISABLE_UPLOAD_DAEMON},1)
 	chmod -x build/${PATIENT}/rootfs/usr/bin/uploadd
 	chmod -x build/${PATIENT}/rootfs/usr/bin/contextupload
@@ -487,11 +504,36 @@ ifeq (${DISABLE_UPLOAD_DAEMON},1)
 endif
 ifeq (${INSTALL_SSH_AUTH_KEYS},1)
 	mkdir -p build/${PATIENT}/rootfs/var/home/root/.ssh
-	cp ${HOME}/.ssh/authorized_keys build/${PATIENT}/rootfs/var/home/root/.ssh/authorized_keys
+	@if [ -f ./config/authorized_keys ]; then \
+		cp ./config/authorized_keys build/${PATIENT}/rootfs/var/home/root/.ssh/authorized_keys ; \
+	else \
+		cp ${HOME}/.ssh/authorized_keys build/${PATIENT}/rootfs/var/home/root/.ssh/authorized_keys ; \
+	fi
 endif
 ifeq (${INSTALL_WIFI_PROFILES},1)
 	mkdir -p build/${PATIENT}/rootfs/var/preferences/com.palm.wifi
-	cp ${HOME}/.ssh/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl
+	@if [ -f ./config/com.palm.wifi.prefsDB.sl ]; then \
+		cp ./config/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl ; \
+	else \
+		cp ${HOME}/.ssh/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl ; \
+	fi
+endif
+ifeq (${ADD_EXTRA_CARRIERS},1)
+	for f in patches/carriers/*.json ; do \
+		if [ -f $$f ]; then \
+			cat $$f >>build/${PATIENT}/rootfs/etc/carrierdb/carrierdb.json ; \
+		fi ; \
+	done ; \
+	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums \
+		build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old ; \
+	( cd build/${PATIENT}/rootfs ; md5sum ./etc/carrierdb/carrierdb.json ) > \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new ; \
+	./scripts/replace-md5sums.py \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums
+	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old \
+		build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new
 endif
 ifeq (${AUTO_INSTALL_PREWARE},1)
 	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums \
