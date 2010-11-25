@@ -7,6 +7,7 @@ NAME=$1
 if [ -f $NAME/jar/resources/recoverytool.config ] ; then 
     rm -f $NAME/jar/resources/recoverytool.txt
     for hash in `grep Approval $NAME/jar/resources/recoverytool.config` ; do \
+	echo $hash >> $NAME/jar/resources/recoverytool.txt ; \
 	echo $hash | sed -e 's/=.*$//' | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
 	echo -n '=' >> $NAME/jar/resources/recoverytool.txt ; \
 	echo $hash | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \

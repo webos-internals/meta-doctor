@@ -7,6 +7,23 @@ NAME=`basename $1 .jar`
 rm -rf $NAME/jar $NAME/webOS $NAME/rootfs $NAME/carrier
 mkdir -p $NAME/jar $NAME/webOS $NAME/rootfs $NAME/carrier
 unzip -q -X -d $NAME/jar $1
+
+# Decode the approval hashes
+if [ -f $NAME/jar/resources/recoverytool.config ] ; then 
+    rm -f $NAME/jar/resources/recoverytool.txt
+    for hash in `grep Approval $NAME/jar/resources/recoverytool.config` ; do \
+	echo $hash >> $NAME/jar/resources/recoverytool.txt ; \
+	echo $hash | sed -e 's/=.*$//' | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
+	echo -n '=' >> $NAME/jar/resources/recoverytool.txt ; \
+	echo $hash | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
+	tar -t -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
+	echo -n " '" >> $NAME/jar/resources/recoverytool.txt ; \
+	echo $hash | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
+	tar -x -O -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
+	echo "'" >> $NAME/jar/resources/recoverytool.txt ; \
+    done
+fi
+
 tar -C $NAME/webOS -p -x -f $NAME/jar/resources/webOS.tar
 if [ -f $NAME/webOS/nova-cust-image-castle.rootfs.tar.gz ] ; then
     tar -C $NAME/rootfs -p -z -x -f $NAME/webOS/nova-cust-image-castle.rootfs.tar.gz
@@ -22,20 +39,5 @@ for carrier in $NAME/jar/resources/*.tar ; do
     tar -C $NAME/carrier -p -x -f $carrier
   fi
 done
-
-# Decode the approval hashes
-if [ -f $NAME/jar/resources/recoverytool.config ] ; then 
-    rm -f $NAME/jar/resources/recoverytool.txt
-    for hash in `grep Approval $NAME/jar/resources/recoverytool.config` ; do \
-	echo $hash | sed -e 's/=.*$//' | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
-	echo -n '=' >> $NAME/jar/resources/recoverytool.txt ; \
-	echo $hash | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
-	tar -t -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
-	echo -n " '" >> $NAME/jar/resources/recoverytool.txt ; \
-	echo $hash | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
-	tar -x -O -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
-	echo "'" >> $NAME/jar/resources/recoverytool.txt ; \
-    done
-fi
 
 exit 0
