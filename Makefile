@@ -87,7 +87,7 @@
 # unlimited data plan and will be paying exorbitant data charges.
 # Uncomment the corresponding line below to enable this feature.
 
-# DISABLE_UPDATE_DAEMON disables the Palm's Over The Air update daemon.
+# DISABLE_UPDATE_DAEMON disables the Palm Over The Air update daemon.
 # Uncomment the corresponding line below to enable this feature.
 
 # DISABLE_MODEM_UPDATE prevents the device from reflashing the modem
@@ -302,9 +302,11 @@ endif
 ifeq (${DEVICE},pre2)
 CODENAME = roadrunner
 ifeq (${CARRIER},wr)
+MODEL = p102ueuna
+VERSION = 2.0.1
+ifeq (${VERSION},2.0.0)
 MODEL = p103ueu
-VERSION = 2.0.0
-CARRIER_TARBALL = wr.tar
+endif
 endif
 endif
 
@@ -320,6 +322,9 @@ APPLICATIONS = com.palm.app.firstuse
 
 ifdef CUSTOM_DEVICETYPE
 ifeq (${VERSION},2.0.0)
+PATCH_DOCTOR          = 1
+endif
+ifeq (${VERSION},2.0.1)
 PATCH_DOCTOR          = 1
 endif
 DISABLE_UPLOAD_DAEMON = 1
