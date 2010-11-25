@@ -675,6 +675,9 @@ backup-%:
 backup: mount
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	mkdir -p clones/$$id ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.nvram.bin" ; \
+	( novacom -w run file://bin/dd -- if=/dev/mmcblk0p1 ) > \
+	   clones/$$id/${CUSTIMAGEOLD}.nvram.bin ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz ; \
