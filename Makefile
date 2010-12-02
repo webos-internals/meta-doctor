@@ -181,17 +181,17 @@ CARRIER = undefined
 ###################################
 
 ifeq (${LOGNAME},rwhitby)
-DEVICE = pre
+DEVICE = pre2
 CARRIER = wr
-BYPASS_ACTIVATION     = 1
-BYPASS_FIRST_USE_APP  = 1
+# BYPASS_ACTIVATION     = 1
+# BYPASS_FIRST_USE_APP  = 1
 ENABLE_DEVELOPER_MODE = 1
 AUTO_INSTALL_PREWARE  = 1
 ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
-DISABLE_UPDATE_DAEMON = 1
+# DISABLE_UPDATE_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
@@ -693,6 +693,18 @@ backup: mount
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/boot/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.mojodb.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/mojodb/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.mojodb.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.filecache.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/filecache/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.filecache.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.log.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/log/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.log.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.update.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/update/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.update.tar.gz ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz ; \
@@ -701,7 +713,7 @@ backup: mount
 mount: unmount
 	novacom -w run file://usr/sbin/lvm.static -- vgscan --ignorelockingfailure 2> /dev/null
 	novacom -w run file://usr/sbin/lvm.static -- vgchange -ay --ignorelockingfailure 2> /dev/null
-	@for f in var root media ; do \
+	@for f in var root mojodb filecache log update media ; do \
 	  echo "Mounting /dev/mapper/store-$$f" ; \
 	  novacom -w run file://bin/mkdir -- -p /tmp/$$f ; \
 	  novacom -w run file://bin/mount -- /dev/mapper/store-$$f /tmp/$$f -o ro ; \
@@ -712,7 +724,7 @@ mount: unmount
 
 .PHONY: unmount
 unmount:
-	@for f in var root media boot ; do \
+	@for f in var root mojodb filecache log update media boot ; do \
 	  echo "Unmounting /tmp/$$f" ; \
 	  ( novacom -w run file://bin/umount -- /tmp/$$f 2> /dev/null || true ) ; \
 	done
