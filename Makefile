@@ -176,9 +176,9 @@ CARRIER = undefined
 ## END OF AREA FOR END USER CHANGES ##
 ######################################
 
-###################################
-## START OF AREA FOR MY USE ONLY ##
-###################################
+######################################
+## START OF AREA FOR ROD'S USE ONLY ##
+######################################
 
 ifeq (${LOGNAME},rwhitby)
 DEVICE = pre2
@@ -216,9 +216,9 @@ DISABLE_UPLOAD_DAEMON = 1
 # CUSTOM_UPDATE_SITE   = 
 endif
 
-#################################
-## END OF AREA FOR MY USE ONLY ##
-#################################
+####################################
+## END OF AREA FOR ROD'S USE ONLY ##
+####################################
 
 ##############################################################################
 ## DO NOT MODIFY ANYTHING PAST THIS POINT, UNLESS YOU ARE A MAKEFILE EXPERT ##
