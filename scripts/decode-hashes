@@ -11,10 +11,10 @@ if [ -f $NAME/jar/resources/recoverytool.config ] ; then
 	echo $hash | sed -e 's/=.*$//' | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
 	echo -n '=' >> $NAME/jar/resources/recoverytool.txt ; \
 	echo $hash | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
-	tar -t -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
+	tar -z -t -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
 	echo -n " '" >> $NAME/jar/resources/recoverytool.txt ; \
 	echo $hash | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
-	tar -x -O -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
+	tar -z -x -O -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
 	echo "'" >> $NAME/jar/resources/recoverytool.txt ; \
     done
 fi
