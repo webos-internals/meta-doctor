@@ -673,6 +673,15 @@ ifeq (${PATCH_DOCTOR},1)
 endif
 	touch $@
 
+.PHONY: devmode-%
+devmode-%:
+	${MAKE} CARRIER=$* devmode
+
+.PHONY: devmode
+devmode: mount
+	novacom -w run file://bin/mkdir -- -p /var/gadget
+	novacom -w run file://bin/touch -- /var/gadget/novacom_enabled
+
 .PHONY: backup-%
 backup-%:
 	${MAKE} CARRIER=$* backup
