@@ -679,8 +679,8 @@ devmode-%:
 
 .PHONY: devmode
 devmode: mount
-	novacom -w run file://bin/mkdir -- -p /var/gadget
-	novacom -w run file://bin/touch -- /var/gadget/novacom_enabled
+	novacom -w run file://bin/mkdir -- -p /tmp/var/gadget
+	novacom -w run file://bin/touch -- /tmp/var/gadget/novacom_enabled
 
 .PHONY: backup-%
 backup-%:
