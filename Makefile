@@ -183,8 +183,10 @@ CARRIER = undefined
 ifeq (${LOGNAME},rwhitby)
 DEVICE = pre2
 CARRIER = wr
-# BYPASS_ACTIVATION     = 1
-# BYPASS_FIRST_USE_APP  = 1
+ifeq (${CARRIER},sprint)
+BYPASS_ACTIVATION     = 1
+BYPASS_FIRST_USE_APP  = 1
+endif
 ENABLE_DEVELOPER_MODE = 1
 AUTO_INSTALL_PREWARE  = 1
 ENABLE_TESTING_FEEDS  = 1
@@ -679,8 +681,10 @@ devmode-%:
 
 .PHONY: devmode
 devmode: mount
+	novacom -w run file://bin/mount -- /dev/mapper/store-var /tmp/var -o remount,rw
 	novacom -w run file://bin/mkdir -- -p /tmp/var/gadget
 	novacom -w run file://bin/touch -- /tmp/var/gadget/novacom_enabled
+	novacom -w run file://bin/mount -- /dev/mapper/store-var /tmp/var -o remount,ro
 
 .PHONY: backup-%
 backup-%:
@@ -690,6 +694,8 @@ backup-%:
 backup: mount
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	mkdir -p clones/$$id ; \
+	echo "Creating clones/$$id/tokens.txt" ; \
+	novacom -w run file://sbin/tokens -- --list > clones/$$id/tokens.txt ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.nvram.bin" ; \
 	( novacom -w run file://bin/dd -- if=/dev/mmcblk0p1 ) > \
 	   clones/$$id/${CUSTIMAGEOLD}.nvram.bin ; \
