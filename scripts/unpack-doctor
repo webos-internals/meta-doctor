@@ -11,6 +11,7 @@ unzip -q -X -d $NAME/jar $1
 # Decode the approval hashes
 if [ -f $NAME/jar/resources/recoverytool.config ] ; then 
     rm -f $NAME/jar/resources/recoverytool.txt
+    grep SoftwareUpdateSite $NAME/jar/resources/recoverytool.config > $NAME/jar/resources/recoverytool.txt
     for hash in `grep Approval $NAME/jar/resources/recoverytool.config` ; do \
 	echo $hash >> $NAME/jar/resources/recoverytool.txt ; \
 	echo $hash | sed -e 's/=.*$//' | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
