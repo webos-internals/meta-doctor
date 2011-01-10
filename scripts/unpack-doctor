@@ -35,10 +35,8 @@ fi
 if [ -f $NAME/webOS/nova-cust-image-roadrunner.rootfs.tar.gz ] ; then
     tar -C $NAME/rootfs -p -z -x -f $NAME/webOS/nova-cust-image-roadrunner.rootfs.tar.gz
 fi
-for carrier in $NAME/jar/resources/*.tar ; do
-  if [ "$carrier" != "$NAME/jar/resources/webOS.tar" ] ; then
-    tar -C $NAME/carrier -p -x -f $carrier
-  fi
+for carrier in `grep '^CustomizationBuild=' $NAME/jar/resources/recoverytool.config | sed -e 's|CustomizationBuild=||'` ; do
+    tar -C $NAME/carrier -p -x -f $NAME/jar/resources/$carrier
 done
 
 exit 0
