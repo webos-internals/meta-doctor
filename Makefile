@@ -349,6 +349,8 @@ endif
 
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
+export COPYFILE_DISABLE=true
+export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
 ifeq (${PATCH_DOCTOR},1)
 JAD	= build/tools/jad-macosx/jad
 endif
