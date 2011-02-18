@@ -310,12 +310,19 @@ ifeq (${VERSION},2.0.0)
 MODEL = p103ueu
 endif
 endif
+ifeq (${CARRIER},verizonwireless)
+MODEL = p102eww
+VERSION = 2.0.1
+CARRIER_TARBALL = verizon.tar
+DOCTOR = webosdoctorp102${CARRIER}-${VERSION}.jar
+endif
 endif
 
-DOCTOR	= webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
-
+ifndef DOCTOR
+DOCTOR = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 ifeq (${CARRIER},wr)
-DOCTOR	= webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
+DOCTOR = webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
+endif
 endif
 
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
