@@ -455,6 +455,7 @@ endif
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
+ifndef REMOVE_CARRIER_CHECK
 	- ${TAR} -C build/${PATIENT}/carrier \
 		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
 		--delete installer.xml
@@ -462,7 +463,6 @@ endif
 		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
 		--numeric-owner --owner=0 --group=0 -h \
 		--append installer.xml
-ifndef REMOVE_CARRIER_CHECK
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
 endif
@@ -674,10 +674,12 @@ ifdef CUSTOM_WEBOS_DMSET
 		build/${PATIENT}/webOS/installer.xml
 	rm -f build/${PATIENT}/webOS/installer.xml.orig
 endif
+ifndef REMOVE_CARRIER_CHECK
 ifdef CUSTOM_CARRIER_DMSET
 	sed -i.orig -e 's/DMSet token="[^"]*"/DMSet token="${CUSTOM_CARRIER_DMSET}"/' \
 		build/${PATIENT}/carrier/installer.xml
 	rm -f build/${PATIENT}/carrier/installer.xml.orig
+endif
 endif
 ifdef ADD_EXT3FS_PARTITION
 	sed -i.orig \
@@ -825,8 +827,10 @@ endif
 ifdef CUSTOM_WEBOS_TARBALL
 	cp ${CUSTOM_WEBOS_TARBALL} build/${PATIENT}/resources/webOS.tar
 endif
+ifndef REMOVE_CARRIER_CHECK
 ifdef CUSTOM_CARRIER_TARBALL
 	cp ${CUSTOM_CARRIER_TARBALL} build/${PATIENT}/resources/${CARRIER_TARBALL}
+endif
 endif
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
@@ -850,10 +854,12 @@ endif
 ifdef CUSTOM_XML
 	cp ${CUSTOM_XML} build/${PATIENT}/webOS/${CODENAMENEW}.xml
 endif
+ifndef REMOVE_CARRIER_CHECK
 	mkdir -p build/${PATIENT}/carrier
 	${TAR} -C build/${PATIENT}/carrier \
 		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
 		-x installer.xml
+endif
 	gunzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs --wildcards \
