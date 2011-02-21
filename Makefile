@@ -614,7 +614,7 @@ ifdef CUSTOM_MODEL_CHECK
 	sed -i.orig -e '/ApprovalMikeHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalCharlieHash=${CUSTOM_MODEL_CHECK}" >> \
+	echo "ApprovalMikeHash=${CUSTOM_MODEL_CHECK}" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_MODEL_CHECK},1)
