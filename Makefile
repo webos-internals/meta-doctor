@@ -199,18 +199,22 @@ DISABLE_UPLOAD_DAEMON = 1
 # REMOVE_MODEL_CHECK    = 1
 # REMOVE_BUILD_CHECK    = 1
 # REMOVE_RELEASE_CHECK  = 1
+
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
 # CHANGE_KEYBOARD_TYPE  = z
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
+# CUSTOM_XML = castle.xml
+# CUSTOM_BUILD_INFO = palm-build-info
+# CUSTOM_WEBOS_DMSET = base
+# CUSTOM_CARRIER_DMSET = a
+
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
-# CUSTOM_BUILD_INFO = palm-build-info
 # CUSTOM_INSTALLER = nova-installer-image-castle.uImage
 # CUSTOM_KERNEL_DIR = rootfs
 # CUSTOM_ROOTFS = nova-cust-image-castle.rootfs.tar.gz
-# CUSTOM_XML = castle.xml
 # CUSTOM_BUILD_CHECK   = 
 # CUSTOM_RELEASE_CHECK = 
 # CUSTOM_CARRIER_CHECK = 
@@ -451,6 +455,13 @@ endif
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
+	- ${TAR} -C build/${PATIENT}/carrier \
+		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
+		--delete installer.xml
+	${TAR} -C build/${PATIENT}/carrier \
+		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
+		--numeric-owner --owner=0 --group=0 -h \
+		--append installer.xml
 ifndef REMOVE_CARRIER_CHECK
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
@@ -658,6 +669,16 @@ ifdef CUSTOM_DEVICETYPE
 		build/${PATIENT}/webOS/installer.xml
 	rm -f build/${PATIENT}/webOS/installer.xml.orig
 endif
+ifdef CUSTOM_WEBOS_DMSET
+	sed -i.orig -e 's/DMSet token="[^"]*"/DMSet token="${CUSTOM_WEBOS_DMSET}"/' \
+		build/${PATIENT}/webOS/installer.xml
+	rm -f build/${PATIENT}/webOS/installer.xml.orig
+endif
+ifdef CUSTOM_CARRIER_DMSET
+	sed -i.orig -e 's/DMSet token="[^"]*"/DMSet token="${CUSTOM_CARRIER_DMSET}"/' \
+		build/${PATIENT}/carrier/installer.xml
+	rm -f build/${PATIENT}/carrier/installer.xml.orig
+endif
 ifdef ADD_EXT3FS_PARTITION
 	sed -i.orig \
 	  -e 's|<Volume id="media"|<Volume id="ext3fs" type="ext3" size="${ADD_EXT3FS_PARTITION}" mount="/media/ext3fs"/>\
@@ -829,6 +850,10 @@ endif
 ifdef CUSTOM_XML
 	cp ${CUSTOM_XML} build/${PATIENT}/webOS/${CODENAMENEW}.xml
 endif
+	mkdir -p build/${PATIENT}/carrier
+	${TAR} -C build/${PATIENT}/carrier \
+		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
+		-x installer.xml
 	gunzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs --wildcards \
