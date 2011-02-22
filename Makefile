@@ -233,7 +233,7 @@ endif
 CARRIER_TARBALL = ${CARRIER}.tar
 
 # Latest supported version is:
-# VERSION = 1.4.5
+# VERSION = 2.1.0
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
@@ -262,8 +262,11 @@ endif
 ifeq (${DEVICE},preplus)
 CODENAME = castle
 ifeq (${CARRIER},wr)
+MODEL = p101ueude
+VERSION = 2.1.0
+ifeq (${VERSION},1.4.5)
 MODEL = p101ueu
-VERSION = 1.4.5
+endif
 CARRIER_TARBALL = wr-castle-plus.tar
 endif
 ifeq (${CARRIER},verizonwireless)
