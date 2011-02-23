@@ -356,8 +356,10 @@ CLASSES = com/palm/nova/installer/recoverytool/MainFlasher
 DOCTOR_PATCHES = flasher-disable-everything.patch
 endif
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules 
+OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules
+OLDFILES = ./etc/palm-build-info
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
+NEWFILES = ${OLDFILES}
 
 ifeq (${ADD_EXTRA_CARRIERS},1)
 	OLDDIRS += ./etc/carrierdb
@@ -434,19 +436,19 @@ ifeq (${PATCH_DOCTOR},1)
 endif
 	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--delete ${OLDDIRS} ./md5sums* ./etc/palm-build-info
+		--delete ${OLDDIRS} ${OLDFILES} ./md5sums*
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
 	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
 	  ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ./md5sums.gz ./etc/palm-build-info ; \
+		--append ${NEWDIRS} ${NEWFILES} ./md5sums.gz ; \
 	else \
 	  ${TAR} -C build/${PATIENT}/rootfs \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
 		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ./md5sums ./etc/palm-build-info ; \
+		--append ${NEWDIRS} ${NEWFILES} ./md5sums ; \
 	fi
 	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
 	- ${TAR} -C build/${PATIENT}/webOS \
@@ -565,8 +567,8 @@ ifeq (${ADD_EXTRA_CARRIERS},1)
 	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old \
 	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new \
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums
-	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old \
-		build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new
+	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old \
+	      build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new
 endif
 ifeq (${AUTO_INSTALL_PREWARE},1)
 	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums \
@@ -578,11 +580,23 @@ ifeq (${AUTO_INSTALL_PREWARE},1)
 	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
 	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new \
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums
-	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
-		build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new
+	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
+	      build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new
 	mkdir -p build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/
 	cp scripts/preware-install.db \
 	  build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/installHistory.db
+endif
+ifdef CUSTOM_BUILD_INFO
+	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums \
+		build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.old ; \
+	( cd build/${PATIENT}/rootfs ; md5sum ./etc/palm-build-info ) > \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.new ; \
+	./scripts/replace-md5sums.py \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.old \
+	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.new \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums
+	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.old \
+	      build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.new
 endif
 	for app in ${APPLICATIONS} ; do \
 	  ( cd build/${PATIENT}/rootfs ; \
@@ -594,13 +608,8 @@ endif
 	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
 	done
 	( cd build/${PATIENT}/rootfs ; \
-	  find ${OLDDIRS} -type f | xargs md5sum ) \
+	  find ${OLDDIRS} ${OLDFILES} -type f | xargs md5sum ) \
 	    > build/${PATIENT}/rootfs/md5sums.new
-ifdef CUSTOM_BUILD_INFO
-	( cd build/${PATIENT}/rootfs ; \
-	  md5sum ./etc/palm-build-info ) \
-	    >> build/${PATIENT}/rootfs/md5sums.new
-endif
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
 	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
@@ -890,7 +899,7 @@ endif
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		-x ${OLDDIRS} ./md5sums* ./etc/palm-build-info
+		-x ${OLDDIRS} ${OLDFILES} ./md5sums*
 ifdef CUSTOM_KERNEL_DIR
 	( cd ${CUSTOM_KERNEL_DIR}/boot ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/boot ; tar xf - )
 	( cd ${CUSTOM_KERNEL_DIR}/lib/modules ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/lib/modules ; tar xf - )
