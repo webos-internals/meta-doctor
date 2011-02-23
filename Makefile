@@ -209,6 +209,8 @@ DISABLE_UPLOAD_DAEMON = 1
 # CUSTOM_BUILD_INFO = palm-build-info
 # CUSTOM_WEBOS_DMSET = base
 # CUSTOM_CARRIER_DMSET = a
+# CUSTOM_CARRIER_LIST = P100EWW
+# CUSTOM_MODEL_LIST   = Sprint
 
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
@@ -601,6 +603,14 @@ ifeq (${INCREASE_VAR_SPACE},1)
 	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAMENEW}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
+ifdef CUSTOM_CARRIER_LIST
+	[ -f hashes/${CUSTOM_CARRIER_LIST} ]
+	sed -i.orig -e '/ApprovalCharlieHash/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	echo "ApprovalCharlieHash=`cat hashes/${CUSTOM_CARRIER_LIST}`" >> \
+		build/${PATIENT}/resources/recoverytool.config
+endif
 ifdef CUSTOM_CARRIER_CHECK
 	sed -i.orig -e '/ApprovalCharlieHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
@@ -612,6 +622,14 @@ ifeq (${REMOVE_CARRIER_CHECK},1)
 	sed -i.orig -e '/ApprovalCharlieHash/d' -e '/CustomizationBuild/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+endif
+ifdef CUSTOM_MODEL_LIST
+	[ -f hashes/${CUSTOM_MODEL_LIST} ]
+	sed -i.orig -e '/ApprovalMikeHash/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
+	echo "ApprovalMikeHash=`cat hashes/${CUSTOM_MODEL_LIST}`" >> \
+		build/${PATIENT}/resources/recoverytool.config
 endif
 ifdef CUSTOM_MODEL_CHECK
 	sed -i.orig -e '/ApprovalMikeHash/d' \
