@@ -16,9 +16,6 @@ SPRINT_BUILD="pre-p100eww-sprint-1.4.5"
 VZW_BUILD="pre2-p102eww-verizonwireless-2.0.1"
 WR_BUILD="preplus-p101ueude-wr-2.1.0"
 
-WORK_DIR="webOS"
-META_DIR="meta-doctor"
-
 git="git"
 wget="wget"
 make="make"
