@@ -596,6 +596,11 @@ endif
 	( cd build/${PATIENT}/rootfs ; \
 	  find ${OLDDIRS} -type f | xargs md5sum ) \
 	    > build/${PATIENT}/rootfs/md5sums.new
+ifdef CUSTOM_BUILD_INFO
+	( cd build/${PATIENT}/rootfs ; \
+	  md5sum ./etc/palm-build-info ) \
+	    >> build/${PATIENT}/rootfs/md5sums.new
+endif
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
 	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
