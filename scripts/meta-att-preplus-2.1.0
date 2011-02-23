@@ -1,7 +1,7 @@
 #!/bin/bash
-# meta-wr-pre-2.1.0 script by Rod Whitby
+# meta-att-pre-2.1.0 script by Rod Whitby
 # based on meta-meta script by Ed Cates
-# intended to flash WR Pre phones with a working webOS 2.1 image
+# intended to flash ATT PrePlus phones with a working webOS 2.1 image
 #  Your mileage may vary
 
 ATT_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p145r0d09132010/attp145rod/webosdoctorp101ewwatt.jar"
