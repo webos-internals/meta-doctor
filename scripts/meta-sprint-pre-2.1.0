@@ -1,0 +1,73 @@
+#!/bin/bash
+# meta-meta script by Ed Cates
+# modified by Rod Whitby
+# intended to flash Sprint Pre phones with a working webOS 2.1 image
+#  Your mileage may vary
+
+SPRINT_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
+VZW_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+
+SPRINT_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
+VZW_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+WR_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+
+SPRINT_BUILD="pre-p100eww-sprint-1.4.5"
+VZW_BUILD="pre2-p102eww-verizonwireless-2.0.1"
+WR_BUILD="preplus-p101ueude-wr-2.1.0"
+
+WORK_DIR="webOS"
+META_DIR="meta-doctor"
+
+git="git"
+wget="wget"
+make="make"
+jar="jar"
+java="java"
+patch="patch"
+tar="tar"
+
+[ "`uname -s`" == "Darwin" ] && tar=gnutar
+
+WEBOS_TARBALL="webOS.tar"
+SRC_CDMA_FW="roadrunnercdma_fw.tar"
+CDMA_FW="castlecdmafw.tar"
+BLD_INFO="palm-build-info"
+
+for f in $git $wget $make $jar $java $patch; do
+	
+    ( which $f > /dev/null ) || ( echo "Cannot find $f.  Please install it." && exit )
+
+done
+
+mkdir -p downloads
+
+[ ! -f downloads/${SPRINT_FILE} ] && $wget -c ${SPRINT_JAR_URL} -O downloads/${SPRINT_FILE}
+[ ! -f downloads/${VZW_FILE} ] && $wget -c ${VZW_JAR_URL} -O downloads/${VZW_FILE}
+[ ! -f downloads/${WR_FILE} ] && $wget -c ${WR_JAR_URL} -O downloads/${WR_FILE}
+
+$make clobber
+
+$make DEVICE=pre CARRIER=sprint unpack
+$make DEVICE=pre2 CARRIER=verizonwireless unpack
+$make DEVICE=preplus CARRIER=wr unpack
+
+cp build/${WR_BUILD}/resources/webOS.tar ./
+
+$tar -C ./ -f ./build/${VZW_BUILD}/resources/webOS.tar -x ./${SRC_CDMA_FW}
+
+$tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW}
+
+mv ${SRC_CDMA_FW} ${CDMA_FW}
+
+$tar -C ./ -f ./webOS.tar --append ./${CDMA_FW}
+
+cp build/${SPRINT_BUILD}/rootfs/etc/${BLD_INFO} ./
+
+cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
+
+make clobber
+
+make ENABLE_DEVELOPER_MODE=1 AUTO_INSTALL_PREWARE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=base CUSTOM_CARRIER_DMSET=a CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr all
+
+$java -jar build/${WR_BUILD}/${WR_FILE}
