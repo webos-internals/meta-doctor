@@ -1,0 +1,56 @@
+#!/bin/bash
+# meta-wr-pre-2.1.0 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# intended to flash WR Pre phones with a working webOS 2.1 image
+#  Your mileage may vary
+
+ATT_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p145r0d09132010/attp145rod/webosdoctorp101ewwatt.jar"
+WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+
+ATT_FILE="webosdoctorp101ewwatt-1.4.5.jar"
+WR_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+
+ATT_BUILD="preplus-p101eww-att-1.4.5"
+WR_BUILD="preplus-p101ueude-wr-2.1.0"
+
+git="git"
+wget="wget"
+make="make"
+jar="jar"
+java="java"
+patch="patch"
+tar="tar"
+
+if [ "`uname -s`" == "Darwin" ] ; then 
+    tar=gnutar
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+fi
+
+BLD_INFO="palm-build-info"
+
+for f in $git $wget $make $jar $java $patch; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+mkdir -p downloads
+
+[ ! -f downloads/${ATT_FILE} ] && $wget -c ${ATT_JAR_URL} -O downloads/${ATT_FILE}
+[ ! -f downloads/${WR_FILE} ] && $wget -c ${WR_JAR_URL} -O downloads/${WR_FILE}
+
+$make clobber
+
+$make VERSION=1.4.5 DEVICE=preplus CARRIER=att unpack || exit
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
+
+cp build/${ATT_BUILD}/rootfs/etc/${BLD_INFO} ./
+
+cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
+
+make clobber
+
+make ENABLE_DEVELOPER_MODE=1 AUTO_INSTALL_PREWARE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P101UNA CUSTOM_CARRIER_LIST=ATT CUSTOM_WEBOS_DMSET=556 CUSTOM_CARRIER_DMSET=560 CUSTOM_BUILD_INFO=palm-build-info DEVICE=preplus CARRIER=wr all || exit
+
+$java -jar build/${WR_BUILD}/${WR_FILE}
