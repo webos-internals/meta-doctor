@@ -1,0 +1,79 @@
+#!/bin/bash
+# meta-wr-pre-2.1.0 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# intended to flash WR Pre phones with a working webOS 2.1 image
+#  Your mileage may vary
+
+P100_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d06302010/eudep145rod/webosdoctorp100ueu-wr.jar"
+P102_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+P101_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+
+P100_FILE="webosdoctorp100ueu-wr-1.4.5.jar"
+P102_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+P101_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+
+P100_BUILD="pre-p100ueu-wr-1.4.5"
+P102_BUILD="pre2-p102eww-verizonwireless-2.0.1"
+P101_BUILD="preplus-p101ueude-wr-2.1.0"
+
+WORK_DIR="webOS"
+META_DIR="meta-doctor"
+
+git="git"
+wget="wget"
+make="make"
+jar="jar"
+java="java"
+patch="patch"
+tar="tar"
+
+if [ "`uname -s`" == "Darwin" ] ; then 
+    tar=gnutar
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+fi
+
+WEBOS_TARBALL="webOS.tar"
+SRC_CDMA_FW="roadrunnercdma_fw.tar"
+CDMA_FW="castlecdmafw.tar"
+BLD_INFO="palm-build-info"
+
+for f in $git $wget $make $jar $java $patch; do
+	
+    ( which $f > /dev/null ) || ( echo "Cannot find $f.  Please install it." && exit )
+
+done
+
+mkdir -p downloads
+
+[ ! -f downloads/${P100_FILE} ] && $wget -c ${P100_JAR_URL} -O downloads/${P100_FILE}
+[ ! -f downloads/${P102_FILE} ] && $wget -c ${P102_JAR_URL} -O downloads/${P102_FILE}
+[ ! -f downloads/${P101_FILE} ] && $wget -c ${P101_JAR_URL} -O downloads/${P101_FILE}
+
+$make clobber
+
+$make VERSION=1.4.5 DEVICE=pre CARRIER=wr unpack || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
+
+cp build/${P101_BUILD}/resources/webOS.tar ./
+
+$tar -C ./ -f ./build/${P102_BUILD}/resources/webOS.tar -x ./${SRC_CDMA_FW} || exit
+
+$tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW} || exit
+
+mv ${SRC_CDMA_FW} ${CDMA_FW}
+
+$tar -C ./ -f ./webOS.tar --append ./${CDMA_FW} || exit
+
+cp build/${P100_BUILD}/rootfs/etc/${BLD_INFO} ./
+
+cp build/${P101_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
+
+make clobber
+
+make ENABLE_DEVELOPER_MODE=1 AUTO_INSTALL_PREWARE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P100UEU CUSTOM_WEBOS_DMSET=312 CUSTOM_CARRIER_DMSET=317 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr all || exit
+
+rm -f ${CDMA_FW} webOS.tar
+
+$java -jar build/${P101_BUILD}/${P101_FILE}

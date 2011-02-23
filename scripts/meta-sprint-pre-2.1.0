@@ -27,7 +27,11 @@ java="java"
 patch="patch"
 tar="tar"
 
-[ "`uname -s`" == "Darwin" ] && tar=gnutar
+if [ "`uname -s`" == "Darwin" ] ; then 
+    tar=gnutar
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+fi
 
 WEBOS_TARBALL="webOS.tar"
 SRC_CDMA_FW="roadrunnercdma_fw.tar"
@@ -48,19 +52,19 @@ mkdir -p downloads
 
 $make clobber
 
-$make DEVICE=pre CARRIER=sprint unpack
-$make DEVICE=pre2 CARRIER=verizonwireless unpack
-$make DEVICE=preplus CARRIER=wr unpack
+$make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
 cp build/${WR_BUILD}/resources/webOS.tar ./
 
-$tar -C ./ -f ./build/${VZW_BUILD}/resources/webOS.tar -x ./${SRC_CDMA_FW}
+$tar -C ./ -f ./build/${VZW_BUILD}/resources/webOS.tar -x ./${SRC_CDMA_FW} || exit
 
-$tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW}
+$tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW} || exit
 
 mv ${SRC_CDMA_FW} ${CDMA_FW}
 
-$tar -C ./ -f ./webOS.tar --append ./${CDMA_FW}
+$tar -C ./ -f ./webOS.tar --append ./${CDMA_FW} || exit
 
 cp build/${SPRINT_BUILD}/rootfs/etc/${BLD_INFO} ./
 
@@ -68,7 +72,7 @@ cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
 make clobber
 
-make ENABLE_DEVELOPER_MODE=1 AUTO_INSTALL_PREWARE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=base CUSTOM_CARRIER_DMSET=a CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr all
+make ENABLE_DEVELOPER_MODE=1 AUTO_INSTALL_PREWARE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=base CUSTOM_CARRIER_DMSET=a CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr all || exit
 
 rm -f ${CDMA_FW} webOS.tar
 
