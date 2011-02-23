@@ -16,7 +16,6 @@ WR_BUILD="preplus-p101ueude-wr-2.1.0"
 git="git"
 wget="wget"
 make="make"
-jar="jar"
 java="java"
 patch="patch"
 tar="tar"
@@ -29,7 +28,7 @@ fi
 
 BLD_INFO="palm-build-info"
 
-for f in $git $wget $make $jar $java $patch; do
+for f in $git $wget $make $java $patch; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 
