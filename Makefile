@@ -543,16 +543,20 @@ ifeq (${INSTALL_SSH_AUTH_KEYS},1)
 	mkdir -p build/${PATIENT}/rootfs/var/home/root/.ssh
 	@if [ -f ./config/authorized_keys ]; then \
 		cp ./config/authorized_keys build/${PATIENT}/rootfs/var/home/root/.ssh/authorized_keys ; \
-	else \
+	elif [ -f ${HOME}/.ssh/authorized_keys ]; then \
 		cp ${HOME}/.ssh/authorized_keys build/${PATIENT}/rootfs/var/home/root/.ssh/authorized_keys ; \
+	else \
+		echo "No authorized_keys file found in ./config or ${HOME}/.ssh" ; \
 	fi
 endif
 ifeq (${INSTALL_WIFI_PROFILES},1)
 	mkdir -p build/${PATIENT}/rootfs/var/preferences/com.palm.wifi
 	@if [ -f ./config/com.palm.wifi.prefsDB.sl ]; then \
 		cp ./config/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl ; \
-	else \
+	elif [ -f ${HOME}/.ssh/com.palm.wifi.prefsDB.sl ]; then \
 		cp ${HOME}/.ssh/com.palm.wifi.prefsDB.sl build/${PATIENT}/rootfs/var/preferences/com.palm.wifi/prefsDB.sl ; \
+	else \
+		echo "No com.palm.wifi.prefsDB.sl file found in ./config or ${HOME}/.ssh" ; \
 	fi
 endif
 ifeq (${ADD_EXTRA_CARRIERS},1)
