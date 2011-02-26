@@ -619,11 +619,12 @@ build/${PATIENT}/.patched: ${JAD}
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
 ifeq (${BYPASS_ACTIVATION},1)
 	( cd patches/webos-${VERSION} ; cat bypass-activation.patch ) | \
-	( cd build/${PATIENT}/rootfs ; patch -p0 --no-backup-if-mismatch )
+	( cd build/${PATIENT}/rootfs ; patch -p1 --no-backup-if-mismatch )
 endif
 ifeq (${BYPASS_FIRST_USE_APP},1)
 	mkdir -p build/${PATIENT}/rootfs/var/luna/preferences
 	touch build/${PATIENT}/rootfs/var/luna/preferences/ran-first-use
+	touch build/${PATIENT}/rootfs/var/luna/preferences/first-use-profile-created
 	sed -i.orig -e 's/"visible": "false"/"visible": "true"/' \
 		build/${PATIENT}/rootfs/usr/palm/applications/com.palm.app.firstuse/appinfo.json
 	rm -f build/${PATIENT}/rootfs/usr/palm/applications/com.palm.app.firstuse/appinfo.json.orig

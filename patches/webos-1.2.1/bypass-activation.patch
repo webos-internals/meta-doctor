@@ -1,5 +1,5 @@
---- usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js.orig	2009-09-22 23:51:00.000000000 +0930
-+++ usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js	2009-09-22 23:57:24.000000000 +0930
+--- /usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js.orig
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
 @@ -29,6 +29,11 @@
  
  function setUpFirstUse() {

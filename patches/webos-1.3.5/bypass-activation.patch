@@ -1,5 +1,5 @@
---- usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js.orig
-+++ usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
+--- /usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js.orig
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
 @@ -32,6 +32,11 @@
  
  function setUpFirstUse() {
