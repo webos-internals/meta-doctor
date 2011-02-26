@@ -40,6 +40,15 @@ for f in $git $wget $make $java $patch; do
 
 done
 
+ARGS=
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1"
+fi
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=bell CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr"
+
+make ${ARGS} settings
+
 mkdir -p downloads
 
 [ ! -f downloads/${BELLMO_FILE} ] && $wget -c ${BELLMO_JAR_URL} -O downloads/${BELLMO_FILE}
@@ -68,7 +77,7 @@ cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
 make clobber
 
-make ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=bell CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr all || exit
+make ${ARGS} all || exit
 
 rm -f ${CDMA_FW} webOS.tar
 

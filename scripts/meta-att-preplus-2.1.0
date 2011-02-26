@@ -34,6 +34,15 @@ for f in $git $wget $make $java $patch; do
 
 done
 
+ARGS=
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1"
+fi
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P101UNA CUSTOM_CARRIER_LIST=ATT CUSTOM_WEBOS_DMSET=556 CUSTOM_CARRIER_DMSET=560 CUSTOM_BUILD_INFO=palm-build-info DEVICE=preplus CARRIER=wr"
+
+make ${ARGS} settings
+
 mkdir -p downloads
 
 [ ! -f downloads/${ATT_FILE} ] && $wget -c ${ATT_JAR_URL} -O downloads/${ATT_FILE}
@@ -50,6 +59,6 @@ cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
 make clobber
 
-make ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P101UNA CUSTOM_CARRIER_LIST=ATT CUSTOM_WEBOS_DMSET=556 CUSTOM_CARRIER_DMSET=560 CUSTOM_BUILD_INFO=palm-build-info DEVICE=preplus CARRIER=wr all || exit
+make ${ARGS} all || exit
 
 $java -jar build/${WR_BUILD}/${WR_FILE}
