@@ -116,17 +116,6 @@
 # This is not a method to use a device on a different cellular carrier.
 # Uncomment the corresponding line below to enable this feature.
 
-# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
-# This allows more space for the installation of Linux applications
-# and the storage of huge amounts of email and attachments on the
-# device.  The extra space is taken away from the USB drive.
-# Uncomment the corresponding line below to enable this feature.
-
-# ADD_EXT3FS_PARTITION adds a spare LVM partition formatted as ext3.
-# This allows space for experimentation that requires an additional
-# ext3 filesytem.  The extra space is taken away from the USB drive.
-# Uncomment the corresponding line below to enable this feature.
-
 # CHANGE_KEYBOARD_TYPE permanently changes the keyboard layout using
 # the manufacturing software token area.  You only need to do this
 # once.	 Future uses of the webOS Doctor without this feature enabled
@@ -137,6 +126,17 @@
 
 # ADD_EXTRA_CARRIERS adds extra carrier information from the files in
 # the ./patches/carriers directory (currently only for WebOS 2.0.0). 
+# Uncomment the corresponding line below to enable this feature.
+
+# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
+# This allows more space for the installation of Linux applications
+# and the storage of huge amounts of email and attachments on the
+# device.  The extra space is taken away from the USB drive.
+# Uncomment the corresponding line below to enable this feature.
+
+# ADD_EXT3FS_PARTITION adds a spare LVM partition formatted as ext3.
+# This allows space for experimentation that requires an additional
+# ext3 filesytem.  The extra space is taken away from the USB drive.
 # Uncomment the corresponding line below to enable this feature.
 
 ##########################
@@ -159,12 +159,12 @@
 # DISABLE_UPDATE_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
 # ENABLE_USB_NETWORKING = 1
-# REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
-# INCREASE_VAR_SPACE    = 1
+# REMOVE_CARRIER_CHECK  = 1
 # CHANGE_KEYBOARD_TYPE  = z
-# ADD_EXT3FS_PARTITION  = 2GB
 # ADD_EXTRA_CARRIERS    = 1
+# INCREASE_VAR_SPACE    = 1
+# ADD_EXT3FS_PARTITION  = 2GB
 
 # Select "pre", "preplus", "pixi", "pixiplus" or "pre2".
 DEVICE = undefined
@@ -197,22 +197,19 @@ INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
 # DISABLE_UPDATE_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
-# REMOVE_CARRIER_CHECK  = 1
 # REMOVE_MODEL_CHECK    = 1
+# REMOVE_CARRIER_CHECK  = 1
 # REMOVE_BUILD_CHECK    = 1
 # REMOVE_RELEASE_CHECK  = 1
 
-# INCREASE_VAR_SPACE    = 1
-# ADD_EXT3FS_PARTITION  = 2GB
-# CHANGE_KEYBOARD_TYPE  = z
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
 # CUSTOM_XML = castle.xml
 # CUSTOM_BUILD_INFO = palm-build-info
 # CUSTOM_WEBOS_DMSET = base
 # CUSTOM_CARRIER_DMSET = a
-# CUSTOM_CARRIER_LIST = P100EWW
-# CUSTOM_MODEL_LIST   = Sprint
+# CUSTOM_MODEL_LIST = P100EWW
+# CUSTOM_CARRIER_LIST = Sprint
 
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
@@ -381,6 +378,123 @@ JAD	= build/tools/jad-linux/jad
 endif
 endif
 JODE= downloads/jode-1.1.2-pre1.jar
+
+.PHONY: settings
+settings:
+	@echo "DEVICE = ${DEVICE}"
+	@echo "CARRIER = ${CARRIER}"
+	@echo "VERSION = ${VERSION}"
+ifdef BYPASS_ACTIVATION
+	@echo "BYPASS_ACTIVATION = ${BYPASS_ACTIVATION}"
+endif
+ifdef BYPASS_FIRST_USE_APP 
+	@echo "BYPASS_FIRST_USE_APP = ${BYPASS_FIRST_USE_APP}"
+endif
+ifdef ENABLE_DEVELOPER_MODE
+	@echo "ENABLE_DEVELOPER_MODE = ${ENABLE_DEVELOPER_MODE}"
+endif
+ifdef AUTO_INSTALL_PREWARE 
+	@echo "AUTO_INSTALL_PREWARE = ${AUTO_INSTALL_PREWARE}"
+endif
+ifdef ENABLE_TESTING_FEEDS 
+	@echo "ENABLE_TESTING_FEEDS = ${ENABLE_TESTING_FEEDS}"
+endif
+ifdef INSTALL_SSH_AUTH_KEYS
+	@echo "INSTALL_SSH_AUTH_KEYS = ${INSTALL_SSH_AUTH_KEYS}"
+endif
+ifdef INSTALL_WIFI_PROFILES
+	@echo "INSTALL_WIFI_PROFILES = ${INSTALL_WIFI_PROFILES}"
+endif
+ifdef DISABLE_UPLOAD_DAEMON
+	@echo "DISABLE_UPLOAD_DAEMON = ${DISABLE_UPLOAD_DAEMON}"
+endif
+ifdef DISABLE_UPDATE_DAEMON
+	@echo "DISABLE_UPDATE_DAEMON = ${DISABLE_UPDATE_DAEMON}"
+endif
+ifdef DISABLE_MODEM_UPDATE 
+	@echo "DISABLE_MODEM_UPDATE = ${DISABLE_MODEM_UPDATE}"
+endif
+ifdef ENABLE_USB_NETWORKING
+	@echo "ENABLE_USB_NETWORKING = ${ENABLE_USB_NETWORKING}"
+endif
+ifdef REMOVE_MODEL_CHECK   
+	@echo "REMOVE_MODEL_CHECK = ${REMOVE_MODEL_CHECK}"
+endif
+ifdef REMOVE_CARRIER_CHECK 
+	@echo "REMOVE_CARRIER_CHECK = ${REMOVE_CARRIER_CHECK}"
+endif
+ifdef REMOVE_BUILD_CHECK   
+	@echo "REMOVE_BUILD_CHECK = ${REMOVE_BUILD_CHECK}"
+endif
+ifdef REMOVE_RELEASE_CHECK 
+	@echo "REMOVE_RELEASE_CHECK = ${REMOVE_RELEASE_CHECK}"
+endif
+ifdef CHANGE_KEYBOARD_TYPE 
+	@echo "CHANGE_KEYBOARD_TYPE = ${CHANGE_KEYBOARD_TYPE}"
+endif
+ifdef ADD_EXTRA_CARRIERS   
+	@echo "ADD_EXTRA_CARRIERS = ${ADD_EXTRA_CARRIERS}"
+endif
+ifdef INCREASE_VAR_SPACE   
+	@echo "INCREASE_VAR_SPACE = ${INCREASE_VAR_SPACE}"
+endif
+ifdef ADD_EXT3FS_PARTITION 
+	@echo "ADD_EXT3FS_PARTITION = ${ADD_EXT3FS_PARTITION}"
+endif
+ifdef CUSTOM_WEBOS_TARBALL
+	@echo "CUSTOM_WEBOS_TARBALL = ${CUSTOM_WEBOS_TARBALL}"
+endif
+ifdef CUSTOM_CARRIER_TARBALL
+	@echo "CUSTOM_CARRIER_TARBALL = ${CUSTOM_CARRIER_TARBALL}"
+endif
+ifdef CUSTOM_XML
+	@echo "CUSTOM_XML = ${CUSTOM_XML}"
+endif
+ifdef CUSTOM_BUILD_INFO
+	@echo "CUSTOM_BUILD_INFO = ${CUSTOM_BUILD_INFO}"
+endif
+ifdef CUSTOM_WEBOS_DMSET
+	@echo "CUSTOM_WEBOS_DMSET = ${CUSTOM_WEBOS_DMSET}"
+endif
+ifdef CUSTOM_CARRIER_DMSET
+	@echo "CUSTOM_CARRIER_DMSET = ${CUSTOM_CARRIER_DMSET}"
+endif
+ifdef CUSTOM_MODEL_LIST  
+	@echo "CUSTOM_MODEL_LIST = ${CUSTOM_MODEL_LIST}"
+endif
+ifdef CUSTOM_CARRIER_LIST
+	@echo "CUSTOM_CARRIER_LIST = ${CUSTOM_CARRIER_LIST}"
+endif
+ifdef CUSTOM_DEVICETYPE
+	@echo "CUSTOM_DEVICETYPE = ${CUSTOM_DEVICETYPE}"
+endif
+ifdef CUSTOM_BOOTLOADER
+	@echo "CUSTOM_BOOTLOADER = ${CUSTOM_BOOTLOADER}"
+endif
+ifdef CUSTOM_INSTALLER
+	@echo "CUSTOM_INSTALLER = ${CUSTOM_INSTALLER}"
+endif
+ifdef CUSTOM_KERNEL_DIR
+	@echo "CUSTOM_KERNEL_DIR = ${CUSTOM_KERNEL_DIR}"
+endif
+ifdef CUSTOM_ROOTFS
+	@echo "CUSTOM_ROOTFS = ${CUSTOM_ROOTFS}"
+endif
+ifdef CUSTOM_BUILD_CHECK  
+	@echo "CUSTOM_BUILD_CHECK = ${CUSTOM_BUILD_CHECK}"
+endif
+ifdef CUSTOM_RELEASE_CHECK
+	@echo "CUSTOM_RELEASE_CHECK = ${CUSTOM_RELEASE_CHECK}"
+endif
+ifdef CUSTOM_CARRIER_CHECK
+	@echo "CUSTOM_CARRIER_CHECK = ${CUSTOM_CARRIER_CHECK}"
+endif
+ifdef CUSTOM_MODEL_CHECK  
+	@echo "CUSTOM_MODEL_CHECK = ${CUSTOM_MODEL_CHECK}"
+endif
+ifdef CUSTOM_UPDATE_SITE  
+	@echo "CUSTOM_UPDATE_SITE = ${CUSTOM_UPDATE_SITE}"
+endif
 
 .PHONY: all
 all:
