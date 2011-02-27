@@ -47,7 +47,7 @@ fi
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=bell CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr"
 
-make ${ARGS} settings
+$make ${ARGS} settings
 
 mkdir -p downloads
 
@@ -75,9 +75,9 @@ cp build/${BELLMO_BUILD}/rootfs/etc/${BLD_INFO} ./
 
 cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
-make clobber
+$make clobber
 
-make ${ARGS} all || exit
+$make ${ARGS} all || exit
 
 rm -f ${CDMA_FW} webOS.tar
 

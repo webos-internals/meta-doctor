@@ -41,7 +41,7 @@ fi
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P100UNA CUSTOM_CARRIER_LIST=Telcel CUSTOM_WEBOS_DMSET=667 CUSTOM_CARRIER_DMSET=671 CUSTOM_BUILD_INFO=palm-build-info DEVICE=preplus CARRIER=wr"
 
-make ${ARGS} settings
+$make ${ARGS} settings
 
 mkdir -p downloads
 
@@ -57,8 +57,8 @@ cp build/${TEL_BUILD}/rootfs/etc/${BLD_INFO} ./
 
 cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
-make clobber
+$make clobber
 
-make ${ARGS} all || exit
+$make ${ARGS} all || exit
 
 $java -jar build/${WR_BUILD}/${WR_FILE}
