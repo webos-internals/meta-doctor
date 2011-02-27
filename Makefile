@@ -522,79 +522,74 @@ endif
 all-%:
 	${MAKE} CARRIER=$* unpack patch pack
 
-.PHONY: pack-%
-pack-%:
-	${MAKE} CARRIER=$* pack
+.PHONY: unpack-%
+unpack-%:
+	${MAKE} CARRIER=$* unpack
 
-.PHONY: pack
-pack: build/${PATIENT}/.packed
+.PHONY: unpack
+unpack: build/${PATIENT}/.unpacked
 
-CODENAMEOLD = ${CODENAME}
-INSTIMAGEOLD = nova-installer-image-${CODENAMEOLD}
-CUSTIMAGEOLD = nova-cust-image-${CODENAMEOLD}
-BOOTLOADEROLD = boot-${CODENAMEOLD}
-
-ifdef CUSTOM_DEVICETYPE
-CODENAMENEW = ${CUSTOM_DEVICETYPE}
-else
-CODENAMENEW = ${CODENAMEOLD}
-endif
-
-INSTIMAGENEW = nova-installer-image-${CODENAMENEW}
-CUSTIMAGENEW = nova-cust-image-${CODENAMENEW}
-BOOTLOADERNEW = boot-${CODENAMENEW}
-
-
-build/${PATIENT}/.packed:
-	rm -f $@
-ifeq (${PATCH_DOCTOR},1)
-	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
-endif
-	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
-		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--delete ${OLDDIRS} ${OLDFILES} ./md5sums*
-	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
-	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
-	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
-	  ${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ${NEWFILES} ./md5sums.gz ; \
-	else \
-	  ${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ${NEWFILES} ./md5sums ; \
-	fi
-	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
-	- ${TAR} -C build/${PATIENT}/webOS \
-		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
-	${TAR} -C build/${PATIENT}/webOS \
-		-f build/${PATIENT}/resources/webOS.tar \
-		--numeric-owner --owner=0 --group=0 -h \
-		--append ./${CUSTIMAGENEW}.rootfs.tar.gz ./${INSTIMAGENEW}.uImage ./${BOOTLOADERNEW}.bin ./${CODENAMENEW}.xml ./installer.xml \
-			 ${USERTGZ} 
-	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
-		build/${PATIENT}/META-INF/MANIFEST.MF
+build/${PATIENT}/.unpacked: downloads/${DOCTOR}
+	rm -rf build/${PATIENT}
+	mkdir -p build/${PATIENT}
+	cp $< build/${PATIENT}/${DOCTOR}
 	( cd build/${PATIENT} ; \
-		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
-			resources/webOS.tar resources/recoverytool.config )
-	( cd build/${PATIENT} ; \
-		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
+		unzip -q ${DOCTOR} META-INF/MANIFEST.MF com/* \
 			resources/webOS.tar resources/recoverytool.config )
 ifndef REMOVE_CARRIER_CHECK
-	- ${TAR} -C build/${PATIENT}/carrier \
-		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
-		--delete installer.xml
+	( cd build/${PATIENT} ; \
+		unzip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
+endif
+ifdef CUSTOM_WEBOS_TARBALL
+	cp ${CUSTOM_WEBOS_TARBALL} build/${PATIENT}/resources/webOS.tar
+endif
+ifndef REMOVE_CARRIER_CHECK
+ifdef CUSTOM_CARRIER_TARBALL
+	cp ${CUSTOM_CARRIER_TARBALL} build/${PATIENT}/resources/${CARRIER_TARBALL}
+endif
+endif
+	mkdir -p build/${PATIENT}/webOS
+	${TAR} -C build/${PATIENT}/webOS \
+		-f build/${PATIENT}/resources/webOS.tar \
+		-x ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
+ifdef CUSTOM_DEVICETYPE
+	mv build/${PATIENT}/webOS/${CUSTIMAGEOLD}.rootfs.tar.gz build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
+	mv build/${PATIENT}/webOS/${INSTIMAGEOLD}.uImage build/${PATIENT}/webOS/${INSTIMAGENEW}.uImage
+	mv build/${PATIENT}/webOS/${BOOTLOADEROLD}.bin build/${PATIENT}/webOS/${BOOTLOADERNEW}.bin
+	mv build/${PATIENT}/webOS/${CODENAMEOLD}.xml build/${PATIENT}/webOS/${CODENAMENEW}.xml
+endif
+ifdef CUSTOM_INSTALLER
+	cp ${CUSTOM_INSTALLER} build/${PATIENT}/webOS/${INSTIMAGENEW}.uImage
+endif
+ifdef CUSTOM_BOOTLOADER
+	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/webOS/${BOOTLOADERNEW}.bin
+endif
+ifdef CUSTOM_ROOTFS
+	cp ${CUSTOM_ROOTFS} build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
+endif
+ifdef CUSTOM_XML
+	cp ${CUSTOM_XML} build/${PATIENT}/webOS/${CODENAMENEW}.xml
+endif
+ifndef REMOVE_CARRIER_CHECK
+	mkdir -p build/${PATIENT}/carrier
 	${TAR} -C build/${PATIENT}/carrier \
 		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
-		--numeric-owner --owner=0 --group=0 -h \
-		--append installer.xml
-	( cd build/${PATIENT} ; \
-		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
-	( cd build/${PATIENT} ; \
-		zip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
+		-x installer.xml
+endif
+	gunzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
+	mkdir -p build/${PATIENT}/rootfs
+	${TAR} -C build/${PATIENT}/rootfs --wildcards \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		-x ${OLDDIRS} ${OLDFILES} ./md5sums*
+ifdef CUSTOM_KERNEL_DIR
+	( cd ${CUSTOM_KERNEL_DIR}/boot ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/boot ; tar xf - )
+	( cd ${CUSTOM_KERNEL_DIR}/lib/modules ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/lib/modules ; tar xf - )
+endif
+ifdef CUSTOM_BOOTLOADER
+	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/rootfs/boot/boot.bin
+endif
+ifdef CUSTOM_BUILD_INFO
+	cp ${CUSTOM_BUILD_INFO} build/${PATIENT}/rootfs/etc/palm-build-info
 endif
 	touch $@
 
@@ -861,6 +856,82 @@ ifeq (${PATCH_DOCTOR},1)
 endif
 	touch $@
 
+.PHONY: pack-%
+pack-%:
+	${MAKE} CARRIER=$* pack
+
+.PHONY: pack
+pack: build/${PATIENT}/.packed
+
+CODENAMEOLD = ${CODENAME}
+INSTIMAGEOLD = nova-installer-image-${CODENAMEOLD}
+CUSTIMAGEOLD = nova-cust-image-${CODENAMEOLD}
+BOOTLOADEROLD = boot-${CODENAMEOLD}
+
+ifdef CUSTOM_DEVICETYPE
+CODENAMENEW = ${CUSTOM_DEVICETYPE}
+else
+CODENAMENEW = ${CODENAMEOLD}
+endif
+
+INSTIMAGENEW = nova-installer-image-${CODENAMENEW}
+CUSTIMAGENEW = nova-cust-image-${CODENAMENEW}
+BOOTLOADERNEW = boot-${CODENAMENEW}
+
+
+build/${PATIENT}/.packed:
+	rm -f $@
+ifeq (${PATCH_DOCTOR},1)
+	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
+endif
+	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		--delete ${OLDDIRS} ${OLDFILES} ./md5sums*
+	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
+	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
+	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
+	  ${TAR} -C build/${PATIENT}/rootfs \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		--numeric-owner --owner=0 --group=0 \
+		--append ${NEWDIRS} ${NEWFILES} ./md5sums.gz ; \
+	else \
+	  ${TAR} -C build/${PATIENT}/rootfs \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		--numeric-owner --owner=0 --group=0 \
+		--append ${NEWDIRS} ${NEWFILES} ./md5sums ; \
+	fi
+	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
+	- ${TAR} -C build/${PATIENT}/webOS \
+		-f build/${PATIENT}/resources/webOS.tar \
+		--delete ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
+	${TAR} -C build/${PATIENT}/webOS \
+		-f build/${PATIENT}/resources/webOS.tar \
+		--numeric-owner --owner=0 --group=0 -h \
+		--append ./${CUSTIMAGENEW}.rootfs.tar.gz ./${INSTIMAGENEW}.uImage ./${BOOTLOADERNEW}.bin ./${CODENAMENEW}.xml ./installer.xml \
+			 ${USERTGZ} 
+	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
+		build/${PATIENT}/META-INF/MANIFEST.MF
+	( cd build/${PATIENT} ; \
+		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
+			resources/webOS.tar resources/recoverytool.config )
+	( cd build/${PATIENT} ; \
+		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
+			resources/webOS.tar resources/recoverytool.config )
+ifndef REMOVE_CARRIER_CHECK
+	- ${TAR} -C build/${PATIENT}/carrier \
+		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
+		--delete installer.xml
+	${TAR} -C build/${PATIENT}/carrier \
+		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
+		--numeric-owner --owner=0 --group=0 -h \
+		--append installer.xml
+	( cd build/${PATIENT} ; \
+		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
+	( cd build/${PATIENT} ; \
+		zip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
+endif
+	touch $@
+
 .PHONY: devmode-%
 devmode-%:
 	${MAKE} CARRIER=$* devmode
@@ -959,77 +1030,6 @@ reboot:
 recover:
 	novacom -w run file://sbin/tellbootie recover || true
 	@sleep 5
-
-.PHONY: unpack-%
-unpack-%:
-	${MAKE} CARRIER=$* unpack
-
-.PHONY: unpack
-unpack: build/${PATIENT}/.unpacked
-
-build/${PATIENT}/.unpacked: downloads/${DOCTOR}
-	rm -rf build/${PATIENT}
-	mkdir -p build/${PATIENT}
-	cp $< build/${PATIENT}/${DOCTOR}
-	( cd build/${PATIENT} ; \
-		unzip -q ${DOCTOR} META-INF/MANIFEST.MF com/* \
-			resources/webOS.tar resources/recoverytool.config )
-ifndef REMOVE_CARRIER_CHECK
-	( cd build/${PATIENT} ; \
-		unzip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
-endif
-ifdef CUSTOM_WEBOS_TARBALL
-	cp ${CUSTOM_WEBOS_TARBALL} build/${PATIENT}/resources/webOS.tar
-endif
-ifndef REMOVE_CARRIER_CHECK
-ifdef CUSTOM_CARRIER_TARBALL
-	cp ${CUSTOM_CARRIER_TARBALL} build/${PATIENT}/resources/${CARRIER_TARBALL}
-endif
-endif
-	mkdir -p build/${PATIENT}/webOS
-	${TAR} -C build/${PATIENT}/webOS \
-		-f build/${PATIENT}/resources/webOS.tar \
-		-x ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
-ifdef CUSTOM_DEVICETYPE
-	mv build/${PATIENT}/webOS/${CUSTIMAGEOLD}.rootfs.tar.gz build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
-	mv build/${PATIENT}/webOS/${INSTIMAGEOLD}.uImage build/${PATIENT}/webOS/${INSTIMAGENEW}.uImage
-	mv build/${PATIENT}/webOS/${BOOTLOADEROLD}.bin build/${PATIENT}/webOS/${BOOTLOADERNEW}.bin
-	mv build/${PATIENT}/webOS/${CODENAMEOLD}.xml build/${PATIENT}/webOS/${CODENAMENEW}.xml
-endif
-ifdef CUSTOM_INSTALLER
-	cp ${CUSTOM_INSTALLER} build/${PATIENT}/webOS/${INSTIMAGENEW}.uImage
-endif
-ifdef CUSTOM_BOOTLOADER
-	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/webOS/${BOOTLOADERNEW}.bin
-endif
-ifdef CUSTOM_ROOTFS
-	cp ${CUSTOM_ROOTFS} build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
-endif
-ifdef CUSTOM_XML
-	cp ${CUSTOM_XML} build/${PATIENT}/webOS/${CODENAMENEW}.xml
-endif
-ifndef REMOVE_CARRIER_CHECK
-	mkdir -p build/${PATIENT}/carrier
-	${TAR} -C build/${PATIENT}/carrier \
-		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
-		-x installer.xml
-endif
-	gunzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
-	mkdir -p build/${PATIENT}/rootfs
-	${TAR} -C build/${PATIENT}/rootfs --wildcards \
-		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		-x ${OLDDIRS} ${OLDFILES} ./md5sums*
-ifdef CUSTOM_KERNEL_DIR
-	( cd ${CUSTOM_KERNEL_DIR}/boot ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/boot ; tar xf - )
-	( cd ${CUSTOM_KERNEL_DIR}/lib/modules ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/lib/modules ; tar xf - )
-endif
-ifdef CUSTOM_BOOTLOADER
-	cp ${CUSTOM_BOOTLOADER} build/${PATIENT}/rootfs/boot/boot.bin
-endif
-ifdef CUSTOM_BUILD_INFO
-	cp ${CUSTOM_BUILD_INFO} build/${PATIENT}/rootfs/etc/palm-build-info
-endif
-	touch $@
 
 .PHONY: download-%
 download-%:
