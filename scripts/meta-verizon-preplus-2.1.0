@@ -45,7 +45,7 @@ if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1"
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Verizon CUSTOM_MODEL_LIST=P101EWW CUSTOM_WEBOS_DMSET=520 CUSTOM_CARRIER_DMSET=524 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} CUSTOM_BOOTLOGO=scripts/WebOS-Internals.tga ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Verizon CUSTOM_MODEL_LIST=P101EWW CUSTOM_WEBOS_DMSET=520 CUSTOM_CARRIER_DMSET=524 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -63,12 +63,9 @@ $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
 cp build/${WR_BUILD}/resources/webOS.tar ./
 
-$tar -C ./ -f ./build/${VZW_BUILD}/resources/webOS.tar -x ./${SRC_CDMA_FW} || exit
+cp build/${VZW_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
 
 $tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW} || exit
-
-mv ${SRC_CDMA_FW} ${CDMA_FW}
-
 $tar -C ./ -f ./webOS.tar --append ./${CDMA_FW} || exit
 
 cp build/${P101_BUILD}/rootfs/etc/${BLD_INFO} ./
