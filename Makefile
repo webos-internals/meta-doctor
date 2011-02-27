@@ -172,6 +172,9 @@ DEVICE = undefined
 # Select "wr", "sprint", "verizonwireless", "bellmo", "telcel" or "att".
 CARRIER = undefined
 
+# Supply a different boot logo if you wish.
+CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
+
 ######################################
 ## END OF AREA FOR END USER CHANGES ##
 ######################################
@@ -212,7 +215,7 @@ DISABLE_UPLOAD_DAEMON = 1
 # CUSTOM_CARRIER_DMSET = a
 # CUSTOM_MODEL_LIST = P100EWW
 # CUSTOM_CARRIER_LIST = Sprint
-CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
+# CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
