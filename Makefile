@@ -550,8 +550,7 @@ endif
 endif
 	mkdir -p build/${PATIENT}/webOS
 	${TAR} -C build/${PATIENT}/webOS \
-		-f build/${PATIENT}/resources/webOS.tar \
-		-x ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
+		-f build/${PATIENT}/resources/webOS.tar -x
 ifdef CUSTOM_DEVICETYPE
 	mv build/${PATIENT}/webOS/${CUSTIMAGEOLD}.rootfs.tar.gz build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
 	mv build/${PATIENT}/webOS/${INSTIMAGEOLD}.uImage build/${PATIENT}/webOS/${INSTIMAGENEW}.uImage
@@ -573,8 +572,7 @@ endif
 ifndef REMOVE_CARRIER_CHECK
 	mkdir -p build/${PATIENT}/carrier
 	${TAR} -C build/${PATIENT}/carrier \
-		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
-		-x installer.xml
+		-f build/${PATIENT}/resources/${CARRIER_TARBALL} -x
 endif
 	gunzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz
 	mkdir -p build/${PATIENT}/rootfs
@@ -890,25 +888,21 @@ endif
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
 	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
-	  ${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ${NEWFILES} ./md5sums.gz ; \
+	  ( cd build/${PATIENT}/rootfs ; \
+		${TAR} -f ../webOS/${CUSTIMAGENEW}.rootfs.tar \
+			--numeric-owner --owner=0 --group=0 \
+			--append ${NEWDIRS} ${NEWFILES} ./md5sums.gz ) ; \
 	else \
-	  ${TAR} -C build/${PATIENT}/rootfs \
-		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--numeric-owner --owner=0 --group=0 \
-		--append ${NEWDIRS} ${NEWFILES} ./md5sums ; \
+	  ( cd build/${PATIENT}/rootfs ; \
+		${TAR} -f ../webOS/${CUSTIMAGENEW}.rootfs.tar \
+			--numeric-owner --owner=0 --group=0 \
+			--append ${NEWDIRS} ${NEWFILES} ./md5sums ) ; \
 	fi
 	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
-	- ${TAR} -C build/${PATIENT}/webOS \
-		-f build/${PATIENT}/resources/webOS.tar \
-		--delete ./${CUSTIMAGEOLD}.rootfs.tar.gz ./${INSTIMAGEOLD}.uImage ./${BOOTLOADEROLD}.bin ./${CODENAMEOLD}.xml ./installer.xml
-	${TAR} -C build/${PATIENT}/webOS \
-		-f build/${PATIENT}/resources/webOS.tar \
-		--numeric-owner --owner=0 --group=0 -h \
-		--append ./${CUSTIMAGENEW}.rootfs.tar.gz ./${INSTIMAGENEW}.uImage ./${BOOTLOADERNEW}.bin ./${CODENAMENEW}.xml ./installer.xml \
-			 ${USERTGZ} 
+	( cd build/${PATIENT}/webOS ; \
+		${TAR} -f ../resources/webOS.tar \
+			--numeric-owner --owner=0 --group=0 -h \
+			-c . )
 	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
 		build/${PATIENT}/META-INF/MANIFEST.MF
 	( cd build/${PATIENT} ; \
@@ -918,13 +912,10 @@ endif
 		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
 ifndef REMOVE_CARRIER_CHECK
-	- ${TAR} -C build/${PATIENT}/carrier \
-		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
-		--delete installer.xml
-	${TAR} -C build/${PATIENT}/carrier \
-		-f build/${PATIENT}/resources/${CARRIER_TARBALL} \
-		--numeric-owner --owner=0 --group=0 -h \
-		--append installer.xml
+	( cd build/${PATIENT}/carrier ; \
+		${TAR} -f ../resources/${CARRIER_TARBALL} \
+			--numeric-owner --owner=0 --group=0 -h \
+			-c installer.xml *.ipk )
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
 	( cd build/${PATIENT} ; \
