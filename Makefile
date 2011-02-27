@@ -575,8 +575,13 @@ endif
 		--numeric-owner --owner=0 --group=0 -h \
 		--append ./${CUSTIMAGENEW}.rootfs.tar.gz ./${INSTIMAGENEW}.uImage ./${BOOTLOADERNEW}.bin ./${CODENAMENEW}.xml ./installer.xml \
 			 ${USERTGZ} 
+	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
+		build/${PATIENT}/META-INF/MANIFEST.MF
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} META-INF/MANIFEST.MF META-INF/JARKEY.* ${CLASSES:%=%*.class} \
+			resources/webOS.tar resources/recoverytool.config )
+	( cd build/${PATIENT} ; \
+		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
 ifndef REMOVE_CARRIER_CHECK
 	- ${TAR} -C build/${PATIENT}/carrier \
@@ -588,13 +593,6 @@ ifndef REMOVE_CARRIER_CHECK
 		--append installer.xml
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
-endif
-	sed -i.orig -e '/^Name: /d' -e '/^SHA1-Digest: /d' -e '/^ /d' -e '/^\n$$/d' \
-		build/${PATIENT}/META-INF/MANIFEST.MF
-	( cd build/${PATIENT} ; \
-		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
-			resources/webOS.tar resources/recoverytool.config )
-ifndef REMOVE_CARRIER_CHECK
 	( cd build/${PATIENT} ; \
 		zip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
 endif
