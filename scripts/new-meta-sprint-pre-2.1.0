@@ -18,7 +18,7 @@ W145_BUILD="pre-p100eww-sprint-1.4.5"
 CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
 W210_BUILD="preplus-p101ueude-wr-2.1.0"
 
-PATIENT="meta-sprint-2.1.0"
+PATIENT="meta-sprint-pre-2.1.0"
 
 git="git"
 wget="wget"
