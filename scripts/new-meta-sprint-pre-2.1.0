@@ -62,7 +62,6 @@ ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAE
 
 SPRINT_IPKS="${SPRINT_IPKS} \
 audiod-config-cdma_*.ipk \
-com.palm.app.amazonstore_*.ipk \
 crotest-images_*.ipk \
 ozengine_*.ipk \
 "
