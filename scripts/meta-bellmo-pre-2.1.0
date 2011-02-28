@@ -4,6 +4,8 @@
 # intended to flash BellMobility Pre phones with a working webOS 2.1 image
 #  Your mileage may vary
 
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
 BELLMO_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d07142010/b11ep145rod/webosdoctorp100ewwbellmo.jar"
 VZW_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
 WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"

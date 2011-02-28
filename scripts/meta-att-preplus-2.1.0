@@ -4,6 +4,8 @@
 # intended to flash ATT PrePlus phones with a working webOS 2.1 image
 #  Your mileage may vary
 
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
 ATT_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p145r0d09132010/attp145rod/webosdoctorp101ewwatt.jar"
 WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
 

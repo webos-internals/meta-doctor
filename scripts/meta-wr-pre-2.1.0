@@ -4,6 +4,8 @@
 # intended to flash WR Pre phones with a working webOS 2.1 image
 #  Your mileage may vary
 
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
 P100_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d06302010/eudep145rod/webosdoctorp100ueu-wr.jar"
 P101_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
 

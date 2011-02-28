@@ -4,6 +4,8 @@
 # intended to flash Sprint Pre phones with a working webOS 2.1 image
 #  Your mileage may vary
 
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
 SPRINT_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
 VZW_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
 WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
