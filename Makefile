@@ -370,6 +370,12 @@ ifeq (${ADD_EXTRA_CARRIERS},1)
 	OLDDIRS += ./etc/carrierdb
 endif
 
+ifdef CUSTOM_IPK_LIST
+IPK_LIST = $(subst  ;, ,${CUSTOM_IPK_LIST})
+else
+IPK_LIST = *.ipk
+endif
+
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
 export COPYFILE_DISABLE=true
@@ -927,7 +933,7 @@ ifndef REMOVE_CARRIER_CHECK
 	( cd build/${PATIENT}/carrier ; \
 		${TAR} -f ../resources/${CARRIER_TARBALL} \
 			--numeric-owner --owner=0 --group=0 -h \
-			-c installer.xml *.ipk )
+			-c installer.xml ${IPK_LIST} )
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
 	( cd build/${PATIENT} ; \
