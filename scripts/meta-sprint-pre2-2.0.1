@@ -1,0 +1,106 @@
+#!/bin/bash
+# meta-meta script by Ed Cates
+# modified by Rod Whitby
+# intended to flash Sprint Pre phones with a working webOS 2.1 image
+#  Your mileage may vary
+
+SPRINT_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
+VZW_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+#WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+
+SPRINT_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
+VZW_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+#WR_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+
+SPRINT_BUILD="pre-p100eww-sprint-1.4.5"
+VZW_BUILD="pre2-p102eww-verizonwireless-2.0.1"
+#WR_BUILD="preplus-p101ueude-wr-2.1.0"
+
+REQUIRED_TOKENS=( DMCARRIER DMCLoAUTHNAME DMCLoAUTHPW DMCLoNONCE DMMODEL DMSVRoAUTHPW DMSVRoNONCE ModemSN PN PRODoID PalmSN )
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+
+if [ "`uname -s`" == "Darwin" ] ; then 
+    tar=gnutar
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+fi
+
+WEBOS_TARBALL="webOS.tar"
+SRC_CDMA_FW="roadrunnercdma_fw.tar"
+CDMA_FW="castleutmsfw.tar"
+BLD_INFO="palm-build-info"
+
+for f in $git $wget $make $java $patch; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+[ -f ./castle.xml ] || { echo "Please place a FULL castle.xml from show properties in ./castle.xml" ; exit ; }
+
+[ -f ./custom-tokens.xml ] && rm ./custom-tokens.xml
+
+for token in "${REQUIRED_TOKENS[@]}"; do
+	grep $token ./castle.xml | sed 's/..$/ action=\"overwrite\"&/' >> custom-tokens.xml
+done
+
+mkdir -p downloads
+
+[ ! -f downloads/${SPRINT_FILE} ] && $wget -c ${SPRINT_JAR_URL} -O downloads/${SPRINT_FILE}
+[ ! -f downloads/${VZW_FILE} ] && $wget -c ${VZW_JAR_URL} -O downloads/${VZW_FILE}
+#[ ! -f downloads/${WR_FILE} ] && $wget -c ${WR_JAR_URL} -O downloads/${WR_FILE}
+
+$make clobber
+
+$make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
+#$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
+
+[ -f ./roadrunner.xml ] && rm ./roadrunner.xml
+
+cp build/${VZW_BUILD}/webOS/roadrunner.xml .
+
+INSERT_LINE=`grep -n "<Section name=\"tokens\" type=\"token\" size=\"4KB\">" ./roadrunner.xml | awk -F: '{print $1}'`
+TOTAL_LINES=`cat ./roadrunner.xml | wc -l`
+
+head -n $INSERT_LINE ./roadrunner.xml > roadrunner-custom.xml
+cat ./custom-tokens.xml >> roadrunner-custom.xml
+tail -n $(($TOTAL_LINES - $INSERT_LINE)) roadrunner.xml >> roadrunner-custom.xml
+
+#cp build/${SPRINT_BUILD}/resources/webOS.tar ./
+
+#$tar -C ./ -f ./build/${VZW_BUILD}/resources/webOS.tar -x ./${SRC_CDMA_FW} || exit
+
+#$tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW} || exit
+
+#mv ${SRC_CDMA_FW} ${CDMA_FW}
+
+#$tar -C ./ -f ./webOS.tar --append ./${CDMA_FW} || exit
+
+cp build/${SPRINT_BUILD}/rootfs/etc/${BLD_INFO} ./
+
+cp build/${VZW_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
+
+make clobber
+
+make ENABLE_DEVELOPER_MODE=1 REMOVE_MODEL_CHECK=1 REMOVE_CARRIER_CHECK=1 CUSTOM_XML=roadrunner-custom.xml DEVICE=pre2 CARRIER=verizonwireless VERSION=2.0.1 all || exit
+
+cp build/${VZW_BUILD}/${VZW_FILE} ./FIRST-${VZW_FILE}
+
+make clobber
+
+make ENABLE_DEVELOPER_MODE=1 AUTO_INSTALL_PREWARE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=base CUSTOM_CARRIER_DMSET=a CUSTOM_BUILD_INFO=palm-build-info DEVICE=pre2 CARRIER=verizonwireless VERSION=2.0.1 all || exit
+
+cp build/${VZW_BUILD}/${VZW_FILE} ./SECOND-${VZW_FILE}
+
+#rm -f ${CDMA_FW} webOS.tar
+
+
+
+#$java -jar build/${VZW_BUILD}/${VZW_FILE}
