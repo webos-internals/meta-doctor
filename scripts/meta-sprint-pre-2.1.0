@@ -6,17 +6,19 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-SPRINT_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
-VZW_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+W145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
+CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
 
-SPRINT_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
-VZW_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
-WR_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+W145_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
+CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
 
-SPRINT_BUILD="pre-p100eww-sprint-1.4.5"
-VZW_BUILD="pre2-p102eww-verizonwireless-2.0.1"
-WR_BUILD="preplus-p101ueude-wr-2.1.0"
+W145_BUILD="pre-p100eww-sprint-1.4.5"
+CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
+W210_BUILD="preplus-p101ueude-wr-2.1.0"
+
+PATIENT="meta-sprint-pre-2.1.0"
 
 git="git"
 wget="wget"
@@ -32,6 +34,7 @@ if [ "`uname -s`" == "Darwin" ] ; then
 fi
 
 WEBOS_TARBALL="webOS.tar"
+CARRIER_TARBALL="carrier.tar"
 SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="castlecdmafw.tar"
 BLD_INFO="palm-build-info"
@@ -43,41 +46,81 @@ for f in $git $wget $make $java $patch; do
 done
 
 ARGS=
+SPRINT_IPKS="\
+com.mobitv.app.sprinttv_*.ipk \
+com.palm.app.sprintportal_*.ipk \
+dmtree-sprint_*.ipk \
+mobitv-sprint-rtspsrc_*.ipk \
+"
+
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+    SPRINT_IPKS=
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=base CUSTOM_CARRIER_DMSET=a CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=base CUSTOM_CARRIER_DMSET=a CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} DEVICE=preplus CARRIER=wr"
+
+SPRINT_IPKS="${SPRINT_IPKS} \
+audiod-config-cdma_*.ipk \
+crotest-images_*.ipk \
+ozengine_*.ipk \
+"
+
+WR_IPKS="\
+contacts.plugin.pmvoicecommand_*.ipk \
+palmcustomizationinfo-wr-castle-plus_*.ipk \
+pmvoicecommand-dede_*.ipk \
+pmvoicecommand-engb_*.ipk \
+pmvoicecommand-enus_*.ipk \
+pmvoicecommand-eses_*.ipk \
+pmvoicecommand-esmx_*.ipk \
+pmvoicecommand-frca_*.ipk \
+pmvoicecommand-frfr_*.ipk \
+pmvoicecommand-itit_*.ipk \
+pmvoicecommand_*.ipk \
+sweatshop-wr-castle_*.ipk \
+"
 
 $make ${ARGS} settings
 
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo
+
 mkdir -p downloads
 
-[ ! -f downloads/${SPRINT_FILE} ] && $wget -c ${SPRINT_JAR_URL} -O downloads/${SPRINT_FILE}
-[ ! -f downloads/${VZW_FILE} ] && $wget -c ${VZW_JAR_URL} -O downloads/${VZW_FILE}
-[ ! -f downloads/${WR_FILE} ] && $wget -c ${WR_JAR_URL} -O downloads/${WR_FILE}
+[ ! -f downloads/${W145_FILE} ] && $wget -c ${W145_JAR_URL} -O downloads/${W145_FILE}
+[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
 
-$make clobber
+# $make clobber
 
 $make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
 $make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
-cp build/${WR_BUILD}/resources/webOS.tar ./
+cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
 
-cp build/${VZW_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
+cp build/${CDMA_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
 
-$tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW} || exit
-$tar -C ./ -f ./webOS.tar --append ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
-cp build/${SPRINT_BUILD}/rootfs/etc/${BLD_INFO} ./
+mkdir -p carrier
 
-cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
+( cd build/${W145_BUILD}/carrier ; \
+    $tar -c -f - ${SPRINT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${W210_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml *.ipk )
+rm -rf carrier
 
-$make clobber
+cp build/${W145_BUILD}/rootfs/etc/${BLD_INFO} ./
 
-$make ${ARGS} all || exit
+cp build/${W210_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
-rm -f ${CDMA_FW} webOS.tar
+$make ${ARGS} clobber-build all || exit
 
-$java -jar build/${WR_BUILD}/${WR_FILE}
+$java -jar build/${PATIENT}/${W210_FILE}
+
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}

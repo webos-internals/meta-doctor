@@ -6,17 +6,19 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-BELLMO_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d07142010/b11ep145rod/webosdoctorp100ewwbellmo.jar"
-VZW_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-WR_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+W145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d07142010/b11ep145rod/webosdoctorp100ewwbellmo.jar"
+CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
 
-BELLMO_FILE="webosdoctorp100ewwbellmo-1.4.5.jar"
-VZW_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
-WR_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+W145_FILE="webosdoctorp100ewwbellmo-1.4.5.jar"
+CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
 
-BELLMO_BUILD="pre-p100eww-bellmo-1.4.5"
-VZW_BUILD="pre2-p102eww-verizonwireless-2.0.1"
-WR_BUILD="preplus-p101ueude-wr-2.1.0"
+W145_BUILD="pre-p100eww-bellmo-1.4.5"
+CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
+W210_BUILD="preplus-p101ueude-wr-2.1.0"
+
+PATIENT="meta-bellmo-pre-2.1.0"
 
 git="git"
 wget="wget"
@@ -47,37 +49,39 @@ if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=bell CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=webOS.tar DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=bell CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} PATIENT=${PATIENT} DEVICE=preplus CARRIER=wr"
 
 $make ${ARGS} settings
 
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo
+
 mkdir -p downloads
 
-[ ! -f downloads/${BELLMO_FILE} ] && $wget -c ${BELLMO_JAR_URL} -O downloads/${BELLMO_FILE}
-[ ! -f downloads/${VZW_FILE} ] && $wget -c ${VZW_JAR_URL} -O downloads/${VZW_FILE}
-[ ! -f downloads/${WR_FILE} ] && $wget -c ${WR_JAR_URL} -O downloads/${WR_FILE}
+[ ! -f downloads/${W145_FILE} ] && $wget -c ${W145_JAR_URL} -O downloads/${W145_FILE}
+[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
 
-$make clobber
+# $make clobber
 
 $make VERSION=1.4.5 DEVICE=pre CARRIER=bellmo unpack || exit
 $make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
-cp build/${WR_BUILD}/resources/webOS.tar ./
+cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
 
-cp build/${VZW_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
+cp build/${CDMA_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
 
-$tar -C ./ -f ./webOS.tar --delete ./${CDMA_FW} || exit
-$tar -C ./ -f ./webOS.tar --append ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
-cp build/${BELLMO_BUILD}/rootfs/etc/${BLD_INFO} ./
+cp build/${W145_BUILD}/rootfs/etc/${BLD_INFO} ./
 
-cp build/${WR_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
+cp build/${W210_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
-$make clobber
+$make ${ARGS} clobber-build all || exit
 
-$make ${ARGS} all || exit
+$java -jar build/${PATIENT}/${W210_FILE}
 
-rm -f ${CDMA_FW} webOS.tar
-
-$java -jar build/${WR_BUILD}/${WR_FILE}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL}
