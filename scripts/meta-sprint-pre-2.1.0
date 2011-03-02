@@ -49,6 +49,8 @@ ARGS=
 SPRINT_IPKS="\
 com.mobitv.app.sprinttv_*.ipk \
 com.palm.app.sprintportal_*.ipk \
+com.handson.app.nascar_*.ipk \
+com.handson.app.nfl_*.ipk \
 dmtree-sprint_*.ipk \
 mobitv-sprint-rtspsrc_*.ipk \
 "
