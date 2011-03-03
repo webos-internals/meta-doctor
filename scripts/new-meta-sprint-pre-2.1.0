@@ -1,24 +1,24 @@
 #!/bin/bash
-# meta-verizon-preplus-2.1.0 script by Rod Whitby
+# meta-sprint-pre-2.1.0 script by Rod Whitby
 # based on meta-meta script by Ed Cates
-# intended to flash Verizon PrePlus phones with a working webOS 2.1 image
+# intended to flash Sprint Pre phones with a working webOS 2.1 image
 #  Your mileage may vary
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W145_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p145r0d09132010/ver1z0np145rod/webosdoctorp101ewwverizonwireless.jar"
+W145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
 CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
 W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
 
-W145_FILE="webosdoctorp101ewwverizonwireless-1.4.5.jar"
+W145_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
 CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
 W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
 
-W145_BUILD="preplus-p101eww-verizonwireless-1.4.5"
+W145_BUILD="pre-p100eww-sprint-1.4.5"
 CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
 W210_BUILD="preplus-p101ueude-wr-2.1.0"
 
-PATIENT="meta-verizon-preplus-2.1.0"
+PATIENT="meta-sprint-pre-2.1.0"
 
 git="git"
 wget="wget"
@@ -48,28 +48,31 @@ for f in $git $wget $make $java $patch; do
 done
 
 ARGS=
-VZW_IPKS=
-WR_IPKS=
-IPK_LIST=
-
-VZW_IPKS="\
-com.nim.vznavigator_*.ipk \
-com.palm.app.mobilehotspot_*.ipk \
-com.nim.app.vznavigator_*.ipk \
+SPRINT_IPKS="\
+com.mobitv.app.sprinttv_*.ipk \
+com.palm.app.sprintportal_*.ipk \
+com.handson.app.nascar_*.ipk \
+com.handson.app.nfl_*.ipk \
+dmtree-sprint_*.ipk \
+mobitv-sprint-rtspsrc_*.ipk \
 "
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
-    VZW_IPKS=
+    SPRINT_IPKS=
 fi
 
-VZW_IPKS="${VZW_IPKS} \
-amazonservice_*.ipk \
-com.palm.app.amazonstore_*.ipk \
-crotestcastleplus-images_*.ipk \
-palmcustomizationinfo-verizon_*.ipk"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} DEVICE=preplus CARRIER=wr"
 
-WR_IPKS="contacts.plugin.pmvoicecommand_*.ipk \
+SPRINT_IPKS="${SPRINT_IPKS} \
+audiod-config-cdma_*.ipk \
+crotest-images_*.ipk \
+ozengine_*.ipk \
+"
+
+WR_IPKS="\
+contacts.plugin.pmvoicecommand_*.ipk \
+palmcustomizationinfo-wr-castle-plus_*.ipk \
 pmvoicecommand-dede_*.ipk \
 pmvoicecommand-engb_*.ipk \
 pmvoicecommand-enus_*.ipk \
@@ -79,11 +82,8 @@ pmvoicecommand-frca_*.ipk \
 pmvoicecommand-frfr_*.ipk \
 pmvoicecommand-itit_*.ipk \
 pmvoicecommand_*.ipk \
-sweatshop-wr-castle_*.ipk"
-
-IPK_LIST=$( echo "${VZW_IPKS} ${WR_IPKS}"  | sed -e 's/ /;/g' -e 's/;;/;/g' )
-
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Verizon CUSTOM_MODEL_LIST=P101EWW CUSTOM_WEBOS_DMSET=520 CUSTOM_CARRIER_DMSET=524 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_IPK_LIST=${IPK_LIST} PATIENT=${PATIENT} DEVICE=preplus CARRIER=wr"
+sweatshop-wr-castle_*.ipk \
+"
 
 $make ${ARGS} settings
 
@@ -99,7 +99,7 @@ mkdir -p downloads
 
 # $make clobber
 
-$make VERSION=1.4.5 DEVICE=preplus CARRIER=verizonwireless unpack || exit
+$make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
 $make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
@@ -112,8 +112,8 @@ $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
 mkdir -p carrier
 
-( cd build/${CDMA_BUILD}/carrier ; \
-    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${W145_BUILD}/carrier ; \
+    $tar -c -f - ${SPRINT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml *.ipk )
