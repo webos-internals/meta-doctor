@@ -39,6 +39,8 @@ SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="castlecdmafw.tar"
 BLD_INFO="palm-build-info"
 
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO} ${BLD_INFO}-unmasqed
+
 for f in $git $wget $make $java $patch; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
@@ -115,15 +117,14 @@ mkdir -p carrier
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml *.ipk )
+
 rm -rf carrier
 
-
-cp build/${W145_BUILD}/rootfs/etc/${BLD_INFO} ./
-
-cp build/${W210_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
+head -n 1 build/${W210_BUILD}/rootfs/etc/${BLD_INFO} >  ./${BLD_INFO}
+tail -n 4 build/${W145_BUILD}/rootfs/etc/${BLD_INFO} >> ./${BLD_INFO}
 
 $make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO}

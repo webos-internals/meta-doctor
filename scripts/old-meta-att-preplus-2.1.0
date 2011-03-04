@@ -32,8 +32,6 @@ fi
 
 BLD_INFO="palm-build-info"
 
-rm -f ${BLD_INFO} ${BLD_INFO}-unmasqed
-
 for f in $git $wget $make $java $patch; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
@@ -63,11 +61,10 @@ mkdir -p downloads
 $make VERSION=1.4.5 DEVICE=preplus CARRIER=att unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
-head -n 1 build/${W210_BUILD}/rootfs/etc/${BLD_INFO} >  ./${BLD_INFO}
-tail -n 4 build/${W145_BUILD}/rootfs/etc/${BLD_INFO} >> ./${BLD_INFO}
+cp build/${W145_BUILD}/rootfs/etc/${BLD_INFO} ./
+
+cp build/${W210_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
 $make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
-
-rm -f ${BLD_INFO}
