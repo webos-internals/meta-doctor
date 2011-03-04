@@ -120,4 +120,4 @@ $make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
