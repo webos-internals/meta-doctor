@@ -1,6 +1,6 @@
 #!/bin/bash
-# meta-meta script by Ed Cates
-# modified by Rod Whitby
+# meta-sprint-pre-2.1.0 script by Rod Whitby
+# based on meta-meta script by Ed Cates
 # intended to flash Sprint Pre phones with a working webOS 2.1 image
 #  Your mileage may vary
 
@@ -39,6 +39,8 @@ SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="castlecdmafw.tar"
 BLD_INFO="palm-build-info"
 
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO} ${BLD_INFO}-unmasqed
+
 for f in $git $wget $make $java $patch; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
@@ -60,7 +62,7 @@ if [ "$1" = "--wifi-only" ] ; then
     SPRINT_IPKS=
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_DMSET=base CUSTOM_CARRIER_DMSET=a CUSTOM_BUILD_INFO=palm-build-info CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} DEVICE=preplus CARRIER=wr"
 
 SPRINT_IPKS="${SPRINT_IPKS} \
 audiod-config-cdma_*.ipk \
@@ -115,11 +117,8 @@ mkdir -p carrier
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml *.ipk )
+
 rm -rf carrier
-
-cp build/${W145_BUILD}/rootfs/etc/${BLD_INFO} ./
-
-cp build/${W210_BUILD}/rootfs/etc/${BLD_INFO} ./${BLD_INFO}-unmasqed
 
 $make ${ARGS} clobber-build all || exit
 
