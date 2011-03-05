@@ -27,7 +27,7 @@ if [ "`uname -s`" == "Darwin" ] ; then
     export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
 fi
 
-for f in $git $wget $make $java $patch; do
+for f in $git $wget $make $java $patch $tar ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 

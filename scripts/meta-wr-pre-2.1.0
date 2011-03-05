@@ -34,7 +34,7 @@ WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
 BLD_INFO="palm-build-info"
 
-for f in $git $wget $make $java $patch; do
+for f in $git $wget $make $java $patch $tar ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 
