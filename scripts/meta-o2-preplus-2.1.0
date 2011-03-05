@@ -20,6 +20,7 @@ make="make"
 java="java"
 patch="patch"
 tar="tar"
+python="python"
 
 if [ "`uname -s`" == "Darwin" ] ; then 
     tar=gnutar
@@ -27,7 +28,7 @@ if [ "`uname -s`" == "Darwin" ] ; then
     export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
 fi
 
-for f in $git $wget $make $java $patch; do
+for f in $git $wget $make $java $patch $python; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 

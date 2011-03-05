@@ -26,6 +26,7 @@ make="make"
 java="java"
 patch="patch"
 tar="tar"
+python="python"
 
 if [ "`uname -s`" == "Darwin" ] ; then 
     tar=gnutar
@@ -40,7 +41,7 @@ BLD_INFO="palm-build-info"
 
 rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${BLD_INFO} ${BLD_INFO}-unmasqed
 
-for f in $git $wget $make $java $patch; do
+for f in $git $wget $make $java $patch $python; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 
