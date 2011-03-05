@@ -370,12 +370,6 @@ ifeq (${ADD_EXTRA_CARRIERS},1)
 	OLDDIRS += ./etc/carrierdb
 endif
 
-ifdef CUSTOM_IPK_LIST
-IPK_LIST = $(subst  ;, ,${CUSTOM_IPK_LIST})
-else
-IPK_LIST = *.ipk
-endif
-
 ifeq ($(shell uname -s),Darwin)
 TAR	= gnutar
 export COPYFILE_DISABLE=true
@@ -589,6 +583,8 @@ ifdef CUSTOM_BOOTLOGO
 endif
 ifndef REMOVE_CARRIER_CHECK
 	mkdir -p build/${PATIENT}/carrier
+	${TAR} -f build/${PATIENT}/resources/${CARRIER_TARBALL} -t \
+		> build/${PATIENT}/carrier/carrier-file-list.txt
 	${TAR} -C build/${PATIENT}/carrier \
 		-f build/${PATIENT}/resources/${CARRIER_TARBALL} -x
 endif
@@ -936,7 +932,7 @@ ifndef REMOVE_CARRIER_CHECK
 	( cd build/${PATIENT}/carrier ; \
 		${TAR} -f ../resources/${CARRIER_TARBALL} \
 			--numeric-owner --owner=0 --group=0 -h \
-			-c installer.xml ${IPK_LIST} )
+			-c -T carrier-file-list.txt )
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
 	( cd build/${PATIENT} ; \

@@ -49,12 +49,12 @@ done
 
 ARGS=
 SPRINT_IPKS="\
-com.mobitv.app.sprinttv_*.ipk \
-com.palm.app.sprintportal_*.ipk \
+dmtree-sprint_*.ipk \
 com.handson.app.nascar_*.ipk \
 com.handson.app.nfl_*.ipk \
-dmtree-sprint_*.ipk \
+com.palm.app.sprintportal_*.ipk \
 mobitv-sprint-rtspsrc_*.ipk \
+com.mobitv.app.sprinttv_*.ipk \
 "
 
 if [ "$1" = "--wifi-only" ] ; then
@@ -65,14 +65,15 @@ fi
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_LIST=Sprint CUSTOM_MODEL_LIST=P100EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} DEVICE=preplus CARRIER=wr"
 
 SPRINT_IPKS="${SPRINT_IPKS} \
-audiod-config-cdma_*.ipk \
 crotest-images_*.ipk \
-ozengine_*.ipk \
+audiod-config-cdma_*.ipk \
 "
 
 WR_IPKS="\
-contacts.plugin.pmvoicecommand_*.ipk \
 palmcustomizationinfo-wr-castle-plus_*.ipk \
+sweatshop-wr-castle_*.ipk \
+pmvoicecommand_*.ipk \
+contacts.plugin.pmvoicecommand_*.ipk \
 pmvoicecommand-dede_*.ipk \
 pmvoicecommand-engb_*.ipk \
 pmvoicecommand-enus_*.ipk \
@@ -81,8 +82,6 @@ pmvoicecommand-esmx_*.ipk \
 pmvoicecommand-frca_*.ipk \
 pmvoicecommand-frfr_*.ipk \
 pmvoicecommand-itit_*.ipk \
-pmvoicecommand_*.ipk \
-sweatshop-wr-castle_*.ipk \
 "
 
 $make ${ARGS} settings
@@ -116,7 +115,7 @@ mkdir -p carrier
     $tar -c -f - ${SPRINT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml *.ipk )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${SPRINT_IPKS} ${WR_IPKS} )
 
 rm -rf carrier
 
