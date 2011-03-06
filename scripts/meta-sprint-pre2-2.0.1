@@ -37,7 +37,7 @@ fi
 WEBOS_TARBALL="webOS.tar"
 CDMA_FW="roadrunnercdma_fw.tar"
 
-for f in $git $wget $make $java $patch $python; do
+for f in $git $wget $make $java $patch $python $tar ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 

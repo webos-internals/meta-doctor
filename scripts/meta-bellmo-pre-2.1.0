@@ -45,7 +45,7 @@ BLD_INFO="palm-build-info"
 
 rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${BLD_INFO} ${BLD_INFO}-unmasqed
 
-for f in $git $wget $make $java $patch $python; do
+for f in $git $wget $make $java $patch $python $tar ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 
