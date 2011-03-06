@@ -15,6 +15,9 @@ W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
 W145_BUILD="pre-p100ueu-wr-1.4.5"
 W210_BUILD="preplus-p101ueude-wr-2.1.0"
 
+W145_MD5="ca6a2e3a976b593859b11dee9941a80e"
+W210_MD5="ed2c394171d19a4af9d9d42c670e9791"
+
 PATIENT="meta-wr-pre-2.1.0"
 
 git="git"
@@ -58,6 +61,13 @@ mkdir -p downloads
 
 [ ! -f downloads/${W145_FILE} ] && $wget -c ${W145_JAR_URL} -O downloads/${W145_FILE}
 [ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+
+[ $(md5sum downloads/${W145_FILE} | cut -d \  -f 1) != ${W145_MD5} ] && \
+        echo "${W145_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W145_FILE} && exit
+[ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
+        echo "${W210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W210_FILE} && exit
 
 # $make clobber
 

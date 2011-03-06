@@ -15,6 +15,9 @@ W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
 W140_BUILD="pre-p100eww-telcel-1.4.0"
 W210_BUILD="preplus-p101ueude-wr-2.1.0"
 
+W140_MD5="e9a1d644a447d460e340725869f3ad46"
+W210_MD5="ed2c394171d19a4af9d9d42c670e9791"
+
 PATIENT="meta-telcel-pre-2.1.0"
 
 git="git"
@@ -58,6 +61,13 @@ mkdir -p downloads
 
 [ ! -f downloads/${W140_FILE} ] && $wget -c ${W140_JAR_URL} -O downloads/${W140_FILE}
 [ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+
+[ $(md5sum downloads/${W140_FILE} | cut -d \  -f 1) != ${W140_MD5} ] && \
+        echo "${W140_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W140_FILE} && exit
+[ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
+        echo "${W210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W210_FILE} && exit
 
 # $make clobber
 
