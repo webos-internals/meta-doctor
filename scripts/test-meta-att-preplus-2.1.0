@@ -1,0 +1,84 @@
+#!/bin/bash
+# meta-att-pre-2.1.0 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# intended to flash ATT PrePlus phones with a working webOS 2.1 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+# W145_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p145r0d09132010/attp145rod/webosdoctorp101ewwatt.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+
+# W145_FILE="webosdoctorp101ewwatt-1.4.5.jar"
+W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+
+# W145_BUILD="preplus-p101eww-att-1.4.5"
+W210_BUILD="preplus-p101ueude-wr-2.1.0"
+
+# W145_MD5="6c0c12ae2585e8f8e1adf3965603ba78"
+W210_MD5="ed2c394171d19a4af9d9d42c670e9791"
+
+PATIENT="meta-att-preplus-2.1.0"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+if [ "`uname -s`" == "Darwin" ] ; then 
+    tar=gnutar
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+fi
+
+BLD_INFO="palm-build-info"
+
+rm -f ${BLD_INFO} ${BLD_INFO}-unmasqed
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+fi
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P101UNA CUSTOM_CARRIER_LIST=ATT CUSTOM_WEBOS_DMSET=556 CUSTOM_CARRIER_DMSET=560 CUSTOM_BUILD_INFO=palm-build-info PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo
+
+mkdir -p downloads
+
+# [ ! -f downloads/${W145_FILE} ] && $wget -c ${W145_JAR_URL} -O downloads/${W145_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+
+#[ $(md5sum downloads/${W145_FILE} | cut -d \  -f 1) != ${W145_MD5} ] && \
+#        echo "${W145_FILE} did not download properly.  Please run this script again." && \
+#         rm -f downloads/${W145_FILE} && exit
+[ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
+        echo "${W210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W210_FILE} && exit
+
+# $make clobber
+
+# $make VERSION=1.4.5 DEVICE=preplus CARRIER=att unpack || exit
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
+
+#head -n 1 build/${W210_BUILD}/rootfs/etc/${BLD_INFO} >  ./${BLD_INFO}
+#tail -n 4 build/${W145_BUILD}/rootfs/etc/${BLD_INFO} >> ./${BLD_INFO}
+
+$make ${ARGS} clobber-build all || exit
+
+$java -jar build/${PATIENT}/${W210_FILE}
+
+rm -f ${BLD_INFO}
