@@ -318,8 +318,11 @@ endif
 ifeq (${DEVICE},pre2)
 CODENAME = roadrunner
 ifeq (${CARRIER},wr)
+MODEL = p103ueuna
+VERSION = 2.1.0
+ifeq (${VERSION},2.0.1)
 MODEL = p102ueuna
-VERSION = 2.0.1
+endif
 ifeq (${VERSION},2.0.0)
 MODEL = p103ueu
 endif
