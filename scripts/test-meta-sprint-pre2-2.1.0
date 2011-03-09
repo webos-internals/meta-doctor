@@ -35,7 +35,8 @@ if [ "`uname -s`" == "Darwin" ] ; then
 fi
 
 WEBOS_TARBALL="webOS.tar"
-CDMA_FW="roadrunnercdma_fw.tar"
+SRC_CDMA_FW="roadrunnercdma_fw.tar"
+CDMA_FW="roadrunnercdmafw.tar"
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -75,7 +76,7 @@ $make VERSION=2.0.1 DEVICE=pre2 CARRIER=wr unpack || exit
 
 cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
 
-cp build/${CDMA_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
+cp build/${CDMA_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
 
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
