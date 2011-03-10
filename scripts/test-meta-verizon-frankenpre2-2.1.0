@@ -1,7 +1,7 @@
 #!/bin/bash
-# meta-meta script by Ed Cates
-# modified by Rod Whitby
-# intended to flash Sprint Pre 2 phones with a working webOS 2.1 image
+# meta-verizon-frankenpre2-2.1.0 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# intended to flash Verizon FrankenPre 2 phones with a working webOS 2.1.0 image
 #  Your mileage may vary
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
@@ -18,7 +18,7 @@ W210_BUILD="pre2-p103ueuna-wr-2.1.0"
 CDMA_MD5="643824a4c103e266fd8e2760b098815c"
 W210_MD5="477f12cc73f5d8a3a00761dcb3751e6b"
 
-PATIENT="meta-sprint-pre2-2.1.0"
+PATIENT="meta-verizon-frankenpre2-2.1.0"
 
 git="git"
 wget="wget"
