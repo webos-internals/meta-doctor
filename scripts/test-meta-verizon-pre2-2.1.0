@@ -1,0 +1,89 @@
+#!/bin/bash
+# meta-meta script by Ed Cates
+# modified by Rod Whitby
+# intended to flash Verizon Pre 2 phones with a working webOS 2.1 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210sfr03082011/wrep210rod/webosdoctorp103ueuna-wr.jar"
+
+CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+W210_FILE="webosdoctorp103ueuna-wr-2.1.0.jar"
+
+CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
+W210_BUILD="pre2-p103ueuna-wr-2.1.0"
+
+CDMA_MD5="643824a4c103e266fd8e2760b098815c"
+W210_MD5="477f12cc73f5d8a3a00761dcb3751e6b"
+
+PATIENT="meta-verizon-pre2-2.1.0"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+if [ "`uname -s`" == "Darwin" ] ; then 
+    tar=gnutar
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+fi
+
+WEBOS_TARBALL="webOS.tar"
+SRC_CDMA_FW="roadrunnercdma_fw.tar"
+CDMA_FW="roadrunnercdmafw.tar"
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+fi
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=pre2 CARRIER=wr"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo
+
+mkdir -p downloads
+
+[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+
+[ $(md5sum downloads/${CDMA_FILE} | cut -d \  -f 1) != ${CDMA_MD5} ] && \
+        echo "${CDMA_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${CDMA_FILE} && exit
+[ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
+        echo "${W210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W210_FILE} && exit
+
+# $make clobber
+
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=wr unpack || exit
+
+cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
+
+cp build/${CDMA_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
+
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
+
+$make ${ARGS} clobber-build all || exit
+
+$java -jar build/${PATIENT}/${W210_FILE}
+
+rm -f ${CDMA_FW} ${WEBOS_TARBALL}
+
