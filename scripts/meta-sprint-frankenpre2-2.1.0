@@ -59,7 +59,6 @@ audiod-config-eu_*.ipk \
 crotestcastleplus-images_*.ipk \
 pmvoicecommand_*.ipk \
 contacts.plugin.pmvoicecommand_*.ipk \
-pmvoicecommand-*.ipk \
 "
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=pre2 CARRIER=wr"
