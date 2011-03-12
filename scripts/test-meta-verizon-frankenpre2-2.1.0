@@ -35,6 +35,7 @@ if [ "`uname -s`" == "Darwin" ] ; then
 fi
 
 WEBOS_TARBALL="webOS.tar"
+CARRIER_TARBALL="carrier.tar"
 SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="roadrunnercdmafw.tar"
 
@@ -45,11 +46,22 @@ for f in $git $wget $make $java $patch $python $tar ; do
 done
 
 ARGS=
+WR_IPKS=
+
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=pre2 CARRIER=wr"
+WR_IPKS="\
+palmcustomizationinfo-wr_*.ipk \
+sweatshop-wr-roadrunner_*.ipk \
+audiod-config-eu_*.ipk \
+crotestcastleplus-images_*.ipk \
+pmvoicecommand_*.ipk \
+contacts.plugin.pmvoicecommand_*.ipk \
+"
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=pre2 CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -81,9 +93,16 @@ cp build/${CDMA_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
+mkdir -p carrier
+
+( cd build/${W210_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${WR_IPKS} )
+
+rm -rf carrier
+
 $make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL}
-
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
