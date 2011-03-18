@@ -269,11 +269,8 @@ endif
 ifeq (${DEVICE},preplus)
 CODENAME = castle
 ifeq (${CARRIER},wr)
-MODEL = p101ueude
-VERSION = 2.1.0
-ifeq (${VERSION},1.4.5)
 MODEL = p101ueu
-endif
+VERSION = 2.1.0
 CARRIER_TARBALL = wr-castle-plus.tar
 endif
 ifeq (${CARRIER},verizonwireless)
@@ -284,11 +281,6 @@ endif
 ifeq (${CARRIER},att)
 MODEL = p101eww
 VERSION = 1.4.5
-ifeq (${VERSION},2.1.0)
-MODEL = p101ueu
-CARRIER_TARBALL = wr-castle-plus.tar
-DOCTOR = webosdoctorp101ueu-wr-${VERSION}.jar
-endif
 endif
 endif
 
