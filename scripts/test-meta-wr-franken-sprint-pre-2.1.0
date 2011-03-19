@@ -1,7 +1,7 @@
 #!/bin/bash
-# meta-wr-pre-2.1.0 script by Rod Whitby
+# meta-wr-franken-sprint-pre-2.1.0 script by Rod Whitby
 # based on meta-meta script by Ed Cates
-# intended to flash WR Pre phones with a working webOS 2.1 image
+# intended to flash WR FrankenSprintPre phones with a working webOS 2.1 image
 #  Your mileage may vary
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
@@ -18,7 +18,7 @@ W210_BUILD="preplus-p101ueu-wr-2.1.0"
 W145_MD5="ca6a2e3a976b593859b11dee9941a80e"
 W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
 
-PATIENT="meta-wr-pre-2.1.0"
+PATIENT="meta-wr-franken-sprint-pre-2.1.0"
 
 git="git"
 wget="wget"
@@ -49,7 +49,7 @@ if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P100UEU CUSTOM_WEBOS_DMSET=312 CUSTOM_CARRIER_DMSET=317 CUSTOM_BUILD_INFO=palm-build-info PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P100EWW CUSTOM_CARRIER=Sprint CUSTOM_WEBOS_DMSET=312 CUSTOM_CARRIER_DMSET=317 CUSTOM_BUILD_INFO=palm-build-info PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
 
 $make ${ARGS} settings
 
