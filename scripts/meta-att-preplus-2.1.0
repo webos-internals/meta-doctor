@@ -7,16 +7,16 @@
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
 W145_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p145r0d09132010/attp145rod/webosdoctorp101ewwatt.jar"
-W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
 
 W145_FILE="webosdoctorp101ewwatt-1.4.5.jar"
-W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 
 W145_BUILD="preplus-p101eww-att-1.4.5"
-W210_BUILD="preplus-p101ueude-wr-2.1.0"
+W210_BUILD="preplus-p101ueu-wr-2.1.0"
 
 W145_MD5="6c0c12ae2585e8f8e1adf3965603ba78"
-W210_MD5="ed2c394171d19a4af9d9d42c670e9791"
+W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
 
 PATIENT="meta-att-preplus-2.1.0"
 

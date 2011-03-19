@@ -8,19 +8,19 @@
 
 W145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d07142010/b11ep145rod/webosdoctorp100ewwbellmo.jar"
 CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
 
 W145_FILE="webosdoctorp100ewwbellmo-1.4.5.jar"
 CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
-W210_FILE="webosdoctorp101ueude-wr-2.1.0.jar"
+W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 
 W145_BUILD="pre-p100eww-bellmo-1.4.5"
 CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
-W210_BUILD="preplus-p101ueude-wr-2.1.0"
+W210_BUILD="preplus-p101ueu-wr-2.1.0"
 
 W145_MD5="e11d44f00d7d9b44e7dcddb3f5b45bee"
 CDMA_MD5="643824a4c103e266fd8e2760b098815c"
-W210_MD5="ed2c394171d19a4af9d9d42c670e9791"
+W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
 
 PATIENT="meta-bellmo-pre-2.1.0"
 
