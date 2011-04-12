@@ -370,7 +370,7 @@ ifeq (${ADD_EXTRA_CARRIERS},1)
 	OLDDIRS += ./etc/carrierdb
 endif
 
-ifeq ($(shell uname -s),CYGWIN_NT-5.1)
+ifeq (CYGWIN,$(findstring CYGWIN,$(shell uname -s)))
 $(error Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead.)
 endif
 
