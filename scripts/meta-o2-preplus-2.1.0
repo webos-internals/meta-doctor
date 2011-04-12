@@ -24,11 +24,17 @@ patch="patch"
 tar="tar"
 python="python"
 
-if [ "`uname -s`" == "Darwin" ] ; then 
-    tar=gnutar
-    export COPYFILE_DISABLE=true
-    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
-fi
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
