@@ -371,7 +371,7 @@ ifeq (${ADD_EXTRA_CARRIERS},1)
 endif
 
 ifeq (CYGWIN,$(findstring CYGWIN,$(shell uname -s)))
-$(error Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead.)
+ERR = $(error Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead.)
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -1051,6 +1051,7 @@ download-%:
 download: downloads/${DOCTOR}
 
 downloads/${DOCTOR}:
+	${ERR}
 	mkdir -p downloads
 	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@ (i.e. the downloads directory that was just created under the current directory)." && false
 	touch $@
