@@ -511,6 +511,7 @@ endif
 
 .PHONY: all
 all:
+	${ERR}
 ifneq (${DEVICE},undefined)
 ifneq (${CARRIER},undefined)
 	@if [ "${MODEL}" == "" ] || [ "${VERSION}" == "" ] ; then \
@@ -533,16 +534,20 @@ endif
 
 .PHONY: all-%
 all-%:
+	${ERR}
 	${MAKE} CARRIER=$* unpack patch pack
 
 .PHONY: unpack-%
 unpack-%:
+	${ERR}
 	${MAKE} CARRIER=$* unpack
 
 .PHONY: unpack
+	${ERR}
 unpack: build/${PATIENT}/.unpacked
 
 build/${PATIENT}/.unpacked: downloads/${DOCTOR}
+	${ERR}
 	rm -rf build/${PATIENT}
 	mkdir -p build/${PATIENT}
 	cp $< build/${PATIENT}/${DOCTOR}
@@ -611,12 +616,14 @@ endif
 
 .PHONY: patch-%
 patch-%:
+	${ERR}
 	${MAKE} CARRIER=$* patch
 
 .PHONY: patch
 patch: build/${PATIENT}/.patched
 
 build/${PATIENT}/.patched: ${JAD}
+	${ERR}
 	rm -f $@
 	[ -d patches/webos-${VERSION} ]
 	@for app in ${APPLICATIONS} ; do \
@@ -881,6 +888,7 @@ pack-%:
 
 .PHONY: pack
 pack: build/${PATIENT}/.packed
+	${ERR}
 
 CODENAMEOLD = ${CODENAME}
 INSTIMAGEOLD = nova-installer-image-${CODENAMEOLD}
@@ -1092,3 +1100,6 @@ clobber-build:
 
 reallyclobber: clobber
 	rm -rf clones
+
+.PHONY: err
+err: ; $(ERR)
