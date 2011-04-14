@@ -539,15 +539,12 @@ all-%:
 
 .PHONY: unpack-%
 unpack-%:
-	${ERR}
 	${MAKE} CARRIER=$* unpack
 
 .PHONY: unpack
-	${ERR}
 unpack: build/${PATIENT}/.unpacked
 
 build/${PATIENT}/.unpacked: downloads/${DOCTOR}
-	${ERR}
 	rm -rf build/${PATIENT}
 	mkdir -p build/${PATIENT}
 	cp $< build/${PATIENT}/${DOCTOR}
@@ -907,6 +904,7 @@ BOOTLOADERNEW = boot-${CODENAMENEW}
 
 
 build/${PATIENT}/.packed:
+	${ERR}
 	rm -f $@
 ifeq (${PATCH_DOCTOR},1)
 	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
