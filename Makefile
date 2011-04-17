@@ -948,6 +948,9 @@ ifndef REMOVE_CARRIER_CHECK
 	( cd build/${PATIENT} ; \
 		zip -q ${DOCTOR} resources/${CARRIER_TARBALL} )
 endif
+	@echo
+	@echo "Your custom doctor file has been created at build/${PATIENT}/${DOCTOR}"
+	@echo
 	touch $@
 
 .PHONY: devmode-%
