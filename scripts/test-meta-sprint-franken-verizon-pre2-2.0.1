@@ -77,3 +77,7 @@ $make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
 $make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W201_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo

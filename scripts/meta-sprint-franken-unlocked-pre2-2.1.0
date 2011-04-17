@@ -111,4 +111,8 @@ $make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo
+
 rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
