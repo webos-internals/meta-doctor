@@ -166,7 +166,7 @@
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
 
-# Select "pre", "preplus", "pixi", "pixiplus" or "pre2".
+# Select "pre", "preplus", "pixi", "pixiplus", "pre2" or "veer".
 DEVICE = undefined
 
 # Select "wr", "sprint", "verizonwireless", "bellmo", "telcel" or "att".
@@ -244,6 +244,8 @@ CARRIER_TARBALL = ${CARRIER}.tar
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
+NVRAM_PARTITION=mmcblk0p1
+BOOT_PARTITION=mmcblk0p2
 ifeq (${CARRIER},wr)
 MODEL = p100ueu
 VERSION = 1.4.5
@@ -268,6 +270,8 @@ endif
 
 ifeq (${DEVICE},preplus)
 CODENAME = castle
+NVRAM_PARTITION=mmcblk0p1
+BOOT_PARTITION=mmcblk0p2
 ifeq (${CARRIER},wr)
 MODEL = p101ueu
 VERSION = 2.1.0
@@ -286,6 +290,8 @@ endif
 
 ifeq (${DEVICE},pixi)
 CODENAME = pixie
+NVRAM_PARTITION=mmcblk0p1
+BOOT_PARTITION=mmcblk0p2
 ifeq (${CARRIER},sprint)
 MODEL = p200eww
 VERSION = 1.4.5
@@ -297,6 +303,8 @@ endif
 
 ifeq (${DEVICE},pixiplus)
 CODENAME = pixie
+NVRAM_PARTITION=mmcblk0p1
+BOOT_PARTITION=mmcblk0p2
 ifeq (${CARRIER},wr)
 MODEL = p121ewweu
 VERSION = 1.4.5
@@ -314,6 +322,8 @@ endif
 
 ifeq (${DEVICE},pre2)
 CODENAME = roadrunner
+NVRAM_PARTITION=mmcblk0p1
+BOOT_PARTITION=mmcblk0p2
 ifeq (${CARRIER},wr)
 MODEL = p103ueuna
 VERSION = 2.1.0
@@ -332,6 +342,16 @@ DOCTOR = webosdoctorp102${CARRIER}-${VERSION}.jar
 endif
 endif
 
+ifeq (${DEVICE},veer)
+CODENAME = broadway
+NVRAM_PARTITION=mmcblk0p13
+BOOT_PARTITION=mmcblk0p14
+ifeq (${CARRIER},att)
+MODEL = p160una
+VERSION = 2.1.2
+endif
+endif
+
 ifndef DOCTOR
 DOCTOR = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 ifeq (${CARRIER},wr)
@@ -342,19 +362,6 @@ endif
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
 APPLICATIONS = com.palm.app.firstuse
-
-ifdef CUSTOM_DEVICETYPE
-ifeq (${VERSION},2.0.0)
-PATCH_DOCTOR          = 1
-endif
-ifeq (${VERSION},2.0.1)
-PATCH_DOCTOR          = 1
-endif
-DISABLE_UPLOAD_DAEMON = 1
-DISABLE_MODEM_UPDATE  = 1
-REMOVE_CARRIER_CHECK  = 1
-REMOVE_MODEL_CHECK    = 1
-endif
 
 ifeq (${PATCH_DOCTOR},1)
 CLASSES = com/palm/nova/installer/recoverytool/MainFlasher
@@ -975,7 +982,7 @@ backup: mount
 	echo "Creating clones/$$id/tokens.txt" ; \
 	novacom -w run file://sbin/tokens -- --list > clones/$$id/tokens.txt ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.nvram.bin" ; \
-	( novacom -w run file://bin/dd -- if=/dev/mmcblk0p1 ) > \
+	( novacom -w run file://bin/dd -- if=/dev/${NVRAM_PARTITION} ) > \
 	   clones/$$id/${CUSTIMAGEOLD}.nvram.bin ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
@@ -1011,9 +1018,9 @@ mount: unmount
 	  novacom -w run file://bin/mkdir -- -p /tmp/$$f ; \
 	  novacom -w run file://bin/mount -- /dev/mapper/store-$$f /tmp/$$f -o ro ; \
 	done
-	@echo "Mounting /dev/mmcblk0p2"
+	@echo "Mounting /dev/${BOOT_PARTITION}"
 	@novacom -w run file://bin/mkdir -- -p /tmp/boot
-	@novacom -w run file://bin/mount -- /dev/mmcblk0p2 /tmp/boot -o ro
+	@novacom -w run file://bin/mount -- /dev/${BOOT_PARTITION} /tmp/boot -o ro
 
 .PHONY: unmount
 unmount:
