@@ -283,7 +283,7 @@ CARRIER_TARBALL = wr-castle-plus.tar
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p101eww
-VERSION = 1.4.5
+VERSION = 1.4.5.1
 CARRIER_TARBALL = verizon.tar
 endif
 ifeq (${CARRIER},att)
@@ -315,7 +315,7 @@ VERSION = 1.4.5
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p121eww
-VERSION = 1.4.5
+VERSION = 1.4.5.1
 CARRIER_TARBALL = verizon.tar
 endif
 ifeq (${CARRIER},att)
