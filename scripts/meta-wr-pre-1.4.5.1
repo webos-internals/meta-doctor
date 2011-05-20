@@ -45,9 +45,10 @@ CARRIER_TARBALL="wr.tar"
 SRC_UMTS_FW="castleumtsfw.tar"
 UMTS_FW="castleumtsfw.tar"
 
+INSTALLER_XML="installer.xml"
 BLD_INFO="palm-build-info"
 
-rm -f ${BLD_INFO} ${BLD_INFO}-unmasqed
+rm -f ${UMTS_FW} ${INSTALLER_XML} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO}
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -56,21 +57,10 @@ for f in $git $wget $make $java $patch $python $tar ; do
 done
 
 ARGS=
-WR_IPKS=
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
-
-WR_IPKS="\
-audiod-config-eu_*_castle.ipk \
-castleumtsfw-row_*_armv7.ipk \
-crotest-images_*_armv7.ipk \
-default-content_*_armv7.ipk \
-firstuse-media_*_armv7.ipk \
-palmcustomizationinfo-wr_*_all.ipk \
-sweatshop-wr-castle_*_armv7.ipk \
-"
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=palm-build-info PATIENT=${PATIENT} VERSION=1.4.5 DEVICE=pre CARRIER=wr"
 
@@ -104,6 +94,11 @@ cp build/${W145_BUILD}/webOS/${SRC_UMTS_FW} ${UMTS_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
 
+cp build/${W145_BUILD}/webOS/${INSTALLER_XML} ./
+
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${INSTALLER_XML} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_XML} || exit
+
 cp build/${W145_BUILD}/resources/${CARRIER_TARBALL} ./
 
 head -n 1 build/${V1451_BUILD}/rootfs/etc/${BLD_INFO} >  ./${BLD_INFO}
@@ -117,4 +112,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W145_FILE}"
 echo
 
-rm -f ${UMTS_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO}
+rm -f ${UMTS_FW} ${INSTALLER_XML} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO}
