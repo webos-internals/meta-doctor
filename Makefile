@@ -225,6 +225,9 @@ DISABLE_UPLOAD_DAEMON = 1
 # CUSTOM_CARRIER_LIST = Sprint
 # CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 
+# EXTRA_ROOTFS_IPKGS   = flash flash-mini-adapter flame
+# EXTRA_ROOTFS_TARBALL = flash.tar
+
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
 # CUSTOM_INSTALLER = nova-installer-image-castle.uImage
@@ -369,20 +372,30 @@ endif
 
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
 
-APPLICATIONS = com.palm.app.firstuse
-
 ifeq (${PATCH_DOCTOR},1)
 CLASSES = com/palm/nova/installer/recoverytool/MainFlasher
 DOCTOR_PATCHES = flasher-disable-everything.patch
 endif
 
-OLDDIRS = ./usr/palm/applications/com.palm.app.firstuse ./usr/lib/ipkg/info ./etc/ssl ./usr/bin ./boot ./lib/modules
-OLDFILES = ./etc/palm-build-info
+OLDIPKGS = com.palm.app.firstuse palmbuildinfo
+OLDDIRS = ./boot ./lib/modules
+NEWIPKGS = ${OLDIPKGS} ${EXTRA_ROOTFS_IPKGS}
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
-NEWFILES = ${OLDFILES}
 
 ifeq (${ADD_EXTRA_CARRIERS},1)
-	OLDDIRS += ./etc/carrierdb
+	OLDIPKGS += pmcarrierdb
+endif
+
+ifeq (${AUTO_INSTALL_PREWARE},1)
+	OLDIPKGS += pmcertstore
+endif
+
+ifeq (${DISABLE_UPDATE_DAEMON},1)
+	OLDIPKGS += updatedaemon
+endif
+
+ifeq (${DISABLE_UPLOAD_DAEMON},1)
+	OLDIPKGS += uploadd contextupload rdxd
 endif
 
 ifeq (CYGWIN,$(findstring CYGWIN,$(shell uname -s)))
@@ -471,6 +484,12 @@ ifdef CUSTOM_WEBOS_TARBALL
 endif
 ifdef CUSTOM_CARRIER_TARBALL
 	@echo "CUSTOM_CARRIER_TARBALL = ${CUSTOM_CARRIER_TARBALL}"
+endif
+ifdef EXTRA_ROOTFS_IPKGS
+	@echo "EXTRA_ROOTFS_IPKGS = ${EXTRA_ROOTFS_IPKGS}"
+endif
+ifdef EXTRA_ROOTFS_TARBALL
+	@echo "EXTRA_ROOTFS_TARBALL = ${EXTRA_ROOTFS_TARBALL}"
 endif
 ifdef CUSTOM_XML
 	@echo "CUSTOM_XML = ${CUSTOM_XML}"
@@ -605,7 +624,7 @@ endif
 ifndef REMOVE_CARRIER_CHECK
 	mkdir -p build/${PATIENT}/carrier
 	${TAR} -f build/${PATIENT}/resources/${CARRIER_TARBALL} -t \
-		> build/${PATIENT}/carrier/carrier-file-list.txt
+		> build/${PATIENT}/carrier-file-list.txt
 	${TAR} -C build/${PATIENT}/carrier \
 		-f build/${PATIENT}/resources/${CARRIER_TARBALL} -x
 endif
@@ -613,7 +632,20 @@ endif
 	mkdir -p build/${PATIENT}/rootfs
 	${TAR} -C build/${PATIENT}/rootfs --wildcards \
 		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		-x ${OLDDIRS} ${OLDFILES} ./md5sums*
+		-x ./usr/lib/ipkg/info
+	rm -f build/${PATIENT}/ipkgs-file-list.txt
+	for package in ${OLDIPKGS} ; do \
+	  if [ -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.list ] ; then \
+	    cat build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.list | \
+		sed -e 's|^|.|' >> build/${PATIENT}/ipkgs-file-list.txt ; \
+	  fi ; \
+	done
+	${TAR} -C build/${PATIENT}/rootfs --wildcards \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		-x -T build/${PATIENT}/ipkgs-file-list.txt ${OLDDIRS} ./md5sums*
+ifdef EXTRA_ROOTFS_TARBALL
+	${TAR} -C build/${PATIENT}/rootfs -f ${EXTRA_ROOTFS_TARBALL} -x
+endif
 ifdef CUSTOM_KERNEL_DIR
 	( cd ${CUSTOM_KERNEL_DIR}/boot ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/boot ; tar xf - )
 	( cd ${CUSTOM_KERNEL_DIR}/lib/modules ; tar cf - . ) | ( cd build/${PATIENT}/rootfs/lib/modules ; tar xf - )
@@ -638,13 +670,6 @@ build/${PATIENT}/.patched: ${JAD}
 	${ERR}
 	rm -f $@
 	[ -d patches/webos-${VERSION} ]
-	@for app in ${APPLICATIONS} ; do \
-	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old ; \
-	done
-	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
-	  gunzip -c < build/${PATIENT}/rootfs/md5sums.gz > build/${PATIENT}/rootfs/md5sums ; \
-	fi
-	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
 ifeq (${BYPASS_ACTIVATION},1)
 	( cd patches/webos-${VERSION} ; cat bypass-activation.patch ) | \
 	( cd build/${PATIENT}/rootfs ; patch -p1 --no-backup-if-mismatch )
@@ -708,59 +733,32 @@ endif
 ifeq (${ADD_EXTRA_CARRIERS},1)
 	for f in patches/carriers/*.json ; do \
 		if [ -f $$f ]; then \
-			cat $$f >>build/${PATIENT}/rootfs/etc/carrierdb/carrierdb.json ; \
+			cat $$f >> build/${PATIENT}/rootfs/etc/carrierdb/carrierdb.json ; \
 		fi ; \
-	done ; \
-	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums \
-		build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old ; \
-	( cd build/${PATIENT}/rootfs ; md5sum ./etc/carrierdb/carrierdb.json ) > \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new ; \
-	./scripts/replace-md5sums.py \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new \
-	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums
-	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.old \
-	      build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcarrierdb.md5sums.new
+	done
 endif
 ifeq (${AUTO_INSTALL_PREWARE},1)
-	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums \
-	   build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old
 	cat scripts/preware-ca-bundle.crt >> build/${PATIENT}/rootfs/etc/ssl/certs/appsigning-bundle.crt
-	( cd build/${PATIENT}/rootfs ; md5sum ./etc/ssl/certs/appsigning-bundle.crt ) > \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new
-	./scripts/replace-md5sums.py \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new \
-	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums
-	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.old \
-	      build/${PATIENT}/rootfs/usr/lib/ipkg/info/pmcertstore.md5sums.new
 	mkdir -p build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/
 	cp scripts/preware-install.db \
 	  build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/installHistory.db
 endif
-ifdef CUSTOM_BUILD_INFO
-	mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums \
-		build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.old ; \
-	( cd build/${PATIENT}/rootfs ; md5sum ./etc/palm-build-info ) > \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.new ; \
-	./scripts/replace-md5sums.py \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.old \
-	  build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.new \
-	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums
-	rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.old \
-	      build/${PATIENT}/rootfs/usr/lib/ipkg/info/palmbuildinfo.md5sums.new
-endif
-	for app in ${APPLICATIONS} ; do \
+	for package in ${NEWIPKGS} ; do \
+	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.old ; \
 	  ( cd build/${PATIENT}/rootfs ; \
-	    find ./usr/palm/applications/$$app -type f | xargs md5sum ) \
-	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
+	    cat ./usr/lib/ipkg/info/$$package.list | sed -e 's|^|.|' | \
+	    xargs -I '{}' find '{}' -type f -prune -print | xargs md5sum ) \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.new ; \
 	  ./scripts/replace-md5sums.py \
-	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new \
-	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums ; \
-	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$app.md5sums.new ; \
+	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.new \
+	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums ; \
+	  rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.new ; \
 	done
-	( cd build/${PATIENT}/rootfs ; \
-	  find ${OLDDIRS} ${OLDFILES} -type f | xargs md5sum ) \
+	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
+	  gunzip -c < build/${PATIENT}/rootfs/md5sums.gz > build/${PATIENT}/rootfs/md5sums ; \
+	fi
+	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
+	( cd build/${PATIENT}/rootfs ; find . -type f | xargs md5sum ) \
 	    > build/${PATIENT}/rootfs/md5sums.new
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
@@ -924,22 +922,34 @@ build/${PATIENT}/.packed:
 ifeq (${PATCH_DOCTOR},1)
 	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
 endif
-	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
-		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
-		--delete ${OLDDIRS} ${OLDFILES} ./md5sums*
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
+	rm -f build/${PATIENT}/ipkgs-file-list.txt
+	for package in ${NEWIPKGS} ; do \
+	  cat build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.list | \
+		sed -e 's|^|.|' >> build/${PATIENT}/ipkgs-file-list.txt ; \
+	done
 	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
 	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
-	  ( cd build/${PATIENT}/rootfs ; \
-		${TAR} -f ../webOS/${CUSTIMAGENEW}.rootfs.tar \
-			--numeric-owner --owner=0 --group=0 \
-			--append ${NEWDIRS} ${NEWFILES} ./md5sums.gz ) ; \
-	else \
-	  ( cd build/${PATIENT}/rootfs ; \
-		${TAR} -f ../webOS/${CUSTIMAGENEW}.rootfs.tar \
-			--numeric-owner --owner=0 --group=0 \
-			--append ${NEWDIRS} ${NEWFILES} ./md5sums ) ; \
 	fi
+ifdef EXTRA_ROOTFS_IPKGS
+	@echo
+	@echo "You can safely ignore any 'Not found in archive' errors from the following ${TAR} command."
+	@echo
+endif
+	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		--delete -T build/${PATIENT}/ipkgs-file-list.txt \
+		./usr/lib/ipkg/info ${OLDDIRS} ./md5sums*
+ifdef EXTRA_ROOTFS_IPKGS
+	@echo
+	@echo "You can safely ignore any 'Not found in archive' errors from the previous ${TAR} command."
+	@echo
+endif
+	( cd build/${PATIENT}/rootfs ; \
+		${TAR} -f ../webOS/${CUSTIMAGENEW}.rootfs.tar \
+			--numeric-owner --owner=0 --group=0 \
+			--append -T ../ipkgs-file-list.txt \
+			./usr/lib/ipkg/info ${NEWDIRS} ./md5sums* )
 	gzip -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar
 	( cd build/${PATIENT}/webOS ; \
 		${TAR} -f ../resources/webOS.tar \
@@ -957,7 +967,7 @@ ifndef REMOVE_CARRIER_CHECK
 	( cd build/${PATIENT}/carrier ; \
 		${TAR} -f ../resources/${CARRIER_TARBALL} \
 			--numeric-owner --owner=0 --group=0 -h \
-			-c -T carrier-file-list.txt )
+			-c -T ../carrier-file-list.txt )
 	( cd build/${PATIENT} ; \
 		zip -q -d ${DOCTOR} resources/${CARRIER_TARBALL} )
 	( cd build/${PATIENT} ; \
@@ -967,6 +977,34 @@ endif
 	@echo "Your custom doctor file has been created at build/${PATIENT}/${DOCTOR}"
 	@echo
 	touch $@
+
+.PHONY: extract-ipkgs
+extract-rootfs-ipkgs:
+	[ -d build/${PATIENT}/rootfs/usr/lib/ipkg/info ]
+	rm -f build/${PATIENT}/extras-file-list.txt
+	for package in ${EXTRA_ROOTFS_IPKGS} ; do \
+	  if [ -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.list ] ; then \
+	    ( cd build/${PATIENT}/rootfs ; \
+	      ls -1 ./usr/lib/ipkg/info/$$package.* >> ../extras-file-list.txt ) ; \
+	    cat build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.list | \
+		sed -e 's|^|.|' >> build/${PATIENT}/extras-file-list.txt ; \
+	  fi ; \
+	done
+	mkdir -p build/${PATIENT}/extras
+	if [ -f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz ] ; then \
+	  ${TAR} -C build/${PATIENT}/extras \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar.gz \
+		-z -x -T build/${PATIENT}/extras-file-list.txt ; \
+	else \
+	  ${TAR} -C build/${PATIENT}/extras \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		-x -T build/${PATIENT}/extras-file-list.txt ; \
+	fi
+	${TAR} -C build/${PATIENT}/extras \
+		-f ${EXTRA_ROOTFS_TARBALL} \
+		-c .
+	rm -rf build/${PATIENT}/extras
+	rm -f build/${PATIENT}/extras-file-list.txt
 
 .PHONY: devmode-%
 devmode-%:
