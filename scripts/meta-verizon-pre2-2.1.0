@@ -29,11 +29,17 @@ patch="patch"
 tar="tar"
 python="python"
 
-if [ "`uname -s`" == "Darwin" ] ; then 
-    tar=gnutar
-    export COPYFILE_DISABLE=true
-    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
-fi
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
 
 WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
@@ -41,7 +47,7 @@ SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="roadrunnercdmafw.tar"
 BLD_INFO="palm-build-info"
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO} ${BLD_INFO}-unmasqed
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -101,12 +107,16 @@ mkdir -p carrier
 
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${WR_IPKS} )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${WR_IPKS} )
 
 rm -rf carrier
 
 $make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo
 
 rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}

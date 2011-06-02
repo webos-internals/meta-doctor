@@ -45,6 +45,8 @@ CARRIER_TARBALL="carrier.tar"
 SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="roadrunnercdmafw.tar"
 
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
+
 for f in $git $wget $make $java $patch $python $tar ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
