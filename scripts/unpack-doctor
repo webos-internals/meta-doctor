@@ -38,6 +38,9 @@ fi
 if [ -f $NAME/webOS/nova-cust-image-broadway.rootfs.tar.gz ] ; then
     tar -C $NAME/rootfs -p -z -x -f $NAME/webOS/nova-cust-image-broadway.rootfs.tar.gz
 fi
+if [ -f $NAME/webOS/nova-cust-image-topaz.rootfs.tar.gz ] ; then
+    tar -C $NAME/rootfs -p -z -x -f $NAME/webOS/nova-cust-image-topaz.rootfs.tar.gz
+fi
 for carrier in `grep '^CustomizationBuild=' $NAME/jar/resources/recoverytool.config | sed -e 's|CustomizationBuild=||'` ; do
     tar -C $NAME/carrier -p -x -f $NAME/jar/resources/$carrier
 done
