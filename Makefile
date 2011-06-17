@@ -166,10 +166,10 @@
 # INCREASE_VAR_SPACE    = 1
 # ADD_EXT3FS_PARTITION  = 2GB
 
-# Select "pre", "preplus", "pixi", "pixiplus", "pre2" or "veer".
+# Select "pre", "preplus", "pixi", "pixiplus", "pre2", "veer" or "touchpad".
 DEVICE = undefined
 
-# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel" or "att".
+# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel", "att" or "wifi".
 CARRIER = undefined
 
 # Supply a different boot logo if you wish.
@@ -360,6 +360,16 @@ BOOT_PARTITION=mmcblk0p14
 ifeq (${CARRIER},att)
 MODEL = p160una
 VERSION = 2.1.2
+endif
+endif
+
+ifeq (${DEVICE},touchpad)
+CODENAME = topaz
+ifeq (${CARRIER},wifi)
+NVRAM_PARTITION=mmcblk0p12
+BOOT_PARTITION=mmcblk0p13
+MODEL = ???????
+VERSION = 3.0.0
 endif
 endif
 
