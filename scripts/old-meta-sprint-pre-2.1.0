@@ -9,22 +9,18 @@
 W145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
 CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
 W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
-A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
 
 W145_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
 CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
-A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
 
 W145_BUILD="pre-p100eww-sprint-1.4.5"
 CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
 W210_BUILD="preplus-p101ueu-wr-2.1.0"
-A212_BUILD="veer-p160una-att-2.1.2"
 
 W145_MD5="a55a377dd38fd7a8e94ba9514e1d9e18"
 CDMA_MD5="643824a4c103e266fd8e2760b098815c"
 W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
-A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
 
 PATIENT="meta-sprint-pre-2.1.0"
 
@@ -50,12 +46,11 @@ esac
 
 WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
-FLASH_TARBALL="flash.tar"
 SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="castlecdmafw.tar"
 BLD_INFO="palm-build-info"
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${FLASH_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BLD_INFO} ${BLD_INFO}-unmasqed
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -88,13 +83,16 @@ audiod-config-cdma_*.ipk \
 WR_IPKS="\
 palmcustomizationinfo-wr-castle-plus_*.ipk \
 sweatshop-wr-castle_*.ipk \
-"
-
-ATT_IPKS="\
 pmvoicecommand_*.ipk \
 contacts.plugin.pmvoicecommand_*.ipk \
+pmvoicecommand-dede_*.ipk \
+pmvoicecommand-engb_*.ipk \
 pmvoicecommand-enus_*.ipk \
+pmvoicecommand-eses_*.ipk \
 pmvoicecommand-esmx_*.ipk \
+pmvoicecommand-frca_*.ipk \
+pmvoicecommand-frfr_*.ipk \
+pmvoicecommand-itit_*.ipk \
 "
 
 $make ${ARGS} settings
@@ -108,7 +106,6 @@ mkdir -p downloads
 [ ! -f downloads/${W145_FILE} ] && $wget -c ${W145_JAR_URL} -O downloads/${W145_FILE}
 [ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
 [ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
-[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
 
 [ $(md5sum downloads/${W145_FILE} | cut -d \  -f 1) != ${W145_MD5} ] && \
 	echo "${W145_FILE} did not download properly.  Please run this script again." && \
@@ -119,16 +116,12 @@ mkdir -p downloads
 [ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
         echo "${W210_FILE} did not download properly.  Please run this script again." && \
         rm -f downloads/${W210_FILE} && exit
-[ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
-        echo "${A212_FILE} did not download properly.  Please run this script again." && \
-        rm -f downloads/${A212_FILE} && exit
 
 # $make clobber
 
 $make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
 $make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
-$make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack || exit
 
 cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
 
@@ -141,21 +134,13 @@ mkdir -p carrier
 
 ( cd build/${W145_BUILD}/carrier ; \
     $tar -c -f - ${SPRINT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${A212_BUILD}/carrier ; \
-    $tar -c -f - ${ATT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${SPRINT_IPKS} ${WR_IPKS} ${ATT_IPKS} )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${SPRINT_IPKS} ${WR_IPKS} )
 
 rm -rf carrier
 
-$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
-    EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flame" \
-    EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} extract-rootfs-ipkgs || exit
-
-$make ${ARGS} \
-    EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flame" \
-    EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build all || exit
+$make ${ARGS} clobber-build all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 
@@ -163,4 +148,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${FLASH_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
