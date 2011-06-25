@@ -1,0 +1,164 @@
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
+@@ -28,7 +28,7 @@
+ 
+ function setupSimulator() {
+ 	Mojo.Log.info("---------------- setupSimulator() --------------------");
+-	clearTimeout(powerMethod);
++	//clearTimeout(powerMethod);
+ 	isDevice = false;
+ 	isActivated = true;
+ 	isCamped = true;
+@@ -51,18 +51,8 @@
+ }
+ 
+ function setUpFirstUse() {
+-Mojo.Log.info("---------------- setupFirstUse() --------------------");
+-	this.firstUseDepot = new Mojo.Depot(stateEngine, dbSetUpSuccess, dbSetupFailure);	
+-	isInitialized = true;
+-	attemptCount = 0;
+-	dbVersion = -1;
+-	sessionStatus = 'none';
+-	
+-	FirstUseUtil.loadValues();
+-	RoamUtil.checkNetworkStatus();
+-	isConnected = false;
+-	// Subscribe to connection manager
+-	conStatusRequest = AppAssistant.accountService.isConManUp(readConManStatus, errorConManStatus);
++setupSimulator();
++isDevice = true;
+ }
+ 
+ function readConManStatus(response) {
+@@ -103,7 +93,7 @@
+ 
+ function StageAssistant(stageController) {
+ 	Mojo.Log.info("------------Stage assistant called ---------");
+-	tutorialOnly = !PalmSystem.isMinimal;
++	tutorialOnly = false;//!PalmSystem.isMinimal;
+ 
+ 	//Note: we are only looking to see if the demomode parameter is specified and not if its true or false
+ 	var launchParams = Mojo.Controller.getAppController().assistant.launchParams;
+
+
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/provision-assistant.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/provision-assistant.js
+@@ -58,6 +58,10 @@
+ 			
+ 				
+ 		this.setupProgressBar();
++		
++		this.provisionComplete();
++		return;
++		
+ 		ProvisionUtil.setScene(this);
+ 				
+ 		if((!isActivated) && (activationFailed)) {
+
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/customization-assistant.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/customization-assistant.js
+@@ -172,7 +172,8 @@
+ 	},
+ 	
+ 	getNetworkStatus: function () {
+-		this.networkRequest = AppAssistant.accountService.getNetworkStatus(this.readNetworkStatus.bind(this), this.errorNetworkStatus.bind(this));
++		//this.networkRequest = AppAssistant.accountService.getNetworkStatus(this.readNetworkStatus.bind(this), this.errorNetworkStatus.bind(this));
++this.readNetworkStatus();
+ 	},
+ 	
+ 	readNetworkStatus: function (response) {
+@@ -176,7 +177,7 @@
+ 	},
+ 	
+ 	readNetworkStatus: function (response) {
+-		Mojo.Log.info("--------------------------- readNetworkStatus ---------------------------%o", $H(response.extended));
++		/*Mojo.Log.info("--------------------------- readNetworkStatus ---------------------------%o", $H(response.extended));
+ 		if(response.extended && response.extended.state === "service") {
+ 			if(this.networkRequest) {
+ 				this.networkRequest.cancel();
+@@ -180,7 +181,7 @@
+ 		if(response.extended && response.extended.state === "service") {
+ 			if(this.networkRequest) {
+ 				this.networkRequest.cancel();
+-			}
++			}*/
+ 			this.getFDNStatus();
+ 		} else {
+ 			//TODO
+@@ -182,7 +183,7 @@
+ 				this.networkRequest.cancel();
+ 			}
+ 			this.getFDNStatus();
+-		} else {
++		/*} else {
+ 			//TODO
+ 		}
+ 	},
+@@ -184,7 +185,7 @@
+ 			this.getFDNStatus();
+ 		} else {
+ 			//TODO
+-		}
++		}*/
+ 	},
+ 
+ 	errorNetworkStatus: function (response) {
+@@ -204,7 +205,7 @@
+ 	
+ 	processSIMStatus: function (status) {
+ 		Mojo.Log.info("processSIMStatus - push scene ------------ ");
+-		if (status == "simnotfound") {
++		/*if (status == "simnotfound") {
+ 			Mojo.Controller.stageController.pushScene("nosim");
+ 		}
+ 		else if (status == "siminvalid") {
+@@ -214,7 +215,7 @@
+ 			this.showTermsConditions();
+ 			this.displayPin1Lock();
+ 		}
+-		else if(status == "simready"){
++		else if(status == "simready"){*/
+ 			this.getNetworkStatus();
+ 			this.setCarrierSpecificCustomization();
+ 		}
+@@ -217,7 +218,7 @@
+ 		else if(status == "simready"){
+ 			this.getNetworkStatus();
+ 			this.setCarrierSpecificCustomization();
+-		}
++		/*}
+ 		else if(status == "pukrequired") {
+ 			this.displayPuk1Lock();
+ 		} 
+@@ -223,7 +224,7 @@
+ 		} 
+ 		else if(status == "unknown" || status == "simnotready") {
+ 			this.getDeviceLockValue();
+-		} 	
++		} 	*/
+ 	},
+ 	
+ 	getFDNStatus: function () {
+
+
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/firstuse-util.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/firstuse-util.js
+@@ -164,7 +164,7 @@
+ 	},
+ 	
+ 	pushTutorial: function() {
+-		this.dmmodelRequest = new Mojo.Service.Request(NovaAccountService.propsServiceIdentifier, {
++		/*this.dmmodelRequest = new Mojo.Service.Request(NovaAccountService.propsServiceIdentifier, {
+ 			method: 'Get',
+ 			parameters: {"key":"com.palm.properties.DMMODEL"},
+ 			onSuccess: this.setTutorialOverride.bind(this),
+@@ -169,7 +169,7 @@
+ 			parameters: {"key":"com.palm.properties.DMMODEL"},
+ 			onSuccess: this.setTutorialOverride.bind(this),
+ 			onFailure: this.errorTutorialOverride.bind(this)
+-		});
++		});*/
+ 	},
+  	
+ 	// launch app and close this
+
