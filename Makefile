@@ -77,6 +77,7 @@
 # Authority certificate, allowing packages signed by WebOS Internals
 # to be installed via the appInstallService installHistory database.
 # Uncomment the corresponding line below to enable this feature.
+# Note that this feature is not 100% reliable.  Use with caution.
 
 # DISABLE_UPLOAD_DAEMON disables a background process that
 # automatically uploads usage information to Palm on a daily basis.
@@ -169,7 +170,7 @@
 # Select "pre", "preplus", "pixi", "pixiplus", "pre2", "veer" or "touchpad".
 DEVICE = undefined
 
-# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel", "att" or "wifi".
+# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel", "att" or "hp".
 CARRIER = undefined
 
 # Supply a different boot logo if you wish.
@@ -203,7 +204,7 @@ BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
 endif
 ENABLE_DEVELOPER_MODE = 1
-AUTO_INSTALL_PREWARE  = 1
+# AUTO_INSTALL_PREWARE  = 1
 ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
@@ -365,10 +366,10 @@ endif
 
 ifeq (${DEVICE},touchpad)
 CODENAME = topaz
-ifeq (${CARRIER},wifi)
+ifeq (${CARRIER},hp)
 NVRAM_PARTITION=mmcblk0p12
 BOOT_PARTITION=mmcblk0p13
-MODEL = ???????
+MODEL = hstnh-i29c
 VERSION = 3.0.0
 endif
 endif
