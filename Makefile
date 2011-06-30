@@ -215,6 +215,7 @@ DISABLE_UPLOAD_DAEMON = 1
 # REMOVE_CARRIER_CHECK  = 1
 # REMOVE_BUILD_CHECK    = 1
 # REMOVE_RELEASE_CHECK  = 1
+# REMOVE_UPDATE_SITE    = 1
 
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
@@ -477,6 +478,9 @@ ifdef REMOVE_BUILD_CHECK
 endif
 ifdef REMOVE_RELEASE_CHECK 
 	@echo "REMOVE_RELEASE_CHECK = ${REMOVE_RELEASE_CHECK}"
+endif
+ifdef REMOVE_UPDATE_SITE 
+	@echo "REMOVE_UPDATE_SITE = ${REMOVE_UPDATE_SITE}"
 endif
 ifdef CHANGE_KEYBOARD_TYPE 
 	@echo "CHANGE_KEYBOARD_TYPE = ${CHANGE_KEYBOARD_TYPE}"
@@ -848,6 +852,11 @@ ifdef CUSTOM_UPDATE_SITE
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 	echo "SoftwareUpdateSite=${CUSTOM_UPDATE_SITE}" >> \
 		build/${PATIENT}/resources/recoverytool.config
+endif
+ifeq (${REMOVE_UPDATE_SITE},1)
+	sed -i.orig -e '/SoftwareUpdateSite/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
 ifdef CUSTOM_DEVICETYPE
 	sed -i.orig -e 's/DeviceType=.*/DeviceType=${CUSTOM_DEVICETYPE}/' \
