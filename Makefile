@@ -129,13 +129,13 @@
 # the ./patches/carriers directory (currently only for WebOS 2.0.0). 
 # Uncomment the corresponding line below to enable this feature.
 
-# INCREASE_VAR_SPACE increases the size of the /var partition to 2 GB.
-# This allows more space for the installation of Linux applications
-# and the storage of huge amounts of email and attachments on the
-# device.  The extra space is taken away from the USB drive.
+# VAR_PARTITION_SIZE allows you to increase the size of the /var partition.
+# This allows more space for the installation of Linux applications.
+# The extra space is taken away from the USB drive. Note that as of
+# webOS 2.0, emails and attachments are no longer stored in /var.
 # Uncomment the corresponding line below to enable this feature.
 
-# ADD_EXT3FS_PARTITION adds a spare LVM partition formatted as ext3.
+# EXT3FS_PARTITION_SIZE adds a spare LVM partition formatted as ext3.
 # This allows space for experimentation that requires an additional
 # ext3 filesytem.  The extra space is taken away from the USB drive.
 # Uncomment the corresponding line below to enable this feature.
@@ -164,8 +164,8 @@
 # REMOVE_CARRIER_CHECK  = 1
 # CHANGE_KEYBOARD_TYPE  = z
 # ADD_EXTRA_CARRIERS    = 1
-# INCREASE_VAR_SPACE    = 1
-# ADD_EXT3FS_PARTITION  = 2GB
+# VAR_PARTITION_SIZE    = 2GB
+# EXT3FS_PARTITION_SIZE = 2GB
 
 # Select "pre", "preplus", "pixi", "pixiplus", "pre2", "veer" or "touchpad".
 DEVICE = undefined
@@ -486,11 +486,11 @@ endif
 ifdef ADD_EXTRA_CARRIERS   
 	@echo "ADD_EXTRA_CARRIERS = ${ADD_EXTRA_CARRIERS}"
 endif
-ifdef INCREASE_VAR_SPACE   
-	@echo "INCREASE_VAR_SPACE = ${INCREASE_VAR_SPACE}"
+ifdef VAR_PARTITION_SIZE   
+	@echo "VAR_PARTITION_SIZE = ${VAR_PARTITION_SIZE}"
 endif
-ifdef ADD_EXT3FS_PARTITION 
-	@echo "ADD_EXT3FS_PARTITION = ${ADD_EXT3FS_PARTITION}"
+ifdef EXT3FS_PARTITION_SIZE
+	@echo "EXT3FS_PARTITION_SIZE = ${EXT3FS_PARTITION_SIZE}"
 endif
 ifdef CUSTOM_WEBOS_TARBALL
 	@echo "CUSTOM_WEBOS_TARBALL = ${CUSTOM_WEBOS_TARBALL}"
@@ -776,8 +776,8 @@ endif
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums
 	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
-ifeq (${INCREASE_VAR_SPACE},1)
-	sed -i.orig -e '/<Volume id="var"/s|256MB|2048MB|' build/${PATIENT}/webOS/${CODENAMENEW}.xml
+ifdef VAR_PARTITION_SIZE
+	sed -i.orig -e '/<Volume id="var"/s|size=".*" |size="${VAR_PARTITION_SIZE}" |' build/${PATIENT}/webOS/${CODENAMENEW}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
 ifdef CUSTOM_CARRIER_LIST
@@ -884,9 +884,9 @@ ifdef CUSTOM_CARRIER_DMSET
 	rm -f build/${PATIENT}/carrier/installer.xml.orig
 endif
 endif
-ifdef ADD_EXT3FS_PARTITION
+ifdef EXT3FS_PARTITION_SIZE
 	sed -i.orig \
-	  -e 's|<Volume id="media"|<Volume id="ext3fs" type="ext3" size="${ADD_EXT3FS_PARTITION}" mount="/media/ext3fs"/>\
+	  -e 's|<Volume id="media"|<Volume id="ext3fs" type="ext3" size="${EXT3FS_PARTITION_SIZE}" mount="/media/ext3fs"/>\
 <Volume id="media"|' \
 	  -e 's|<Mount id="media"|<Mount id="ext3fs" options="noatime,data=writeback" freq="0" passno="0"/>\
 <Mount id="media"|' \
