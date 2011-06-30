@@ -367,12 +367,10 @@ endif
 
 ifeq (${DEVICE},touchpad)
 CODENAME = topaz
-ifeq (${CARRIER},hp)
 NVRAM_PARTITION=mmcblk0p12
 BOOT_PARTITION=mmcblk0p13
 MODEL = hstnh-i29c
 VERSION = 3.0.0
-endif
 endif
 
 ifndef DOCTOR
@@ -1059,12 +1057,6 @@ backup: mount
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/boot/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz ; \
-	echo "Creating clones/$$id/${CUSTIMAGEOLD}.mojodb.tar.gz" ; \
-	( novacom -w run file://bin/tar -- -C /tmp/mojodb/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.mojodb.tar.gz ; \
-	echo "Creating clones/$$id/${CUSTIMAGEOLD}.filecache.tar.gz" ; \
-	( novacom -w run file://bin/tar -- -C /tmp/filecache/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.filecache.tar.gz ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.log.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/log/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.log.tar.gz ; \
@@ -1074,12 +1066,18 @@ backup: mount
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.mojodb.enc" ; \
+	( novacom -w run file://bin/dd -- if=/dev/mapper/store-mojodb ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.mojodb.enc.gz ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.filecache.enc" ; \
+	( novacom -w run file://bin/dd -- if=/dev/mapper/store-filecache ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.filecache.enc.gz ; \
 
 .PHONY: mount
 mount: unmount
 	novacom -w run file://usr/sbin/lvm.static -- vgscan --ignorelockingfailure 2> /dev/null
 	novacom -w run file://usr/sbin/lvm.static -- vgchange -ay --ignorelockingfailure 2> /dev/null
-	@for f in var root mojodb filecache log update media ; do \
+	@for f in var root log update media ; do \
 	  echo "Mounting /dev/mapper/store-$$f" ; \
 	  novacom -w run file://bin/mkdir -- -p /tmp/$$f ; \
 	  novacom -w run file://bin/mount -- /dev/mapper/store-$$f /tmp/$$f -o ro ; \
@@ -1090,7 +1088,7 @@ mount: unmount
 
 .PHONY: unmount
 unmount:
-	@for f in var root mojodb filecache log update media boot ; do \
+	@for f in var root log update media boot ; do \
 	  echo "Unmounting /tmp/$$f" ; \
 	  ( novacom -w run file://bin/umount -- /tmp/$$f 2> /dev/null || true ) ; \
 	done
