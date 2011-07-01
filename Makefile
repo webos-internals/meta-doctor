@@ -170,7 +170,7 @@
 # Select "pre", "preplus", "pixi", "pixiplus", "pre2", "veer" or "touchpad".
 DEVICE = undefined
 
-# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel", "att" or "hp".
+# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel", "att" or "wifi".
 CARRIER = undefined
 
 # Supply a different boot logo if you wish.
@@ -369,14 +369,18 @@ ifeq (${DEVICE},touchpad)
 CODENAME = topaz
 NVRAM_PARTITION=mmcblk0p12
 BOOT_PARTITION=mmcblk0p13
-MODEL = hstnh-i29c
+MODEL = p300hstnh
 VERSION = 3.0.0
+CARRIER_TARBALL = hp.tar
 endif
 
 ifndef DOCTOR
 DOCTOR = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 ifeq (${CARRIER},wr)
 DOCTOR = webosdoctor${MODEL}-${CARRIER}-${VERSION}.jar
+endif
+ifeq (${CARRIER},wifi)
+DOCTOR = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 endif
 endif
 
