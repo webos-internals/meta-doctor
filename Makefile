@@ -135,6 +135,10 @@
 # webOS 2.0, emails and attachments are no longer stored in /var.
 # Uncomment the corresponding line below to enable this feature.
 
+# SWAP_PARTITION_SIZE allows you to increase the size of the swap partition.
+# The extra space is taken away from the USB drive.
+# Uncomment the corresponding line below to enable this feature.
+
 # EXT3FS_PARTITION_SIZE adds a spare LVM partition formatted as ext3.
 # This allows space for experimentation that requires an additional
 # ext3 filesytem.  The extra space is taken away from the USB drive.
@@ -165,6 +169,7 @@
 # CHANGE_KEYBOARD_TYPE  = z
 # ADD_EXTRA_CARRIERS    = 1
 # VAR_PARTITION_SIZE    = 2GB
+# SWAP_PARTITION_SIZE   = 512MB
 # EXT3FS_PARTITION_SIZE = 2GB
 
 # Select "pre", "preplus", "pixi", "pixiplus", "pre2", "veer" or "touchpad".
@@ -493,6 +498,9 @@ endif
 ifdef VAR_PARTITION_SIZE   
 	@echo "VAR_PARTITION_SIZE = ${VAR_PARTITION_SIZE}"
 endif
+ifdef SWAP_PARTITION_SIZE   
+	@echo "SWAP_PARTITION_SIZE = ${SWAP_PARTITION_SIZE}"
+endif
 ifdef EXT3FS_PARTITION_SIZE
 	@echo "EXT3FS_PARTITION_SIZE = ${EXT3FS_PARTITION_SIZE}"
 endif
@@ -782,6 +790,10 @@ endif
 	rm -f build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new
 ifdef VAR_PARTITION_SIZE
 	sed -i.orig -e '/<Volume id="var"/s|size=".*" |size="${VAR_PARTITION_SIZE}" |' build/${PATIENT}/webOS/${CODENAMENEW}.xml
+	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
+endif
+ifdef SWAP_PARTITION_SIZE
+	sed -i.orig -e '/<Volume id="swap"/s|size=".*"|size="${SWAP_PARTITION_SIZE}"|' build/${PATIENT}/webOS/${CODENAMENEW}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
 ifdef CUSTOM_CARRIER_LIST
