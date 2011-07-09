@@ -89,6 +89,7 @@
 # Uncomment the corresponding line below to enable this feature.
 
 # DISABLE_UPDATE_DAEMON disables the Palm Over The Air update daemon.
+# It also disables provisioning support by cellular providers.
 # Uncomment the corresponding line below to enable this feature.
 
 # DISABLE_MODEM_UPDATE prevents the device from reflashing the modem
@@ -202,7 +203,7 @@ BYPASS_FIRST_USE_APP  = 1
 endif
 ifeq (${DEVICE},veer)
 BYPASS_ACTIVATION     = 1
-BYPASS_FIRST_USE_APP  = 1
+# BYPASS_FIRST_USE_APP  = 1
 endif
 ifeq (${VERSION},1.4.5)
 BYPASS_ACTIVATION     = 1
@@ -410,7 +411,7 @@ ifeq (${AUTO_INSTALL_PREWARE},1)
 endif
 
 ifeq (${DISABLE_UPDATE_DAEMON},1)
-	OLDIPKGS += updatedaemon
+	OLDIPKGS += updatedaemon omadm
 endif
 
 ifeq (${DISABLE_UPLOAD_DAEMON},1)
@@ -726,6 +727,7 @@ ifeq (${ENABLE_USB_NETWORKING},1)
 endif
 ifeq (${DISABLE_UPDATE_DAEMON},1)
 	chmod -x build/${PATIENT}/rootfs/usr/bin/UpdateDaemon
+	chmod -x build/${PATIENT}/rootfs/usr/bin/OmaDm
 endif
 ifeq (${DISABLE_UPLOAD_DAEMON},1)
 	chmod -x build/${PATIENT}/rootfs/usr/bin/uploadd
