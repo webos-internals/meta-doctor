@@ -365,6 +365,10 @@ ifeq (${DEVICE},veer)
 CODENAME = broadway
 NVRAM_PARTITION=mmcblk0p13
 BOOT_PARTITION=mmcblk0p14
+ifeq (${CARRIER},wr)
+MODEL = p160una
+VERSION = 2.1.1
+endif
 ifeq (${CARRIER},att)
 MODEL = p160una
 VERSION = 2.1.2
