@@ -379,8 +379,8 @@ ifeq (${DEVICE},touchpad)
 CODENAME = topaz
 NVRAM_PARTITION=mmcblk0p12
 BOOT_PARTITION=mmcblk0p13
-MODEL = p300hstnh
-VERSION = 3.0.0
+MODEL = p302hstnh
+VERSION = 3.0.2
 CARRIER_TARBALL = hp.tar
 endif
 
@@ -1066,34 +1066,43 @@ backup: mount
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	mkdir -p clones/$$id ; \
 	echo "Creating clones/$$id/tokens.txt" ; \
-	novacom -w run file://sbin/tokens -- --list > clones/$$id/tokens.txt ; \
+	novacom -w run file://sbin/tokens -- --list > clones/$$id/tokens.txt
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.nvram.bin" ; \
 	( novacom -w run file://bin/dd -- if=/dev/${NVRAM_PARTITION} ) > \
-	   clones/$$id/${CUSTIMAGEOLD}.nvram.bin ; \
+	   clones/$$id/${CUSTIMAGEOLD}.nvram.bin
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/root/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/boot/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.log.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/log/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.log.tar.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.log.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.update.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/update/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.update.tar.gz ; \
-	echo "Creating clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
-	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.update.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.mojodb.enc" ; \
 	( novacom -w run file://bin/dd -- if=/dev/mapper/store-mojodb ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.mojodb.enc.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.mojodb.enc.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.filecache.enc" ; \
 	( novacom -w run file://bin/dd -- if=/dev/mapper/store-filecache ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.filecache.enc.gz ; \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.filecache.enc.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz
 
 .PHONY: mount
 mount: unmount
