@@ -22,6 +22,6 @@ if [ -f unpack/nova-cust-image-topaz.rootfs.tar.gz ] ; then
     tar -p -z -x -f unpack/nova-cust-image-topaz.rootfs.tar.gz
 fi
 
-rm -rf unpack home mnt var/tmp
+rm -rf unpack dev home media mnt opt proc sys tmp var/tmp
 
 exit 0
