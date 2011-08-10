@@ -45,7 +45,6 @@ WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
 SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="roadrunnercdmafw.tar"
-BLD_INFO="palm-build-info"
 
 rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
 

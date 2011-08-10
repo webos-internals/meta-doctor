@@ -40,9 +40,9 @@ case "`uname -s`" in
 	;;
 esac
 
-BLD_INFO="palm-build-info"
+BUILD_INFO="palm-build-info"
 
-rm -f ${BLD_INFO} ${BLD_INFO}-unmasqed
+rm -f ${BUILD_INFO}
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -55,7 +55,7 @@ if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P100UEU CUSTOM_WEBOS_DMSET=312 CUSTOM_CARRIER_DMSET=317 CUSTOM_BUILD_INFO=palm-build-info PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_MODEL_LIST=P100UEU CUSTOM_WEBOS_DMSET=312 CUSTOM_CARRIER_DMSET=317 CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -80,8 +80,8 @@ mkdir -p downloads
 $make VERSION=1.4.5 DEVICE=pre CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
-head -n 1 build/${W210_BUILD}/rootfs/etc/${BLD_INFO} >  ./${BLD_INFO}
-tail -n 4 build/${W145_BUILD}/rootfs/etc/${BLD_INFO} >> ./${BLD_INFO}
+head -n 1 build/${W210_BUILD}/rootfs/etc/${BUILD_INFO} >  ./${BUILD_INFO}
+tail -n 4 build/${W145_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 
 $make ${ARGS} clobber-build all || exit
 
@@ -91,4 +91,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
 echo
 
-rm -f ${BLD_INFO}
+rm -f ${BUILD_INFO}

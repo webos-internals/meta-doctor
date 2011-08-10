@@ -50,7 +50,6 @@ CARRIER_TARBALL="carrier.tar"
 FLASH_TARBALL="flash.tar"
 SRC_CDMA_FW="roadrunnercdma_fw.tar"
 CDMA_FW="roadrunnercdmafw.tar"
-BLD_INFO="palm-build-info"
 
 rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${FLASH_TARBALL}
 
