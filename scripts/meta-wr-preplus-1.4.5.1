@@ -50,6 +50,8 @@ BUILD_INFO="palm-build-info"
 
 rm -f ${UMTS_FW} ${INSTALLER_XML} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BUILD_INFO}
 
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
+
 for f in $git $wget $make $java $patch $python $tar ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }

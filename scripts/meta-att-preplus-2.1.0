@@ -42,6 +42,8 @@ esac
 
 BUILD_INFO="palm-build-info"
 
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
+
 rm -f ${BUILD_INFO}
 
 for f in $git $wget $make $java $patch $python $tar ; do
