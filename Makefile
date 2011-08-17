@@ -355,7 +355,7 @@ endif
 endif
 ifeq (${CARRIER},verizonwireless)
 MODEL = p102eww
-VERSION = 2.0.1
+VERSION = 2.1.0
 CARRIER_TARBALL = verizon.tar
 DOCTOR = webosdoctorp102${CARRIER}-${VERSION}.jar
 endif
