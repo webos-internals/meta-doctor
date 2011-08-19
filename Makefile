@@ -578,8 +578,8 @@ all:
 	${ERR}
 ifneq (${DEVICE},undefined)
 ifneq (${CARRIER},undefined)
-	@if [ "${MODEL}" == "" ] || [ "${VERSION}" == "" ] ; then \
-	  echo You have specified an invalid DEVICE and CARRIER combination ; false ; \
+	@if [ "${MODEL}" = "" ] || [ "${VERSION}" = "" ] ; then \
+	  echo You have specified an invalid DEVICE and CARRIER combination ; exit 1 ; \
 	fi
 	${MAKE} unpack patch pack
 else
