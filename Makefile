@@ -143,6 +143,7 @@
 # EXT3FS_PARTITION_SIZE adds a spare LVM partition formatted as ext3.
 # This allows space for experimentation that requires an additional
 # ext3 filesytem.  The extra space is taken away from the USB drive.
+# Note that any existing ext3fs partition will be reformatted.
 # Uncomment the corresponding line below to enable this feature.
 
 ##########################
