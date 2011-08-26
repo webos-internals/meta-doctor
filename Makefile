@@ -28,6 +28,7 @@
 # if you are never going to use cellular connectivity on this device.
 # Bypassing activation may prevent you from creating a Palm profile.
 # This is not a method to use a device on a different cellular carrier.
+# Note that this option is only for use on Phones, not Tablets.
 # Uncomment the corresponding line below to enable this feature.
 
 # BYPASS_FIRST_USE_APP allows the device to start without running the
