@@ -1,0 +1,135 @@
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/app-assistant.js
+@@ -28,7 +28,7 @@
+ 
+ function setupSimulator() {
+ 	Mojo.Log.info("---------------- setupSimulator() --------------------");
+-	clearTimeout(powerMethod);
++	//clearTimeout(powerMethod);
+ 	isDevice = false;
+ 	isActivated = true;
+ 	isCamped = true;
+@@ -51,18 +51,8 @@
+ }
+ 
+ function setUpFirstUse() {
+-Mojo.Log.info("---------------- setupFirstUse() --------------------");
+-	this.firstUseDepot = new Mojo.Depot(stateEngine, dbSetUpSuccess, dbSetupFailure);	
+-	isInitialized = true;
+-	attemptCount = 0;
+-	dbVersion = -1;
+-	sessionStatus = 'none';
+-	
+-	FirstUseUtil.loadValues();
+-	RoamUtil.checkNetworkStatus();
+-	isConnected = false;
+-	// Subscribe to connection manager
+-	conStatusRequest = AppAssistant.accountService.isConManUp(readConManStatus, errorConManStatus);
++setupSimulator();
++isDevice = true;
+ }
+ 
+ function readConManStatus(response) {
+@@ -103,7 +93,7 @@
+ 
+ function StageAssistant(stageController) {
+ 	Mojo.Log.info("------------Stage assistant called ---------");
+-	tutorialOnly = !PalmSystem.isMinimal;
++	tutorialOnly = false;//!PalmSystem.isMinimal;
+ 
+ 	//Note: we are only looking to see if the demomode parameter is specified and not if its true or false
+ 	var launchParams = Mojo.Controller.getAppController().assistant.launchParams;
+
+
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/provision-assistant.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/provision-assistant.js
+@@ -58,6 +58,10 @@
+ 			
+ 				
+ 		this.setupProgressBar();
++		
++		this.provisionComplete();
++		return;
++		
+ 		ProvisionUtil.setScene(this);
+ 				
+ 		if((!isActivated) && (activationFailed)) {
+
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/customization-assistant.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/customization-assistant.js
+@@ -183,19 +183,20 @@
+ 	},
+ 	
+ 	getNetworkStatus: function () {
+-		this.networkRequest = AppAssistant.accountService.getNetworkStatus(this.readNetworkStatus.bind(this), this.errorNetworkStatus.bind(this));
++		//this.networkRequest = AppAssistant.accountService.getNetworkStatus(this.readNetworkStatus.bind(this), this.errorNetworkStatus.bind(this));
++this.readNetworkStatus();
+ 	},
+ 	
+ 	readNetworkStatus: function (response) {
+-		Mojo.Log.info("--------------------------- readNetworkStatus ---------------------------%o", $H(response.extended));
++		/*Mojo.Log.info("--------------------------- readNetworkStatus ---------------------------%o", $H(response.extended));
+ 		if(response.extended && response.extended.state === "service") {
+ 			if(this.networkRequest) {
+ 				this.networkRequest.cancel();
+-			}
++			}*/
+ 			this.getFDNStatus();
+-		} else {
++		/*} else {
+ 			//TODO
+-		}
++		}*/
+ 	},
+ 
+ 	errorNetworkStatus: function (response) {
+@@ -215,7 +216,7 @@
+ 	
+ 	processSIMStatus: function (status) {
+ 		Mojo.Log.info("processSIMStatus - push scene ------------ ");
+-		if (status == "simnotfound") {
++		/*if (status == "simnotfound") {
+ 			Mojo.Controller.stageController.pushScene("nosim");
+ 		}
+ 		else if (status == "siminvalid") {
+@@ -225,16 +226,16 @@
+ 			this.showIntro();
+ 			this.displayPin1Lock();
+ 		}
+-		else if(status == "simready"){
++		else if(status == "simready"){*/
+ 			this.getNetworkStatus();
+ 			this.setCarrierSpecificCustomization();
+-		}
++		/*}
+ 		else if(status == "pukrequired") {
+ 			this.displayPuk1Lock();
+ 		} 
+ 		else if(status == "unknown" || status == "simnotready") {
+ 			this.getDeviceLockValue();
+-		} 	
++		} 	*/
+ 	},
+ 	
+ 	getFDNStatus: function () {
+--- .orig/usr/palm/applications/com.palm.app.firstuse/app/controllers/firstuse-util.js
++++ /usr/palm/applications/com.palm.app.firstuse/app/controllers/firstuse-util.js
+@@ -164,7 +164,7 @@
+ 	},
+ 	
+ 	pushTutorial: function() {
+-		this.dmmodelRequest = new Mojo.Service.Request(NovaAccountService.propsServiceIdentifier, {
++		/*this.dmmodelRequest = new Mojo.Service.Request(NovaAccountService.propsServiceIdentifier, {
+ 			method: 'Get',
+ 			parameters: {"key":"com.palm.properties.DMMODEL"},
+ 			onSuccess: this.setTutorialOverride.bind(this),
+@@ -169,7 +169,7 @@
+ 			parameters: {"key":"com.palm.properties.DMMODEL"},
+ 			onSuccess: this.setTutorialOverride.bind(this),
+ 			onFailure: this.errorTutorialOverride.bind(this)
+-		});
++		});*/
+ 	},
+  	
+ 	// launch app and close this
+

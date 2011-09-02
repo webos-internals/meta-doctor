@@ -175,7 +175,7 @@
 # SWAP_PARTITION_SIZE   = 512MB
 # EXT3FS_PARTITION_SIZE = 2GB
 
-# Select "pre", "preplus", "pixi", "pixiplus", "pre2", "veer" or "touchpad".
+# Select "pre", "preplus", "pixi", "pixiplus", "pre2", "pre3", "veer" or "touchpad".
 DEVICE = undefined
 
 # Select "wr", "sprint", "verizonwireless", "bellmo", "telcel", "att" or "wifi".
@@ -261,7 +261,7 @@ endif
 CARRIER_TARBALL = ${CARRIER}.tar
 
 # Latest supported version is:
-# VERSION = 2.1.0
+# VERSION = 2.2.0
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
@@ -360,6 +360,16 @@ MODEL = p102eww
 VERSION = 2.1.0
 CARRIER_TARBALL = verizon.tar
 DOCTOR = webosdoctorp102${CARRIER}-${VERSION}.jar
+endif
+endif
+
+ifeq (${DEVICE},pre3)
+CODENAME = mantaray
+NVRAM_PARTITION=mmcblk0p13
+BOOT_PARTITION=mmcblk0p14
+ifeq (${CARRIER},wr)
+MODEL = p220manta
+VERSION = 2.2.0
 endif
 endif
 

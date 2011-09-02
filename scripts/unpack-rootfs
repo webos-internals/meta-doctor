@@ -18,6 +18,9 @@ fi
 if [ -f unpack/nova-cust-image-broadway.rootfs.tar.gz ] ; then
     tar -p -z -x -f unpack/nova-cust-image-broadway.rootfs.tar.gz
 fi
+if [ -f unpack/nova-cust-image-mantaray.rootfs.tar.gz ] ; then
+    tar -p -z -x -f unpack/nova-cust-image-mantaray.rootfs.tar.gz
+fi
 if [ -f unpack/nova-cust-image-topaz.rootfs.tar.gz ] ; then
     tar -p -z -x -f unpack/nova-cust-image-topaz.rootfs.tar.gz
 fi
