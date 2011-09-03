@@ -79,6 +79,8 @@
 # to be installed via the appInstallService installHistory database.
 # Uncomment the corresponding line below to enable this feature.
 # Note that this feature is not 100% reliable.  Use with caution.
+# If this feature fails to operate correctly, just remove the
+# /var/palm/data/com.palm.appInstallService/installHistory.db file.
 
 # DISABLE_UPLOAD_DAEMON disables a background process that
 # automatically uploads usage information to Palm on a daily basis.
