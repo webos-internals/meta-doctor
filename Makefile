@@ -1179,7 +1179,7 @@ download: downloads/${DOCTOR}
 downloads/${DOCTOR}:
 	${ERR}
 	mkdir -p downloads
-	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then move it to $@ (i.e. the downloads directory that was just created under the current directory)." && false
+	@ [ -f $@ ] || echo "Please download the correct version of the webOS Doctor .jar file" &&  echo "and then rename and move it to $@ (i.e. the downloads directory that was just created under the current directory)." && false
 	touch $@
 
 .PHONY: jad
