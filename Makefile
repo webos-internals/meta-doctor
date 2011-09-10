@@ -196,7 +196,7 @@ CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 ######################################
 
 ifeq (${LOGNAME},rwhitby)
-DEVICE = pre2
+DEVICE = pre3
 CARRIER = wr
 ifeq (${CARRIER},sprint)
 BYPASS_ACTIVATION     = 1
@@ -931,7 +931,7 @@ ifdef EXT3FS_PARTITION_SIZE
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
 ifdef CHANGE_KEYBOARD_TYPE
-	sed -i.orig -e 's|<Section name="tokens" type="token" size="4KB">|<Section name="tokens" type="token" size="4KB">\
+	sed -i.orig -e 's|<Section name="tokens" type="token" size=".*">|&\
 <Val name="KEYoBRD" action="overwrite" value="${CHANGE_KEYBOARD_TYPE}"/>|' \
 		build/${PATIENT}/webOS/${CODENAMENEW}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
