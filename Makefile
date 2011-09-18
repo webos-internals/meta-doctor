@@ -46,10 +46,11 @@
 # known security implications of leaving a phone in developer mode.
 # Uncomment the corresponding line below to enable this feature.
 
-# ENABLE_TESTING_FEEDS installs a flag file which tells Preware to
-# automatically install testing feeds for all WebOS Internals
-# packages.  You must, of course, install Preware as well to use them.
-# Uncomment the corresponding line below to enable this feature.
+# ENABLE_BETA_FEEDS installs a flag file which tells Preware to
+# automatically install beta feeds for all WebOS Internals packages.
+# ENABLE_ALPHA_FEEDS installs the corresponding flag for the alpha feeds.
+# You must read http://testing.preware.org/ before enabling either.
+# Uncomment the corresponding lines below to enable these features.
 
 # INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
 # user's home directory to the device.	The user can then connect to
@@ -163,7 +164,7 @@
 # BYPASS_FIRST_USE_APP  = 1
 # ENABLE_DEVELOPER_MODE = 1
 # AUTO_INSTALL_PREWARE  = 1
-# ENABLE_TESTING_FEEDS  = 1
+# ENABLE_BETA_FEEDS     = 1
 # INSTALL_SSH_AUTH_KEYS = 1
 # INSTALL_WIFI_PROFILES = 1
 # DISABLE_UPLOAD_DAEMON = 1
@@ -219,6 +220,7 @@ ENABLE_DEVELOPER_MODE = 1
 ENABLE_TESTING_FEEDS  = 1
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
+EXT3FS_PARTITION_SIZE = 2GB
 DISABLE_UPLOAD_DAEMON = 1
 # DISABLE_UPDATE_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
@@ -473,8 +475,11 @@ endif
 ifdef AUTO_INSTALL_PREWARE 
 	@echo "AUTO_INSTALL_PREWARE = ${AUTO_INSTALL_PREWARE}"
 endif
-ifdef ENABLE_TESTING_FEEDS 
-	@echo "ENABLE_TESTING_FEEDS = ${ENABLE_TESTING_FEEDS}"
+ifdef ENABLE_BETA_FEEDS
+	@echo "ENABLE_BETA_FEEDS = ${ENABLE_BETA_FEEDS}"
+endif
+ifdef ENABLE_ALPHA_FEEDS
+	@echo "ENABLE_ALPHA_FEEDS = ${ENABLE_ALPHA_FEEDS}"
 endif
 ifdef INSTALL_SSH_AUTH_KEYS
 	@echo "INSTALL_SSH_AUTH_KEYS = ${INSTALL_SSH_AUTH_KEYS}"
@@ -736,9 +741,13 @@ ifeq (${ENABLE_DEVELOPER_MODE},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
 	touch build/${PATIENT}/rootfs/var/gadget/novacom_enabled
 endif
-ifeq (${ENABLE_TESTING_FEEDS},1)
+ifeq (${ENABLE_BETA_FEEDS},1)
 	mkdir -p build/${PATIENT}/rootfs/var/preferences/org.webosinternals.preware
-	touch build/${PATIENT}/rootfs/var/preferences/org.webosinternals.preware/enable-testing-feeds
+	touch build/${PATIENT}/rootfs/var/preferences/org.webosinternals.preware/enable-beta-feeds
+endif
+ifeq (${ENABLE_ALPHA_FEEDS},1)
+	mkdir -p build/${PATIENT}/rootfs/var/preferences/org.webosinternals.preware
+	touch build/${PATIENT}/rootfs/var/preferences/org.webosinternals.preware/enable-alpha-feeds
 endif
 ifeq (${ENABLE_USB_NETWORKING},1)
 	mkdir -p build/${PATIENT}/rootfs/var/gadget
