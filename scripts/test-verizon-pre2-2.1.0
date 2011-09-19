@@ -1,0 +1,185 @@
+#!/bin/bash
+# meta-verizon-pre2-2.1.0 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# modifications by 'andidendel' and 'John Steffes'
+# intended to flash Verizon Pre2 phones with a working webOS 2.1 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+CLSC_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
+V1451_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
+P220_JAR_URL="http://palm.cdnetworks.net/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar"
+T302_JAR_URL="http://palm.cdnetworks.net/rom/touchpad/p302r0d08012011/wifip302rod/webosdoctorp302hstnhwifi.jar"
+
+A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
+W210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
+P220_FILE="webosdoctorp220manta-wr-2.2.0.jar"
+T302_FILE="webosdoctorp302hstnhwifi-3.0.2.jar"
+
+A212_BUILD="veer-p160una-att-2.1.2"
+W210_BUILD="pre2-p102eww-verizonwireless-2.1.0"
+P220_BUILD="pre3-p220manta-wr-2.2.0"
+T302_BUILD="touchpad-p302hstnh-wifi-3.0.2"
+
+A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
+W210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
+P220_MD5="319ce80db93a2fc845a004d60fc3735b"
+T302_MD5="669db17352726708486491c532a06d9d"
+
+PATIENT="test-verizon-pre2-2.1.0"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+WEBOS_TARBALL="webOS.tar"
+CARRIER_TARBALL="carrier.tar"
+ENYO_TARBALL="enyo.tar"
+FLASH_TARBALL="flash.tar"
+FLASH2_TARBALL="flash2.tar"
+
+rm -f ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${ENYO_TARBALL} ${FLASH_TARBALL}
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+ATT_IPKS=
+VZW_IPKS=
+
+ATT_IPKS="\
+pmvoicecommand_*.ipk \
+contacts.plugin.pmvoicecommand_*.ipk \
+pmvoicecommand-enus_*.ipk \
+pmvoicecommand-esmx_*.ipk \
+"
+
+VZW_IPKS="\
+com.nim.vznavigator_*.ipk \
+com.nim.app.vznavigator_*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+skyped_*.ipk \
+com.skype.app.skypesearchdirectory_*.ipk \
+"
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+    VZW_IPKS=
+fi
+
+VZW_IPKS="${VZW_IPKS} \
+amazonservice_*.ipk \
+com.palm.app.amazonstore_*.ipk \
+palmcustomizationinfo-verizon_*.ipk \
+crotestcastleplus-images_*.ipk \
+roadrunnercdmafw-verizon_*.ipk \
+sweatshop-verizon-roadrunner_*.ipk \
+"
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_LIST=Verizon CUSTOM_MODEL_LIST=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=pre2 CARRIER=verizonwireless"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo
+
+mkdir -p downloads
+
+[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+[ ! -f downloads/${P220_FILE} ] && $wget -c ${P220_JAR_URL} -O downloads/${P220_FILE}
+[ ! -f downloads/${T302_FILE} ] && $wget -c ${T302_JAR_URL} -O downloads/${T302_FILE}
+
+[ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
+        echo "${A212_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${A212_FILE} && exit
+[ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
+        echo "${W210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W210_FILE} && exit
+[ $(md5sum downloads/${P220_FILE} | cut -d \  -f 1) != ${P220_MD5} ] && \
+        echo "${P220_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${P220_FILE} && exit
+[ $(md5sum downloads/${T302_FILE} | cut -d \  -f 1) != ${T302_MD5} ] && \
+        echo "${T302_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${T302_FILE} && exit
+
+# $make clobber
+
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack || exit
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
+$make VERSION=2.2.0 DEVICE=pre3 CARRIER=wr unpack || exit
+$make VERSION=3.0.2 DEVICE=touchpad CARRIER=wifi unpack || exit
+
+cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
+
+mkdir -p carrier
+
+( cd build/${W210_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${A212_BUILD}/carrier ; \
+    $tar -c -f - ${ATT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${ATT_IPKS} ${WR_IPKS} )
+
+rm -rf carrier
+
+$make VERSION=3.0.2 DEVICE=touchpad CARRIER=wifi \
+    EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flashplugin" \
+    EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} extract-rootfs-ipkgs || exit
+
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
+    EXTRA_ROOTFS_IPKGS="flame" \
+    EXTRA_ROOTFS_TARBALL=${FLASH2_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p flash2
+cd flash2
+$tar -x -f ../${FLASH2_TARBALL}
+rm -rf usr
+$tar -f ../${FLASH_TARBALL} --append ./* || exit
+cd ..
+rm -rf flash2 ${FLASH2_TARBALL}
+
+$make VERSION=2.2.0 DEVICE=pre3 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="enyo" \
+    EXTRA_ROOTFS_TARBALL=${ENYO_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p enyo
+cd enyo
+$tar -x -f ../${ENYO_TARBALL}
+$tar -f ../${FLASH_TARBALL} --append ./* || exit
+cd ..
+rm -rf enyo
+
+$make ${ARGS} \
+    EXTRA_ROOTFS_IPKGS="enyo flash flash-mini-adapter flame flashplugin" \
+    EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build all || exit
+
+$java -jar build/${PATIENT}/${W210_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo
+
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${ENYO_TARBALL} ${FLASH_TARBALL}
