@@ -1081,6 +1081,20 @@ devmode: mount
 	novacom -w run file://bin/touch -- /tmp/var/gadget/novacom_enabled
 	novacom -w run file://bin/mount -- /dev/mapper/store-var /tmp/var -o remount,ro
 
+.PHONY: emigrate
+emigrate: mount
+	novacom -w run file://bin/mount -- ${BOOT_PARTITION} /tmp/boot -o remount,rw
+	novacom -w run file://bin/mv -- /tmp/boot/uImage /tmp/boot/uImage.webOS
+	novacom -w run file://bin/ln -- -s cm-uMulti /tmp/boot/uImage
+	novacom -w run file://bin/mount -- ${BOOT_PARTITION} /tmp/boot -o remount,ro
+
+.PHONY: immigrate
+immigrate: mount
+	novacom -w run file://bin/mount -- ${BOOT_PARTITION} /tmp/boot -o remount,rw
+	novacom -w run file://bin/rm -- -f /tmp/boot/uImage
+	novacom -w run file://bin/mv -- /tmp/boot/uImage.webOS /tmp/boot/uImage
+	novacom -w run file://bin/mount -- ${BOOT_PARTITION} /tmp/boot -o remount,ro
+
 .PHONY: backup-%
 backup-%:
 	${MAKE} CARRIER=$* backup
