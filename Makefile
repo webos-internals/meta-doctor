@@ -197,7 +197,7 @@ CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 
 ifeq (${LOGNAME},rwhitby)
 DEVICE = pre3
-CARRIER = wr
+CARRIER = att
 ifeq (${CARRIER},sprint)
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
@@ -374,6 +374,10 @@ BOOT_PARTITION=mmcblk0p14
 ifeq (${CARRIER},wr)
 MODEL = p220manta
 VERSION = 2.2.0
+endif
+ifeq (${CARRIER},att)
+MODEL = p223manta
+VERSION = 2.2.3
 endif
 endif
 
