@@ -1,0 +1,2 @@
+echo "FOO" > ./model_DOC.txt
+tar -c -f - ./model_DOC.txt | gzip -f | openssl enc -e -a -A
