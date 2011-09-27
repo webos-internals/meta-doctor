@@ -24,8 +24,8 @@
 # BYPASS_ACTIVATION removes the Palm activation process that normally
 # runs on the first boot of the device.	 This allows users to use the
 # device even if they do not have access to cellular connectivity or
-# would prefer not to go through the activation process.  Only use this
-# if you are never going to use cellular connectivity on this device.
+# would prefer not to go through the activation process.  This option
+# disables the cellular functionality until the next time you doctor.
 # Bypassing activation may prevent you from creating a Palm profile.
 # This is not a method to use a device on a different cellular carrier.
 # Note that this option is only for use on Phones, not Tablets.
