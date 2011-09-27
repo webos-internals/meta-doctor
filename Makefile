@@ -466,6 +466,12 @@ endif
 endif
 JODE= downloads/jode-1.1.2-pre1.jar
 
+.PHONY: help
+help:
+	@echo
+	@echo "You can find documentation of your available options in the Makefile."
+	@echo
+
 .PHONY: settings
 settings:
 	@echo "DEVICE = ${DEVICE}"
