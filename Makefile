@@ -181,7 +181,7 @@
 # Select "pre", "preplus", "pixi", "pixiplus", "pre2", "pre3", "veer" or "touchpad".
 DEVICE = undefined
 
-# Select "wr", "sprint", "verizonwireless", "bellmo", "telcel", "att" or "wifi".
+# Select "wr", "sprint", "verizon", "bellmo", "telcel", "att" or "wifi".
 CARRIER = undefined
 
 # Supply a different boot logo if you wish.
@@ -302,10 +302,10 @@ MODEL = p101ueu
 VERSION = 2.1.0
 CARRIER_TARBALL = wr-castle-plus.tar
 endif
-ifeq (${CARRIER},verizonwireless)
+ifeq (${CARRIER},verizon)
 MODEL = p101eww
 VERSION = 1.4.5.1
-CARRIER_TARBALL = verizon.tar
+DOCTOR = webosdoctor${MODEL}${CARRIER}wireless-${VERSION}.jar
 endif
 ifeq (${CARRIER},att)
 MODEL = p101eww
@@ -334,10 +334,10 @@ ifeq (${CARRIER},wr)
 MODEL = p121ewweu
 VERSION = 1.4.5
 endif
-ifeq (${CARRIER},verizonwireless)
+ifeq (${CARRIER},verizon)
 MODEL = p121eww
 VERSION = 1.4.5.1
-CARRIER_TARBALL = verizon.tar
+DOCTOR = webosdoctor${MODEL}${CARRIER}wireless-${VERSION}.jar
 endif
 ifeq (${CARRIER},att)
 MODEL = p121eww
@@ -359,11 +359,11 @@ ifeq (${VERSION},2.0.0)
 MODEL = p103ueu
 endif
 endif
-ifeq (${CARRIER},verizonwireless)
+ifeq (${CARRIER},verizon)
 MODEL = p102eww
 VERSION = 2.1.0
 CARRIER_TARBALL = verizon.tar
-DOCTOR = webosdoctorp102${CARRIER}-${VERSION}.jar
+DOCTOR = webosdoctorp102${CARRIER}wireless-${VERSION}.jar
 endif
 endif
 
@@ -378,6 +378,11 @@ endif
 ifeq (${CARRIER},att)
 MODEL = p223manta
 VERSION = 2.2.3
+endif
+ifeq (${CARRIER},verizon)
+MODEL = p223manta
+VERSION = 2.2.3
+CARRIER_TARBALL = verizon-world.tar
 endif
 endif
 
@@ -624,9 +629,9 @@ ifneq (${CARRIER},undefined)
 	@echo You must set the DEVICE and CARRIER variables ; false
 else
 	${MAKE} DEVICE=pre all-wr all-sprint all-bellmo all-telcel
-	${MAKE} DEVICE=preplus all-wr all-verizonwireless all-att
+	${MAKE} DEVICE=preplus all-wr all-verizon all-att
 	${MAKE} DEVICE=pixi all-sprint
-	${MAKE} DEVICE=pixiplus all-wr all-verizonwireless all-att
+	${MAKE} DEVICE=pixiplus all-wr all-verizon all-att
 endif
 endif
 

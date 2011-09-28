@@ -119,7 +119,7 @@ mkdir -p downloads
 # $make clobber
 
 $make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
-$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizonwireless unpack || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
 cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
