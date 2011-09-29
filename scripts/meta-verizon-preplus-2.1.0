@@ -13,7 +13,7 @@ W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod
 CDMA_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 
-CDMA_BUILD="pre2-p102eww-verizonwireless-2.1.0"
+CDMA_BUILD="pre2-p102eww-verizon-2.1.0"
 W210_BUILD="preplus-p101ueu-wr-2.1.0"
 
 CDMA_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"

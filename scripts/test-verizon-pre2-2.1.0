@@ -20,7 +20,7 @@ P220_FILE="webosdoctorp220manta-wr-2.2.0.jar"
 T302_FILE="webosdoctorp302hstnhwifi-3.0.2.jar"
 
 A212_BUILD="veer-p160una-att-2.1.2"
-W210_BUILD="pre2-p102eww-verizonwireless-2.1.0"
+W210_BUILD="pre2-p102eww-verizon-2.1.0"
 P220_BUILD="pre3-p220manta-wr-2.2.0"
 T302_BUILD="touchpad-p302hstnh-wifi-3.0.2"
 

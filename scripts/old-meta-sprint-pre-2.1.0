@@ -15,7 +15,7 @@ CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 
 W145_BUILD="pre-p100eww-sprint-1.4.5"
-CDMA_BUILD="pre2-p102eww-verizonwireless-2.0.1"
+CDMA_BUILD="pre2-p102eww-verizon-2.0.1"
 W210_BUILD="preplus-p101ueu-wr-2.1.0"
 
 W145_MD5="a55a377dd38fd7a8e94ba9514e1d9e18"
