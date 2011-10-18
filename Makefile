@@ -197,24 +197,34 @@ CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 
 ifeq (${LOGNAME},rwhitby)
 DEVICE = pre3
-CARRIER = att
-ifeq (${CARRIER},sprint)
-BYPASS_ACTIVATION     = 1
-BYPASS_FIRST_USE_APP  = 1
-endif
-ifeq (${CUSTOM_CARRIER_LIST},Sprint)
-BYPASS_ACTIVATION     = 1
-BYPASS_FIRST_USE_APP  = 1
-endif
-ifeq (${DEVICE},veer)
-BYPASS_ACTIVATION     = 1
-# BYPASS_FIRST_USE_APP  = 1
-endif
+CARRIER = wr
 ifeq (${VERSION},1.4.5)
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
-endif
 ENABLE_DEVELOPER_MODE = 1
+endif
+ifeq (${VERSION},1.4.5.1)
+BYPASS_ACTIVATION     = 1
+BYPASS_FIRST_USE_APP  = 1
+ENABLE_DEVELOPER_MODE = 1
+endif
+ifeq (${CARRIER},sprint)
+BYPASS_ACTIVATION     = 1
+BYPASS_FIRST_USE_APP  = 1
+ENABLE_DEVELOPER_MODE = 1
+endif
+ifeq (${DEVICE},pre2)
+BYPASS_ACTIVATION     = 1
+endif
+ifeq (${DEVICE},veer)
+BYPASS_ACTIVATION     = 1
+endif
+ifeq (${DEVICE},pre3)
+EXT3FS_PARTITION_SIZE = 1GB
+endif
+ifeq (${DEVICE},touchpad)
+EXT3FS_PARTITION_SIZE = 4GB
+endif
 INSTALL_SSH_AUTH_KEYS = 1
 INSTALL_WIFI_PROFILES = 1
 DISABLE_UPLOAD_DAEMON = 1
@@ -407,6 +417,8 @@ BOOT_PARTITION=mmcblk0p13
 MODEL = p302hstnh
 VERSION = 3.0.2
 ifeq (${CARRIER},wifi)
+MODEL = p304hstnh
+VERSION = 3.0.4
 CARRIER_TARBALL = hp.tar
 endif
 ifeq (${CARRIER},att)
@@ -1117,6 +1129,14 @@ immigrate: mount
 .PHONY: backup-%
 backup-%:
 	${MAKE} CARRIER=$* backup
+
+.PHONY: qualcomm
+qualcomm:
+	novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8
+	mkdir -p clones/new
+	for f in 1 2 3 5 6 7 8 9 10 11 12 13 14 ; do \
+	  ( novacom -w run file://bin/dd -- if=/dev/mmcblk0p$$f ) > clones/new/mmcblk0p$$f.bin ; \
+	done
 
 .PHONY: backup
 backup: mount
