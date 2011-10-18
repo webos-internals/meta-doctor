@@ -35,8 +35,7 @@
 # First Use application.  This allows users to enable wifi service
 # first and use that for Palm profile creation and restoring of all
 # the profile data.  Note that to create a Palm profile you may still
-# need to activate the cellular connection.  This will also make the
-# First Use application visible in the launcher.
+# need to activate the cellular connection.
 # This is not a method to use a device on a different cellular carrier.
 # Uncomment the corresponding line below to enable this feature.
 
