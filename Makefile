@@ -194,7 +194,7 @@ CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 ## START OF AREA FOR ROD'S USE ONLY ##
 ######################################
 
-ifeq (${LOGNAME},rwhitby)
+ifeq (${LOGNAME},rwhitby1)
 DEVICE = pre3
 CARRIER = wr
 ifeq (${VERSION},1.4.5)

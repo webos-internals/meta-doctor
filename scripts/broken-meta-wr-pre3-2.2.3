@@ -42,6 +42,12 @@ esac
 WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
 
+BUILD_INFO="palm-build-info"
+
+rm -f ${BUILD_INFO}
+
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
+
 for f in $git $wget $make $java $patch $python $tar ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
@@ -69,7 +75,7 @@ pmvoicecommand-esmx_*.ipk
 sweatshop-wr-mantaray_*.ipk
 "
 
-ARGS="${ARGS} DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_CHECK=ROW CUSTOM_MODEL_CHECK=HSTNH-F30CE CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.0 DEVICE=pre3 CARRIER=wr"
+ARGS="${ARGS} DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_CHECK=ROW CUSTOM_MODEL_CHECK=HSTNH-F30CE CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.2.0 DEVICE=pre3 CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -104,12 +110,15 @@ mkdir -p carrier
 
 rm -rf carrier
 
+head -n 1 build/${A223_BUILD}/rootfs/etc/${BUILD_INFO} >  ./${BUILD_INFO}
+tail -n 4 build/${W220_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
+
 $make ${ARGS} clobber-build all || exit
 
-$java -jar build/${PATIENT}/${W220_FILE}
+$java -jar build/${PATIENT}/${W220_FILE} --auto
 
 echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W220_FILE}"
 echo
 
-rm -f ${WEBOS_TARBALL} ${CARRIER_TARBALL}
+rm -f ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${BUILD_INFO}
