@@ -868,7 +868,7 @@ ifdef CUSTOM_CARRIER_CHECK
 	sed -i.orig -e '/ApprovalCharlieHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalCharlieHash=${CUSTOM_CARRIER_CHECK}" >> \
+	echo "ApprovalCharlieHash=`./scripts/encode-hash ${CUSTOM_CARRIER_CHECK}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_CARRIER_CHECK},1)
@@ -888,7 +888,7 @@ ifdef CUSTOM_MODEL_CHECK
 	sed -i.orig -e '/ApprovalMikeHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalMikeHash=${CUSTOM_MODEL_CHECK}" >> \
+	echo "ApprovalMikeHash=`./scripts/encode-hash ${CUSTOM_MODEL_CHECK}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_MODEL_CHECK},1)
