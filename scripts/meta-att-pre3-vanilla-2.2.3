@@ -101,7 +101,7 @@ mkdir -p carrier
 ( cd build/${W220_BUILD}/carrier ; \
     $tar -c -f - ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${A223_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - installer.xml ${ATT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${WR_IPKS} ${ATT_IPKS} )
 
 rm -rf carrier
