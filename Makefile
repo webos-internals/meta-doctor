@@ -72,17 +72,6 @@
 # fatal error.  
 # Uncomment the corresponding line below to enable this feature.
 
-# AUTO_INSTALL_PREWARE automatically queues the installation of
-# Preware as soon as a network connection is available after first
-# boot.  This feature also installs the preware.org x509 Certification
-# Authority certificate, allowing packages signed by WebOS Internals
-# to be installed via the appInstallService installHistory database.
-# Uncomment the corresponding line below to enable this feature.
-# Note that this feature is not 100% reliable.  Use with caution.
-# If this feature fails to operate correctly, just remove the
-# /var/palm/data/com.palm.appInstallService/installHistory.db
-# file, then reboot and install Preware manually.
-
 # DISABLE_UPLOAD_DAEMON disables a background process that
 # automatically uploads usage information to Palm on a daily basis.
 # It uploads debug information related to operating system or
@@ -194,7 +183,7 @@ CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 ## START OF AREA FOR ROD'S USE ONLY ##
 ######################################
 
-ifeq (${LOGNAME},rwhitby1)
+ifeq (${LOGNAME},rwhitby)
 DEVICE = pre3
 CARRIER = wr
 ifeq (${VERSION},1.4.5)
@@ -451,10 +440,6 @@ ifeq (${ADD_EXTRA_CARRIERS},1)
 	OLDIPKGS += pmcarrierdb
 endif
 
-ifeq (${AUTO_INSTALL_PREWARE},1)
-	OLDIPKGS += pmcertstore
-endif
-
 ifeq (${DISABLE_UPDATE_DAEMON},1)
 	OLDIPKGS += updatedaemon omadm
 endif
@@ -501,9 +486,6 @@ ifdef BYPASS_FIRST_USE_APP
 endif
 ifdef ENABLE_DEVELOPER_MODE
 	@echo "ENABLE_DEVELOPER_MODE = ${ENABLE_DEVELOPER_MODE}"
-endif
-ifdef AUTO_INSTALL_PREWARE 
-	@echo "AUTO_INSTALL_PREWARE = ${AUTO_INSTALL_PREWARE}"
 endif
 ifdef ENABLE_BETA_FEEDS
 	@echo "ENABLE_BETA_FEEDS = ${ENABLE_BETA_FEEDS}"
@@ -821,12 +803,6 @@ ifeq (${ADD_EXTRA_CARRIERS},1)
 			cat $$f >> build/${PATIENT}/rootfs/etc/carrierdb/carrierdb.json ; \
 		fi ; \
 	done
-endif
-ifeq (${AUTO_INSTALL_PREWARE},1)
-	cat scripts/preware-ca-bundle.crt >> build/${PATIENT}/rootfs/etc/ssl/certs/appsigning-bundle.crt
-	mkdir -p build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/
-	cp scripts/preware-install.db \
-	  build/${PATIENT}/rootfs/var/palm/data/com.palm.appInstallService/installHistory.db
 endif
 	for package in ${NEWIPKGS} ; do \
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.old ; \
