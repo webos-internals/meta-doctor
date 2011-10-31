@@ -233,8 +233,8 @@ ENABLE_BETA_FEEDS  = 1
 # CUSTOM_BUILD_INFO = palm-build-info
 # CUSTOM_WEBOS_DMSET = base
 # CUSTOM_CARRIER_DMSET = a
-# CUSTOM_MODEL_LIST = P100EWW
-# CUSTOM_CARRIER_LIST = Sprint
+# CUSTOM_MODEL_CHECK = P100EWW
+# CUSTOM_CARRIER_CHECK = Sprint
 # CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 
 # EXTRA_ROOTFS_IPKGS   = flash flash-mini-adapter flame
@@ -247,8 +247,6 @@ ENABLE_BETA_FEEDS  = 1
 # CUSTOM_ROOTFS = nova-cust-image-castle.rootfs.tar.gz
 # CUSTOM_BUILD_CHECK   = 
 # CUSTOM_RELEASE_CHECK = 
-# CUSTOM_CARRIER_CHECK = 
-# CUSTOM_MODEL_CHECK   = 
 # CUSTOM_UPDATE_SITE   = 
 endif
 
@@ -565,11 +563,11 @@ endif
 ifdef CUSTOM_CARRIER_DMSET
 	@echo "CUSTOM_CARRIER_DMSET = ${CUSTOM_CARRIER_DMSET}"
 endif
-ifdef CUSTOM_MODEL_LIST  
-	@echo "CUSTOM_MODEL_LIST = ${CUSTOM_MODEL_LIST}"
+ifdef CUSTOM_MODEL_CHECK  
+	@echo "CUSTOM_MODEL_CHECK = ${CUSTOM_MODEL_CHECK}"
 endif
-ifdef CUSTOM_CARRIER_LIST
-	@echo "CUSTOM_CARRIER_LIST = ${CUSTOM_CARRIER_LIST}"
+ifdef CUSTOM_CARRIER_CHECK
+	@echo "CUSTOM_CARRIER_CHECK = ${CUSTOM_CARRIER_CHECK}"
 endif
 ifdef CUSTOM_BOOTLOGO
 	@echo "CUSTOM_BOOTLOGO = ${CUSTOM_BOOTLOGO}"
@@ -594,12 +592,6 @@ ifdef CUSTOM_BUILD_CHECK
 endif
 ifdef CUSTOM_RELEASE_CHECK
 	@echo "CUSTOM_RELEASE_CHECK = ${CUSTOM_RELEASE_CHECK}"
-endif
-ifdef CUSTOM_CARRIER_CHECK
-	@echo "CUSTOM_CARRIER_CHECK = ${CUSTOM_CARRIER_CHECK}"
-endif
-ifdef CUSTOM_MODEL_CHECK  
-	@echo "CUSTOM_MODEL_CHECK = ${CUSTOM_MODEL_CHECK}"
 endif
 ifdef CUSTOM_UPDATE_SITE  
 	@echo "CUSTOM_UPDATE_SITE = ${CUSTOM_UPDATE_SITE}"
@@ -832,13 +824,17 @@ ifdef SWAP_PARTITION_SIZE
 	sed -i.orig -e '/<Volume id="swap"/s|size=".*"|size="${SWAP_PARTITION_SIZE}"|' build/${PATIENT}/webOS/${CODENAMENEW}.xml
 	rm -f build/${PATIENT}/webOS/${CODENAMENEW}.xml.orig
 endif
-ifdef CUSTOM_CARRIER_LIST
-	[ -f hashes/${CUSTOM_CARRIER_LIST} ]
-	sed -i.orig -e '/ApprovalCharlieHash/d' \
+ifdef CUSTOM_MODEL_CHECK
+	sed -i.orig -e '/ApprovalMikeHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalCharlieHash=`cat hashes/${CUSTOM_CARRIER_LIST}`" >> \
+	echo "ApprovalMikeHash=`./scripts/encode-hash ${CUSTOM_MODEL_CHECK}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
+endif
+ifeq (${REMOVE_MODEL_CHECK},1)
+	sed -i.orig -e '/ApprovalMikeHash/d' \
+		build/${PATIENT}/resources/recoverytool.config
+	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
 ifdef CUSTOM_CARRIER_CHECK
 	sed -i.orig -e '/ApprovalCharlieHash/d' \
@@ -849,26 +845,6 @@ ifdef CUSTOM_CARRIER_CHECK
 endif
 ifeq (${REMOVE_CARRIER_CHECK},1)
 	sed -i.orig -e '/ApprovalCharlieHash/d' -e '/CustomizationBuild/d' \
-		build/${PATIENT}/resources/recoverytool.config
-	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-endif
-ifdef CUSTOM_MODEL_LIST
-	[ -f hashes/${CUSTOM_MODEL_LIST} ]
-	sed -i.orig -e '/ApprovalMikeHash/d' \
-		build/${PATIENT}/resources/recoverytool.config
-	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalMikeHash=`cat hashes/${CUSTOM_MODEL_LIST}`" >> \
-		build/${PATIENT}/resources/recoverytool.config
-endif
-ifdef CUSTOM_MODEL_CHECK
-	sed -i.orig -e '/ApprovalMikeHash/d' \
-		build/${PATIENT}/resources/recoverytool.config
-	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalMikeHash=`./scripts/encode-hash ${CUSTOM_MODEL_CHECK}`" >> \
-		build/${PATIENT}/resources/recoverytool.config
-endif
-ifeq (${REMOVE_MODEL_CHECK},1)
-	sed -i.orig -e '/ApprovalMikeHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
