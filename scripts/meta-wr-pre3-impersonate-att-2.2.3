@@ -80,7 +80,7 @@ echo '<Val name="PRODoID" value="HSTNH-F30CN" action="overwrite"/>' >> ./${CUSTO
 echo '<Val name="ProductSKU" value="FB389AA#ABA" action="overwrite"/>' >> ./${CUSTOM_XML}
 tail -n 47 build/${A223_BUILD}/webOS/${CUSTOM_XML} >> ./${CUSTOM_XML}
 
-$make ${ARGS} clobber-build all || exit
+$make ${ARGS} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${A223_FILE} --auto
 

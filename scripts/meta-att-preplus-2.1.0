@@ -85,7 +85,7 @@ $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 head -n 1 build/${W210_BUILD}/rootfs/etc/${BUILD_INFO} >  ./${BUILD_INFO}
 tail -n 4 build/${W145_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 
-$make ${ARGS} clobber-build all || exit
+$make ${ARGS} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 

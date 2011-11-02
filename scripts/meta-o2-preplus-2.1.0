@@ -65,7 +65,7 @@ mkdir -p downloads
 
 # $make clobber
 
-$make ${ARGS} clobber-build all || exit
+$make ${ARGS} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 

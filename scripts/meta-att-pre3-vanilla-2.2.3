@@ -106,7 +106,7 @@ mkdir -p carrier
 
 rm -rf carrier
 
-$make ${ARGS} clobber-build all || exit
+$make ${ARGS} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${A223_FILE}
 

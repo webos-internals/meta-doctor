@@ -106,7 +106,7 @@ cp build/${W145_BUILD}/resources/${CARRIER_TARBALL} ./
 head -n 1 build/${V1451_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
 tail -n 4 build/${W145_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 
-$make ${ARGS} clobber-build all || exit
+$make ${ARGS} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W145_FILE}
 

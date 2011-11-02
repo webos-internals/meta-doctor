@@ -223,8 +223,8 @@ ENABLE_BETA_FEEDS  = 1
 # DISABLE_MODEM_UPDATE  = 1
 # REMOVE_MODEL_CHECK    = 1
 # REMOVE_CARRIER_CHECK  = 1
-# REMOVE_BUILD_CHECK    = 1
-# REMOVE_RELEASE_CHECK  = 1
+# REMOVE_BUILD_NAME    = 1
+# REMOVE_LOCATION_HOST  = 1
 # REMOVE_UPDATE_SITE    = 1
 
 # CUSTOM_WEBOS_TARBALL = webOS.tar
@@ -237,6 +237,9 @@ ENABLE_BETA_FEEDS  = 1
 # CUSTOM_CARRIER_CHECK = Sprint
 # CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 
+# CUSTOM_LOCATION_HOST = 
+# CUSTOM_UPDATE_SITE   = 
+
 # EXTRA_ROOTFS_IPKGS   = flash flash-mini-adapter flame
 # EXTRA_ROOTFS_TARBALL = flash.tar
 
@@ -245,9 +248,6 @@ ENABLE_BETA_FEEDS  = 1
 # CUSTOM_INSTALLER = nova-installer-image-castle.uImage
 # CUSTOM_KERNEL_DIR = rootfs
 # CUSTOM_ROOTFS = nova-cust-image-castle.rootfs.tar.gz
-# CUSTOM_BUILD_CHECK   = 
-# CUSTOM_RELEASE_CHECK = 
-# CUSTOM_UPDATE_SITE   = 
 endif
 
 ####################################
@@ -515,11 +515,11 @@ endif
 ifdef REMOVE_CARRIER_CHECK 
 	@echo "REMOVE_CARRIER_CHECK = ${REMOVE_CARRIER_CHECK}"
 endif
-ifdef REMOVE_BUILD_CHECK   
-	@echo "REMOVE_BUILD_CHECK = ${REMOVE_BUILD_CHECK}"
+ifdef REMOVE_BUILD_NAME   
+	@echo "REMOVE_BUILD_NAME = ${REMOVE_BUILD_NAME}"
 endif
-ifdef REMOVE_RELEASE_CHECK 
-	@echo "REMOVE_RELEASE_CHECK = ${REMOVE_RELEASE_CHECK}"
+ifdef REMOVE_LOCATION_HOST 
+	@echo "REMOVE_LOCATION_HOST = ${REMOVE_LOCATION_HOST}"
 endif
 ifdef REMOVE_UPDATE_SITE 
 	@echo "REMOVE_UPDATE_SITE = ${REMOVE_UPDATE_SITE}"
@@ -569,6 +569,15 @@ endif
 ifdef CUSTOM_CARRIER_CHECK
 	@echo "CUSTOM_CARRIER_CHECK = ${CUSTOM_CARRIER_CHECK}"
 endif
+ifdef CUSTOM_BUILD_NAME  
+	@echo "CUSTOM_BUILD_NAME = ${CUSTOM_BUILD_NAME}"
+endif
+ifdef CUSTOM_LOCATION_HOST
+	@echo "CUSTOM_LOCATION_HOST = ${CUSTOM_LOCATION_HOST}"
+endif
+ifdef CUSTOM_UPDATE_SITE  
+	@echo "CUSTOM_UPDATE_SITE = ${CUSTOM_UPDATE_SITE}"
+endif
 ifdef CUSTOM_BOOTLOGO
 	@echo "CUSTOM_BOOTLOGO = ${CUSTOM_BOOTLOGO}"
 endif
@@ -586,15 +595,6 @@ ifdef CUSTOM_KERNEL_DIR
 endif
 ifdef CUSTOM_ROOTFS
 	@echo "CUSTOM_ROOTFS = ${CUSTOM_ROOTFS}"
-endif
-ifdef CUSTOM_BUILD_CHECK  
-	@echo "CUSTOM_BUILD_CHECK = ${CUSTOM_BUILD_CHECK}"
-endif
-ifdef CUSTOM_RELEASE_CHECK
-	@echo "CUSTOM_RELEASE_CHECK = ${CUSTOM_RELEASE_CHECK}"
-endif
-ifdef CUSTOM_UPDATE_SITE  
-	@echo "CUSTOM_UPDATE_SITE = ${CUSTOM_UPDATE_SITE}"
 endif
 
 .PHONY: all
@@ -848,26 +848,26 @@ ifeq (${REMOVE_CARRIER_CHECK},1)
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
-ifdef CUSTOM_RELEASE_CHECK
+ifdef CUSTOM_LOCATION_HOST
 	sed -i.orig -e '/ApprovalReleaseHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalReleaseHash=${CUSTOM_RELEASE_CHECK}" >> \
+	echo "ApprovalReleaseHash=`./scripts/encode-hash ${CUSTOM_LOCATION_HOST}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
-ifeq (${REMOVE_RELEASE_CHECK},1)
+ifeq (${REMOVE_LOCATION_HOST},1)
 	sed -i.orig -e '/ApprovalReleaseHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
 endif
-ifdef CUSTOM_BUILD_CHECK
+ifdef CUSTOM_BUILD_NAME
 	sed -i.orig -e '/ApprovalBuildName/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalBuildName=${CUSTOM_BUILD_CHECK}" >> \
+	echo "ApprovalBuildName=`./scripts/encode-hash ${CUSTOM_BUILD_NAME}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
-ifeq (${REMOVE_BUILD_CHECK},1)
+ifeq (${REMOVE_BUILD_NAME},1)
 	sed -i.orig -e '/ApprovalBuildName/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
@@ -1077,10 +1077,6 @@ immigrate: mount
 	novacom -w run file://bin/mv -- /tmp/boot/uImage.webOS /tmp/boot/uImage
 	novacom -w run file://bin/mount -- ${BOOT_PARTITION} /tmp/boot -o remount,ro
 
-.PHONY: backup-%
-backup-%:
-	${MAKE} CARRIER=$* backup
-
 .PHONY: qualcomm
 qualcomm:
 	novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8
@@ -1088,6 +1084,10 @@ qualcomm:
 	for f in 1 2 3 5 6 7 8 9 10 11 12 13 14 ; do \
 	  ( novacom -w run file://bin/dd -- if=/dev/mmcblk0p$$f ) > clones/new/mmcblk0p$$f.bin ; \
 	done
+
+.PHONY: backup-%
+backup-%:
+	${MAKE} CARRIER=$* backup
 
 .PHONY: backup
 backup: mount
@@ -1131,6 +1131,30 @@ backup: mount
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz
+
+.PHONY: restore-%
+restore-%:
+	${MAKE} CARRIER=$* restore
+
+.PHONY: restore
+restore: mountrw
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/media/ --no-same-owner --totals -zxf - ./.palm ) \
+	  < clones/$$id/${CUSTIMAGEOLD}.media.tar.gz
+
+.PHONY: mountrw
+mountrw: unmount
+	novacom -w run file://usr/sbin/lvm.static -- vgscan --ignorelockingfailure 2> /dev/null
+	novacom -w run file://usr/sbin/lvm.static -- vgchange -ay --ignorelockingfailure 2> /dev/null
+	@for f in var root log update media ; do \
+	  echo "Mounting /dev/mapper/store-$$f" ; \
+	  novacom -w run file://bin/mkdir -- -p /tmp/$$f ; \
+	  novacom -w run file://bin/mount -- /dev/mapper/store-$$f /tmp/$$f -o rw ; \
+	done
+	@echo "Mounting /dev/${BOOT_PARTITION}"
+	@novacom -w run file://bin/mkdir -- -p /tmp/boot
+	@novacom -w run file://bin/mount -- /dev/${BOOT_PARTITION} /tmp/boot -o rw
 
 .PHONY: mount
 mount: unmount

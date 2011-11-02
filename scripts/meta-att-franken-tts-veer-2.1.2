@@ -89,7 +89,7 @@ $make VERSION=3.0.4 DEVICE=touchpad CARRIER=wifi \
 
 $make ${ARGS} \
     EXTRA_ROOTFS_IPKGS="${TTS_IPKS}" \
-    EXTRA_ROOTFS_TARBALL=${TTS_TARBALL} clobber-build all || exit
+    EXTRA_ROOTFS_TARBALL=${TTS_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${A212_FILE}
 

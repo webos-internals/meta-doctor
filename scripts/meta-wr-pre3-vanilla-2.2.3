@@ -113,7 +113,7 @@ rm -rf carrier
 head -n 1 build/${A223_BUILD}/rootfs/etc/${BUILD_INFO} >  ./${BUILD_INFO}
 tail -n 4 build/${W220_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 
-$make ${ARGS} clobber-build all || exit
+$make ${ARGS} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W220_FILE}
 

@@ -174,7 +174,7 @@ rm -rf enyo
 
 $make ${ARGS} \
     EXTRA_ROOTFS_IPKGS="enyo flash flash-mini-adapter flame flashplugin" \
-    EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build all || exit
+    EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
 

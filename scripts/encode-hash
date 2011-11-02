@@ -1,5 +1,5 @@
 #!/bin/sh
 
-echo "$1" > ./MetaDoctor.txt
-tar -c -f - ./MetaDoctor.txt | gzip -f | openssl enc -e -a -A
-rm -rf ./MetaDoctor.txt
+echo "$1" > "$1"
+tar -c -f - "$1" | gzip -f | openssl enc -e -a -A
+rm -rf "$1"
