@@ -1,0 +1,42 @@
+#!/bin/sh
+
+ar=ar
+tar=tar
+if [ "`uname -s`" = "Darwin" ] ; then
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+    tar=gnutar
+fi
+
+PKG1=$1
+PKG2=$2
+
+if [ -z "${PKG1}" ] || [ -z "${PKG2}" ] ; then
+   echo "Usage: ipkg-compare ipkg1 ipkg2"
+   exit 1
+fi
+
+rm -rf ./ipkg-compare-*.*
+pkg1dir=./ipkg-compare-1.$$
+pkg2dir=./ipkg-compare-2.$$
+mkdir -p ${pkg1dir}/CONTROL ${pkg2dir}/CONTROL
+
+( cd ${pkg1dir} ; $ar x ${PKG1} )
+$tar -C ${pkg1dir}/CONTROL -zxf ${pkg1dir}/control.tar.gz
+rm -f ${pkg1dir}/control.tar.gz
+$tar -C ${pkg1dir} -zxf ${pkg1dir}/data.tar.gz
+rm -f ${pkg1dir}/data.tar.gz
+rm -f ${pkg1dir}/debian-binary
+
+( cd ${pkg2dir} ; $ar x ${PKG2} )
+$tar -C ${pkg2dir}/CONTROL -zxf ${pkg2dir}/control.tar.gz
+rm -f ${pkg2dir}/control.tar.gz
+$tar -C ${pkg2dir} -zxf ${pkg2dir}/data.tar.gz
+rm -f ${pkg2dir}/data.tar.gz
+rm -f ${pkg2dir}/debian-binary
+
+diff -r ${pkg1dir} ${pkg2dir} || exit 1
+
+rm -rf ${pkg1dir} ${pkg2dir}
+
+exit 0

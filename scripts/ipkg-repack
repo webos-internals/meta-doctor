@@ -1,0 +1,80 @@
+#!/bin/sh
+
+ar=ar
+tar=tar
+if [ "`uname -s`" = "Darwin" ] ; then
+    export COPYFILE_DISABLE=true
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+    tar=gnutar
+fi
+
+ID=$1
+APPS=${2:-/media/cryptofs/apps}
+
+if [ -z "${ID}" ] ; then
+   echo "Usage: ipkg-repack appid"
+   exit 1
+fi
+
+CONTROL=${APPS}/usr/lib/ipkg/info/${ID}.control
+
+if [ ! -e "${CONTROL}" ] ; then
+   echo "Package '${ID}' control file not found at ${CONTROL}"
+   exit 1
+fi
+
+LIST=${APPS}/usr/lib/ipkg/info/${ID}.list
+
+if [ ! -e "${LIST}" ] ; then
+   echo "Package '${ID}' list file not found at ${LIST}"
+   exit 1
+fi
+
+POSTINST=${APPS}/usr/lib/ipkg/info/${ID}.postinst
+PMPOSTINSTALL=${APPS}/.scripts/${ID}/pmPostInstall.script
+PRERM=${APPS}/usr/lib/ipkg/info/${ID}.prerm
+PMPREREMOVE=${APPS}/.scripts/${ID}/pmPreRemove.script
+
+VERSION=`sed -n -e 's/^Version: //p' ${CONTROL}`
+
+echo "Found version ${VERSION} of ${ID}"
+
+rm -rf ./ipkg-repack.*
+tmpdir=./ipkg-repack.$$
+mkdir -p ${tmpdir}/CONTROL ${tmpdir}/DATA
+
+sed -e 's,^/,./,' ${LIST} | $tar -C ${APPS} -cf - --files-from=- | $tar -C ${tmpdir}/DATA -xf -
+
+$tar -C ${tmpdir}/DATA -zcf ${tmpdir}/data.tar.gz --owner=0 --group=0 .
+
+cp ${CONTROL} ${tmpdir}/CONTROL/control
+
+FILES=""
+
+if [ -s ${POSTINST} ] ; then
+   cp ${POSTINST} ${tmpdir}/pmPostInstall.script
+   FILES="${FILES} pmPostInstall.script"
+elif [ -s ${PMPOSTINSTALL} ] ; then
+   cp ${PMPOSTINSTALL} ${tmpdir}/pmPostInstall.script
+   FILES="${FILES} pmPostInstall.script"
+fi
+
+if [ -s ${PRERM} ] ; then
+   cp ${PRERM} ${tmpdir}/pmPreRemove.script
+   FILES="${FILES} pmPreRemove.script"
+elif [ -s ${PMPREREMOVE} ] ; then
+   cp ${PMPREREMOVE} ${tmpdir}/pmPreRemove.script
+   FILES="${FILES} pmPreRemove.script"
+fi
+
+$tar -C ${tmpdir}/CONTROL -zcf ${tmpdir}/control.tar.gz  --owner=0 --group=0 .
+
+rm -rf ${tmpdir}/CONTROL
+
+echo "2.0" > ${tmpdir}/debian-binary
+
+( cd ${tmpdir} && $ar -cr ../${ID}_${VERSION}_all.ipk ./debian-binary ./data.tar.gz ./control.tar.gz ${FILES} )
+
+rm -rf ${tmpdir}
+
+exit 0
