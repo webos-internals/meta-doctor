@@ -451,6 +451,7 @@ ERR = $(error Using Cygwin on Windows is not a valid MetaDoctor option.  See the
 endif
 
 ifeq ($(shell uname -s),Darwin)
+MD5SUM	= md5 -r
 TAR	= gnutar
 export COPYFILE_DISABLE=true
 export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
@@ -458,6 +459,7 @@ ifeq (${PATCH_DOCTOR},1)
 JAD	= build/tools/jad-macosx/jad
 endif
 else
+MD5SUM	= md5sum
 TAR	= tar
 ifeq (${PATCH_DOCTOR},1)
 JAD	= build/tools/jad-linux/jad
@@ -800,7 +802,7 @@ endif
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.old ; \
 	  ( cd build/${PATIENT}/rootfs ; \
 	    cat ./usr/lib/ipkg/info/$$package.list | sed -e 's|^|.|' | \
-	    xargs -I '{}' find '{}' -type f -prune -print | xargs md5sum ) \
+	    xargs -I '{}' find '{}' -type f -prune -print | xargs ${MD5SUM} ) \
 	      > build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.new ; \
 	  ./scripts/replace-md5sums.py \
 	    build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.old build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.new \
@@ -811,7 +813,7 @@ endif
 	  gunzip -c < build/${PATIENT}/rootfs/md5sums.gz > build/${PATIENT}/rootfs/md5sums ; \
 	fi
 	mv build/${PATIENT}/rootfs/md5sums build/${PATIENT}/rootfs/md5sums.old
-	( cd build/${PATIENT}/rootfs ; find . -type f | xargs md5sum ) \
+	( cd build/${PATIENT}/rootfs ; find . -type f | xargs ${MD5SUM} ) \
 	    > build/${PATIENT}/rootfs/md5sums.new
 	./scripts/replace-md5sums.py build/${PATIENT}/rootfs/md5sums.old build/${PATIENT}/rootfs/md5sums.new > \
 				     build/${PATIENT}/rootfs/md5sums

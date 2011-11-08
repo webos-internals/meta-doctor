@@ -16,9 +16,11 @@ if [ -z "${PKG1}" ] || [ -z "${PKG2}" ] ; then
    exit 1
 fi
 
+NAME=`basename $1 .ipk`
+
 rm -rf ./ipkg-compare-*.*
-pkg1dir=./ipkg-compare-1.$$
-pkg2dir=./ipkg-compare-2.$$
+pkg1dir=./ipkg-compare-1.$NAME
+pkg2dir=./ipkg-compare-2.$NAME
 mkdir -p ${pkg1dir}/CONTROL ${pkg2dir}/CONTROL
 
 ( cd ${pkg1dir} ; $ar x ${PKG1} )
