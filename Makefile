@@ -408,6 +408,9 @@ VERSION = 3.0.4
 CARRIER_TARBALL = hp.tar
 endif
 ifeq (${CARRIER},att)
+ifeq (${VERSION},3.0.4)
+MODEL = p304hstnh
+endif
 CARRIER_TARBALL = att.tar
 endif
 endif
