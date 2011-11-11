@@ -1084,10 +1084,12 @@ immigrate: mount
 
 .PHONY: qualcomm
 qualcomm:
-	novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8
-	mkdir -p clones/new
+	-novacom -w run file://bin/true
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	mkdir -p clones/$$id ; \
 	for f in 1 2 3 5 6 7 8 9 10 11 12 13 14 ; do \
-	  ( novacom -w run file://bin/dd -- if=/dev/mmcblk0p$$f ) > clones/new/mmcblk0p$$f.bin ; \
+	  echo "Creating clones/$$id/mmcblk0p$$f.bin" ; \
+	  ( novacom -w run file://bin/dd -- if=/dev/mmcblk0p$$f ) > clones/$$id/mmcblk0p$$f.bin ; \
 	done
 
 .PHONY: backup-%
