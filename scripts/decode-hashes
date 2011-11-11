@@ -4,18 +4,18 @@
 
 NAME=$1
 
-if [ -f $NAME/jar/resources/recoverytool.config ] ; then 
-    rm -f $NAME/jar/resources/recoverytool.txt
-    grep SoftwareUpdateSite $NAME/jar/resources/recoverytool.config > $NAME/jar/resources/recoverytool.txt
-    for hash in `grep Approval $NAME/jar/resources/recoverytool.config` ; do \
-	printf "$hash\n" >> $NAME/jar/resources/recoverytool.txt ; \
-	printf "$hash" | sed -e 's/=.*$//' | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
-	printf '=' >> $NAME/jar/resources/recoverytool.txt ; \
+if [ -f $NAME/recoverytool.config ] ; then 
+    rm -f $NAME/recoverytool.txt
+    grep SoftwareUpdateSite $NAME/recoverytool.config > $NAME/recoverytool.txt
+    for hash in `grep Approval $NAME/recoverytool.config` ; do \
+	printf "$hash\n" >> $NAME/recoverytool.txt ; \
+	printf "$hash" | sed -e 's/=.*$//' | tr -d '\n' >> $NAME/recoverytool.txt ; \
+	printf '=' >> $NAME/recoverytool.txt ; \
 	printf "$hash" | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
-	tar -z -t -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
-	printf " '" >> $NAME/jar/resources/recoverytool.txt ; \
+	tar -z -t -f - | tr -d '\n' >> $NAME/recoverytool.txt ; \
+	printf " '" >> $NAME/recoverytool.txt ; \
 	printf "$hash" | sed -e 's/^[^=]*=//' | openssl enc -d -a -A | \
-	tar -z -x -O -f - | tr -d '\n' >> $NAME/jar/resources/recoverytool.txt ; \
-	printf "'\n" >> $NAME/jar/resources/recoverytool.txt ; \
+	tar -z -x -O -f - | tr -d '\n' >> $NAME/recoverytool.txt ; \
+	printf "'\n" >> $NAME/recoverytool.txt ; \
     done
 fi

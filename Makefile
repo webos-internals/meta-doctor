@@ -833,7 +833,7 @@ ifdef CUSTOM_MODEL_CHECK
 	sed -i.orig -e '/ApprovalMikeHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalMikeHash=`./scripts/encode-hash ${CUSTOM_MODEL_CHECK}`" >> \
+	echo "ApprovalMikeHash=`./scripts/encode-hash ./model.txt ${CUSTOM_MODEL_CHECK}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_MODEL_CHECK},1)
@@ -845,7 +845,7 @@ ifdef CUSTOM_CARRIER_CHECK
 	sed -i.orig -e '/ApprovalCharlieHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalCharlieHash=`./scripts/encode-hash ${CUSTOM_CARRIER_CHECK}`" >> \
+	echo "ApprovalCharlieHash=`./scripts/encode-hash ./carrier.txt ${CUSTOM_CARRIER_CHECK}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_CARRIER_CHECK},1)
@@ -857,7 +857,7 @@ ifdef CUSTOM_LOCATION_HOST
 	sed -i.orig -e '/ApprovalReleaseHash/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalReleaseHash=`./scripts/encode-hash ${CUSTOM_LOCATION_HOST}`" >> \
+	echo "ApprovalReleaseHash=`./scripts/encode-hash ${CUSTOM_LOCATION_HOST} ${CUSTOM_LOCATION_HOST}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_LOCATION_HOST},1)
@@ -869,7 +869,7 @@ ifdef CUSTOM_BUILD_NAME
 	sed -i.orig -e '/ApprovalBuildName/d' \
 		build/${PATIENT}/resources/recoverytool.config
 	rm -f build/${PATIENT}/resources/recoverytool.config.orig
-	echo "ApprovalBuildName=`./scripts/encode-hash ${CUSTOM_BUILD_NAME}`" >> \
+	echo "ApprovalBuildName=`./scripts/encode-hash ${CUSTOM_BUILD_NAME} ${CUSTOM_BUILD_NAME}`" >> \
 		build/${PATIENT}/resources/recoverytool.config
 endif
 ifeq (${REMOVE_BUILD_NAME},1)
