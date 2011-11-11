@@ -1,0 +1,91 @@
+#!/bin/bash
+# meta-att-veer-impersonate-wr-2.1.2 script
+# Intended to flash AT&T Veer phones so that they impersonate a WR Veer
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+W211_JAR_URL="http://palm.cdnetworks.net/rom/veer/p211r0d06292011/wrp211rod/webosdoctorp160unawr.jar"
+
+W211_FILE="webosdoctorp160una-wr-2.1.1.jar"
+
+W211_BUILD="veer-p160una-wr-2.1.1"
+
+W211_MD5="fb6ae25e15c809836bbe73931839ccf0"
+
+PATIENT="meta-att-veer-impersonate-wr-2.1.1"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+CUSTOM_XML="broadway.xml"
+
+rm -f ${CUSTOM_XML}
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+fi
+
+ARGS="${ARGS} DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_CHECK=ATT CUSTOM_MODEL_CHECK=P160UNA CUSTOM_XML=${CUSTOM_XML} PATIENT=${PATIENT} VERSION=2.1.1 DEVICE=veer CARRIER=wr"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W211_FILE}"
+echo
+
+mkdir -p downloads
+
+[ ! -f downloads/${W211_FILE} ] && $wget -c ${W211_JAR_URL} -O downloads/${W211_FILE}
+
+[ $(md5sum downloads/${W211_FILE} | cut -d \  -f 1) != ${W211_MD5} ] && \
+        echo "${W211_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W211_FILE} && exit
+
+# $make clobber
+
+$make VERSION=2.1.1 DEVICE=veer CARRIER=wr unpack || exit
+
+head -n 29 build/${W211_BUILD}/webOS/${CUSTOM_XML} >  ./${CUSTOM_XML}
+echo '<Val name="DMCARRIER" value="ROW" action="overwrite"/>' >> ./${CUSTOM_XML}
+echo '<Val name="DMMODEL" value="P160UEU" action="overwrite"/>' >> ./${CUSTOM_XML}
+echo '<Val name="MfgCode" value="" action="overwrite"/>' >> ./${CUSTOM_XML}
+# echo '<Val name="PN" value="180-10918-01" action="overwrite"/>' >> ./${CUSTOM_XML}
+echo '<Val name="PRODoID" value="P160UEU" action="overwrite"/>' >> ./${CUSTOM_XML}
+echo '<Val name="ProductSKU" value="FB348AA#ABD" action="overwrite"/>' >> ./${CUSTOM_XML}
+tail -n 46 build/${W211_BUILD}/webOS/${CUSTOM_XML} >> ./${CUSTOM_XML}
+
+$make ${ARGS} clobber-build settings all || exit
+
+$java -jar build/${PATIENT}/${W211_FILE} --auto
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W211_FILE}"
+echo
+
+rm -f ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CUSTOM_XML}
