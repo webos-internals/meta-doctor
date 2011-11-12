@@ -32,10 +32,11 @@
 # Uncomment the corresponding line below to enable this feature.
 
 # BYPASS_FIRST_USE_APP allows the device to start without running the
-# First Use application.  This allows users to enable wifi service
+# First Use application.  This allows phone users to enable wifi service
 # first and use that for Palm profile creation and restoring of all
 # the profile data.  Note that to create a Palm profile you may still
-# need to activate the cellular connection.
+# need to activate the cellular connection. This is not normally
+# required on a TouchPad, as it supports wifi in the First Use app.
 # This is not a method to use a device on a different cellular carrier.
 # Uncomment the corresponding line below to enable this feature.
 
