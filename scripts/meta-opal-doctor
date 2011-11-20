@@ -1,0 +1,2 @@
+#!/bin/sh
+make CUSTOM_DEVICETYPE=opal CUSTOM_MODEL_CHECK="HSTNH-I32C" CUSTOM_CARRIER_CHECK="ROW" DEVICE=touchpad CODENAME=opal DOCTOR=webosdoctorp304hstnhatt-3.0.4.jar CARRIER=att VERSION=3.0.3 CUSTOM_WEBOS_TARBALL=opal/cust-opal-509417.tar CUSTOM_CARRIER_TARBALL=opal/wr-opal.tar settings clobber-build all
