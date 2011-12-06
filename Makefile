@@ -125,7 +125,6 @@
 # Uncomment the corresponding line below to enable this feature.
 
 # VAR_PARTITION_SIZE allows you to increase the size of the /var partition.
-# This allows more space for the installation of Linux applications.
 # The extra space is taken away from the USB drive. Note that as of
 # webOS 2.0, emails and attachments are no longer stored in /var.
 # Uncomment the corresponding line below to enable this feature.
