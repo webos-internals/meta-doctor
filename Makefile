@@ -346,8 +346,11 @@ CODENAME = roadrunner
 NVRAM_PARTITION=mmcblk0p1
 BOOT_PARTITION=mmcblk0p2
 ifeq (${CARRIER},wr)
+MODEL = p224pre2
+VERSION = 2.2.4
+ifeq (${VERSION},2.1.0)
 MODEL = p103ueuna
-VERSION = 2.1.0
+endif
 ifeq (${VERSION},2.0.1)
 MODEL = p102ueuna
 endif
