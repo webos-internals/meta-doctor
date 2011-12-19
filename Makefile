@@ -166,7 +166,7 @@
 # SWAP_PARTITION_SIZE   = 512MB
 # EXT3FS_PARTITION_SIZE = 2GB
 
-# Select "pre", "preplus", "pixi", "pixiplus", "pre2", "pre3", "veer" or "touchpad".
+# Select "pre", "preplus", "pixi", "pixiplus", "pre2", "pre3", "veer", "touchpad", or "touchpadgo".
 DEVICE = undefined
 
 # Select "wr", "sprint", "verizon", "bellmo", "telcel", "att" or "wifi".
@@ -418,6 +418,32 @@ CARRIER_TARBALL = att.tar
 endif
 endif
 
+ifeq (${DEVICE},touchpadgo)
+CODENAME = opal
+CUSTOM_DEVICETYPE=opal
+CUSTOM_MODEL_CHECK="HSTNH-I32C"
+CUSTOM_CARRIER_CHECK="ROW"
+NVRAM_PARTITION=mmcblk0p12
+BOOT_PARTITION=mmcblk0p13
+ifeq (${CARRIER},wifi)
+MODEL = opal
+VERSION = 3.0.x
+CARRIER_TARBALL = hp.tar
+endif
+ifeq (${CARRIER},wr)
+MODEL = opal3g
+VERSION = 3.0.3
+AMBULANCE = webosdoctorp304hstnhatt-3.0.4.jar
+CARRIER_TARBALL = att.tar
+endif
+ifeq (${CARRIER},att)
+MODEL = opal3g
+VERSION = 3.0.4
+AMBULANCE = webosdoctorp304hstnhatt-3.0.4.jar
+CARRIER_TARBALL = att.tar
+endif
+endif
+
 ifndef DOCTOR
 DOCTOR = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 ifeq (${CARRIER},wr)
@@ -426,6 +452,10 @@ endif
 ifeq (${CARRIER},wifi)
 DOCTOR = webosdoctor${MODEL}${CARRIER}-${VERSION}.jar
 endif
+endif
+
+ifndef AMBULANCE
+AMBULANCE = ${DOCTOR}
 endif
 
 PATIENT = ${DEVICE}-${MODEL}-${CARRIER}-${VERSION}
@@ -640,7 +670,7 @@ unpack-%:
 .PHONY: unpack
 unpack: build/${PATIENT}/.unpacked
 
-build/${PATIENT}/.unpacked: downloads/${DOCTOR}
+build/${PATIENT}/.unpacked: downloads/${AMBULANCE}
 	rm -rf build/${PATIENT}
 	mkdir -p build/${PATIENT}
 	cp $< build/${PATIENT}/${DOCTOR}
