@@ -43,10 +43,7 @@ esac
 
 WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
-SRC_CDMA_FW="roadrunnercdmafw.tar"
 CDMA_FW="roadrunnercdmafw.tar"
-SRC_UMTS_FW="roadrunnerumtsfw.tar"
-UMTS_FW="roadrunnerumtsfw.tar"
 
 rm -f ${CDMA_FW} ${UMTS_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
 
@@ -83,7 +80,6 @@ fi
 VZW_IPKS="${VZW_IPKS} \
 amazonservice_*.ipk \
 com.palm.app.amazonstore_*.ipk \
-roadrunnercdmafw-verizon_*.ipk \
 "
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
@@ -113,13 +109,10 @@ $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
 
 cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
 
-cp build/${W210_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
-cp build/${W210_BUILD}/webOS/${SRC_UMTS_FW} ${UMTS_FW}
+cp build/${W210_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
 
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
 
 mkdir -p carrier
 
@@ -139,4 +132,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${UMTS_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL}
