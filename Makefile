@@ -832,11 +832,19 @@ ifeq (${INSTALL_WIFI_PROFILES},1)
 	fi
 endif
 ifeq (${ADD_EXTRA_CARRIERS},1)
-	for f in patches/carriers/*.json ; do \
-		if [ -f $$f ]; then \
-			cat $$f >> build/${PATIENT}/rootfs/etc/carrierdb/carrierdb.json ; \
-		fi ; \
-	done
+	@if [ -d ./config/carriers ]; then \
+		for f in config/carriers/*.json ; do \
+			if [ -f $$f ]; then \
+				cat $$f >> build/${PATIENT}/rootfs/etc/carrierdb/carrierdb.json ; \
+			fi ; \
+		done ; \
+	else \
+		for f in patches/carriers/*.json ; do \
+			if [ -f $$f ]; then \
+				cat $$f >> build/${PATIENT}/rootfs/etc/carrierdb/carrierdb.json ; \
+			fi ; \
+		done ; \
+	fi
 endif
 	for package in ${NEWIPKGS} ; do \
 	  mv build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.md5sums.old ; \
