@@ -371,12 +371,12 @@ CODENAME = mantaray
 NVRAM_PARTITION=mmcblk0p13
 BOOT_PARTITION=mmcblk0p14
 ifeq (${CARRIER},wr)
-MODEL = p220manta
-VERSION = 2.2.0
+MODEL = p224manta
+VERSION = 2.2.4
 endif
 ifeq (${CARRIER},att)
-MODEL = p223manta
-VERSION = 2.2.3
+MODEL = p224manta
+VERSION = 2.2.4
 endif
 ifeq (${CARRIER},verizon)
 MODEL = p223manta
