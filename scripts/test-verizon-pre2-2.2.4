@@ -62,7 +62,6 @@ pmvoicecommand-*.ipk \
 com.palm.app.mobilehotspot_*.ipk \
 com.palm.app.skype_*.ipk \
 sweatshop-wr-roadrunner_*.ipk \
-palmcustomizationinfo-wr_*.ipk \
 crotestcastleplus-images_*.ipk \
 audiod-config-eu_*.ipk \
 "
@@ -80,6 +79,8 @@ fi
 VZW_IPKS="${VZW_IPKS} \
 amazonservice_*.ipk \
 com.palm.app.amazonstore_*.ipk \
+palmcustomizationinfo-verizon_*.ipk \
+roadrunnercdmafw-verizon_*.ipk \
 "
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
@@ -116,10 +117,10 @@ $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
 mkdir -p carrier
 
-( cd build/${W210_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W224_BUILD}/carrier ; \
-    $tar -c -f - ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${W210_BUILD}/carrier ; \
+    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${WR_IPKS} )
 
 rm -rf carrier
