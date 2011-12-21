@@ -379,8 +379,8 @@ MODEL = p224manta
 VERSION = 2.2.4
 endif
 ifeq (${CARRIER},verizon)
-MODEL = p223manta
-VERSION = 2.2.3
+MODEL = p224manta
+VERSION = 2.2.4
 CARRIER_TARBALL = verizon-world.tar
 endif
 endif
