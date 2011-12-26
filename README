@@ -1,0 +1,110 @@
+The Webos Internals Meta Doctor is a Makefile which can modify a copy
+of the Palm webOS Doctor before it is flashed onto a webOS device. It
+accomplishes this by reaching into Palm's distributed Doctor JAR file
+and making changes to it.
+
+The following features are available. To enable a feature, uncomment
+the corresponding line in the Makefile.
+
+BYPASS_ACTIVATION removes the Palm activation process that normally
+runs on the first boot of the device. This allows users to use the
+device even if they do not have access to cellular connectivity or
+would prefer not to go through the activation process. This option
+disables the cellular functionality until the next time you
+doctor. Bypassing activation may prevent you from creating a Palm
+profile. This is not a method to use a device on a different cellular
+carrier. Note that this option is only for use on Phones, not
+Tablets.
+
+BYPASS_FIRST_USE_APP allows the device to start without running the
+First Use application. This allows phone users to enable wifi service
+first and use that for Palm profile creation and restoring of all the
+profile data. Note that to create a Palm profile you may still need to
+activate the cellular connection. This is not normally required on a
+TouchPad, as it supports wifi in the First Use app. This is not a
+method to use a device on a different cellular carrier.
+
+ENABLE_DEVELOPER_MODE puts the phone in Developer Mode. This allows
+installation and testing of applications on the device without needing
+to type the developer mode activation code. There are no known
+security implications of leaving a phone in developer mode.
+
+ENABLE_BETA_FEEDS installs a flag file which tells Preware to
+automatically install beta feeds for all WebOS Internals packages.
+ENABLE_ALPHA_FEEDS installs the corresponding flag for the alpha
+feeds. You must read http://testing.preware.org/ before enabling
+either.
+
+INSTALL_SSH_AUTH_KEYS imports the SSH authorized_keys file from the
+user's home directory to the device. The user can then connect to the
+device from their computer as soon as an SSH daemon is installed. You
+must already have a valid openssh authorized_keys file in
+~/.ssh/authorized_keys or in ./config/authorized_keys before enabling
+this feature, or it will cause a fatal error. You then need to install
+the OpenSSH SFTP Server application in Preware to actually access the
+device using the openssh private key that matches the openssh public
+key listed in your authorized_keys file.
+
+INSTALL_WIFI_PROFILES imports a wifi preferences database file from
+the user's home directory to the device. The device will then be set
+up to use wifi immediately after the webOS Doctor has completed. You
+must already have copied a correctly configured prefsDB.sl file from
+the /var/preferences/com.palm.wifi/ directory on the device to
+~/.ssh/com.palm.wifi.prefsDB.sl or to
+./config/com.palm.wifi.prefsDB.sl on your host machine before enabling
+this feature, or it will cause a fatal error.
+
+DISABLE_UPLOAD_DAEMON disables a background process that automatically
+uploads usage information to Palm on a daily basis. It uploads debug
+information related to operating system or application crashes, users'
+GPS information, along with data on every application used, and for
+how long it was used. You may wish to disable this on privacy
+grounds, or if you do not have an unlimited data plan and will be
+paying exorbitant data charges.
+
+DISABLE_UPDATE_DAEMON disables the Palm Over The Air update daemon.
+It also disables provisioning support by cellular providers.
+
+DISABLE_MODEM_UPDATE prevents the device from reflashing the modem
+software. This saves some time during the webOS Doctor process.
+
+ENABLE_USB_NETWORKING activates USB networking functionality. The
+device can then be accessed via USB networking (usbnet drivers are
+required on the host). This is not a tethering mechanism.
+
+REMOVE_CARRIER_CHECK prevents the webOS Doctor from verifying that
+it is installing a software version from the same provider through
+which the device was distributed. It also removes any and all
+carrier-specific applications and features. The webOS Doctor can
+then be used to update the core software using a release from a
+different provider (excluding any provider-specific functionality).
+This is likely to break access to the App Catalog and Updates apps.
+This is not a method to use a device on a different cellular carrier.
+
+REMOVE_MODEL_CHECK prevents the webOS Doctor from verifying that it
+is installing a software version for the intended device. The webOS
+Doctor can then be used to update the core software using a release
+from a different device (e.g. EU device vs US device).
+This is not a method to use a device on a different cellular carrier.
+
+CHANGE_KEYBOARD_TYPE permanently changes the keyboard layout using
+the manufacturing software token area. You only need to do this
+once.  Future uses of the webOS Doctor without this feature enabled
+will not change the setting. You can use this feature again in the
+future at any time to reverse this change.
+('z' means QWERTY, 'y' & 'y1' mean QWERTZ, 'w1' means AZERTY).
+
+ADD_EXTRA_CARRIERS adds extra carrier information from the files in
+the ./patches/carriers directory (currently only for WebOS 2.0.0). 
+
+VAR_PARTITION_SIZE allows you to increase the size of the /var partition.
+The extra space is taken away from the USB drive. Note that as of
+webOS 2.0, emails and attachments are no longer stored in /var.
+
+SWAP_PARTITION_SIZE allows you to increase the size of the swap partition.
+The extra space is taken away from the USB drive.
+
+EXT3FS_PARTITION_SIZE adds a spare LVM partition formatted as ext3.
+This allows space for experimentation that requires an additional
+ext3 filesytem. The extra space is taken away from the USB drive.
+Note that any existing ext3fs partition will be reformatted.
