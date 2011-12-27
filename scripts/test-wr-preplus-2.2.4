@@ -41,22 +41,11 @@ case "`uname -s`" in
 	;;
 esac
 
-WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
-KERN_TARBALL="kernel.tar"
-SRC_UMTS_FW="roadrunnerumtsfw.tar"
-UMTS_FW="castleumtsfw.tar"
-SRC_BOOT_FW="boot-roadrunner.bin"
-BOOT_FW="boot-castle.bin"
-INSTALLER_XML="installer.xml"
-SRC_CUST_FW="nova-cust-image-roadrunner.rootfs.tar"
-CUST_FW="nova-cust-image-castle.rootfs.tar"
-SRC_INSTALLER_FW="nova-installer-image-roadrunner.uImage"
-INSTALLER_FW="nova-installer-image-castle.uImage"
-SRC_XML_FW="roadrunner.xml"
-XML_FW="castle.xml"
+LEGACY_TARBALL="legacy.tar"
+CUSTOM_ROOTFS="rootfs.tar"
 
-rm -f ${UMTS_FW} ${BUILD_INFO} ${BOOT_FW} ${INSTALLER_XML} ${CUST_FW}.gz ${INSTALLER_FW} ${XML_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${KERN_TARBALL}
+rm -f ${BUILD_INFO} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -84,7 +73,7 @@ if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
 
-ARGS="${ARGS} DISABLE_MODEM_UPDATE=1 ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} DISABLE_MODEM_UPDATE=1 ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -109,38 +98,8 @@ mkdir -p downloads
 $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
-cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
-
-# Use the modem firmware from the Pre 2 - same comms board as Pre+
-cp build/${W224_BUILD}/webOS/${SRC_UMTS_FW} ${UMTS_FW}
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_UMTS_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
-
-# Use bootie from the Pre+, as it is device specific
-cp build/${W210_BUILD}/webOS/${BOOT_FW} ${BOOT_FW}
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_BOOT_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${BOOT_FW} || exit
-
-# Use the installer uImage from the Pre+, as it is device specific
-cp build/${W210_BUILD}/webOS/${INSTALLER_FW} ${INSTALLER_FW}
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_INSTALLER_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_FW} || exit
-
-# Use the trenchcoat XML file from the Pre+, as it is device specific
-cp build/${W210_BUILD}/webOS/${XML_FW} ${XML_FW}
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_XML_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${XML_FW} || exit
-
-# Use the installer.xml from the Pre+, to ensure the dmSets is valid
-cp build/${W210_BUILD}/webOS/${INSTALLER_XML} ${INSTALLER_XML}
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${INSTALLER_XML} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_XML} || exit
-
-# Copy over the rootfs
-cp build/${W224_BUILD}/webOS/${SRC_CUST_FW} ${CUST_FW}
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_CUST_FW}.gz || exit
-gzip ${CUST_FW}
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CUST_FW}.gz || exit
+cp build/${W224_BUILD}/webOS/nova-cust-image-roadrunner.rootfs.tar ${CUSTOM_ROOTFS}
+gzip ${CUSTOM_ROOTFS}
 
 mkdir -p carrier
 
@@ -154,12 +113,12 @@ rm -rf carrier
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
-    EXTRA_ROOTFS_TARBALL=${KERN_TARBALL} extract-rootfs-ipkgs || exit
+    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
 
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
     EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
-    EXTRA_ROOTFS_TARBALL=${KERN_TARBALL} clobber-build settings all || exit
+    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE} --auto
 
@@ -167,4 +126,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
 echo
 
-rm -f ${UMTS_FW} ${BUILD_INFO} ${BOOT_FW} ${INSTALLER_XML} ${CUST_FW}.gz ${INSTALLER_FW} ${XML_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${KERN_TARBALL}
+rm -f ${BUILD_INFO} ${INSTALLER_FW} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz
