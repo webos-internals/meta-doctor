@@ -131,6 +131,7 @@ ENABLE_BETA_FEEDS  = 1
 
 # EXTRA_ROOTFS_IPKGS   = flash flash-mini-adapter flame
 # EXTRA_ROOTFS_TARBALL = flash.tar
+# DELETE_ROOTFS_IPKGS  = flash flash-mini-adapter flame
 
 # CUSTOM_DEVICETYPE = castle
 # CUSTOM_BOOTLOADER = boot.bin
@@ -356,6 +357,7 @@ endif
 
 OLDIPKGS = com.palm.app.firstuse palmbuildinfo
 OLDDIRS = ./boot ./lib/modules
+DELIPKGS = ${DELETE_ROOTFS_IPKGS}
 NEWIPKGS = ${OLDIPKGS} ${EXTRA_ROOTFS_IPKGS}
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
 
@@ -477,6 +479,9 @@ ifdef EXTRA_ROOTFS_IPKGS
 endif
 ifdef EXTRA_ROOTFS_TARBALL
 	@echo "EXTRA_ROOTFS_TARBALL = ${EXTRA_ROOTFS_TARBALL}"
+endif
+ifdef DELETE_ROOTFS_IPKGS
+	@echo "DELETE_ROOTFS_IPKGS = ${DELETE_ROOTFS_IPKGS}"
 endif
 ifdef CUSTOM_XML
 	@echo "CUSTOM_XML = ${CUSTOM_XML}"
@@ -905,6 +910,16 @@ build/${PATIENT}/.packed:
 ifeq (${PATCH_DOCTOR},1)
 	( cd build/${PATIENT} ; javac -cp . ${CLASSES:%=%.java} )
 endif
+ifdef DELETE_ROOTFS_IPKGS
+	rm -f build/${PATIENT}/ipkgs-delete-list.txt
+	for package in ${DELIPKGS} ; do \
+	  if [ -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.list ] ; then \
+	    cat build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.list | \
+		sed -e 's|^|.|' >> build/${PATIENT}/ipkgs-delete-list.txt ; \
+	    rm -f build/${PATIENT}/rootfs/usr/lib/ipkg/info/$$package.* ; \
+	  fi ; \
+	done
+endif
 	( cd build/${PATIENT}/rootfs ; mkdir -p ${NEWDIRS} )
 	rm -f build/${PATIENT}/ipkgs-file-list.txt
 	for package in ${NEWIPKGS} ; do \
@@ -914,6 +929,17 @@ endif
 	if [ -f build/${PATIENT}/rootfs/md5sums.gz ] ; then \
 	  gzip -f build/${PATIENT}/rootfs/md5sums ; \
 	fi
+ifdef DELETE_ROOTFS_IPKGS
+	@echo
+	@echo "You can safely ignore any 'Not found in archive' errors from the following ${TAR} command."
+	@echo
+	- ${TAR} -C build/${PATIENT}/rootfs --wildcards \
+		-f build/${PATIENT}/webOS/${CUSTIMAGENEW}.rootfs.tar \
+		--delete -T build/${PATIENT}/ipkgs-delete-list.txt
+	@echo
+	@echo "You can safely ignore any 'Not found in archive' errors from the previous ${TAR} command."
+	@echo
+endif
 ifdef EXTRA_ROOTFS_IPKGS
 	@echo
 	@echo "You can safely ignore any 'Not found in archive' errors from the following ${TAR} command."

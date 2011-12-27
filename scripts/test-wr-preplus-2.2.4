@@ -136,14 +136,9 @@ cp build/${W210_BUILD}/webOS/${INSTALLER_XML} ${INSTALLER_XML}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${INSTALLER_XML} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_XML} || exit
 
+# Copy over the rootfs
 cp build/${W224_BUILD}/webOS/${SRC_CUST_FW} ${CUST_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_CUST_FW}.gz || exit
-# %%% Need to document the rationale for the following ...
-$tar -C ./ -f ./${CUST_FW} --delete ./etc/camd/vx6953-load-firmware || exit
-$tar -C ./ -f ./${CUST_FW} --delete ./etc/camd/vx6953-once-2.0.bin || exit
-$tar -C ./ -f ./${CUST_FW} --delete ./etc/camd/vx6953-once-3.0.bin || exit
-$tar -C ./ -f ./${CUST_FW} --delete ./etc/event.d/vx6953 || exit
-$tar -C ./ -f ./${CUST_FW} --delete ./lib/firmware/vx6953-once.bin || exit
 gzip ${CUST_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CUST_FW}.gz || exit
 
@@ -158,31 +153,12 @@ mkdir -p carrier
 rm -rf carrier
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
-    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan kernel-modules kernel libcompass luna-keymaps palmbuildinfo pmmedia pmtelephony pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx opengles-omap3 palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmnetworking-castle pmtelephony-msm6xxx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tiopenmax tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
+    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
     EXTRA_ROOTFS_TARBALL=${KERN_TARBALL} extract-rootfs-ipkgs || exit
 
-mkdir -p preplus
-cd preplus
-$tar -x -f ../${KERN_TARBALL}
-rm -f ../${KERN_TARBALL}
-mv ./usr/lib/ipkg/info/camd-omap34xx.control ./usr/lib/ipkg/info/camd-omap36xx.control
-mv ./usr/lib/ipkg/info/camd-omap34xx.list ./usr/lib/ipkg/info/camd-omap36xx.list
-mv ./usr/lib/ipkg/info/camd-omap34xx.md5sums ./usr/lib/ipkg/info/camd-omap36xx.md5sums
-mv ./usr/lib/ipkg/info/camsrc-omap34xx.control ./usr/lib/ipkg/info/camsrc-omap36xx.control
-mv ./usr/lib/ipkg/info/camsrc-omap34xx.list ./usr/lib/ipkg/info/camsrc-omap36xx.list
-mv ./usr/lib/ipkg/info/camsrc-omap34xx.md5sums ./usr/lib/ipkg/info/camsrc-omap36xx.md5sums
-mv ./usr/lib/ipkg/info/pmmedia-omap34xx.control ./usr/lib/ipkg/info/pmmedia-omap36xx.control
-mv ./usr/lib/ipkg/info/pmmedia-omap34xx.list ./usr/lib/ipkg/info/pmmedia-omap36xx.list
-mv ./usr/lib/ipkg/info/pmmedia-omap34xx.md5sums ./usr/lib/ipkg/info/pmmedia-omap36xx.md5sums
-mv ./usr/lib/ipkg/info/tisgxgfx.control ./usr/lib/ipkg/info/tisgxgfx-roadrunner.control
-mv ./usr/lib/ipkg/info/tisgxgfx.list ./usr/lib/ipkg/info/tisgxgfx-roadrunner.list
-mv ./usr/lib/ipkg/info/tisgxgfx.md5sums ./usr/lib/ipkg/info/tisgxgfx-roadrunner.md5sums
-$tar -cf ../${KERN_TARBALL} ./* || exit
-cd ..
-rm -rf preplus
-
 $make ${ARGS} \
-    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan kernel-modules kernel libcompass luna-keymaps palmbuildinfo pmmedia pmtelephony pmtpupdater baseimage camd-omap36xx camsrc-omap36xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx opengles-omap3 palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap36xx pmnetworking-castle pmtelephony-msm6xxx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tiopenmax tisgxgfx-roadrunner tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
+    DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
+    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
     EXTRA_ROOTFS_TARBALL=${KERN_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE} --auto
