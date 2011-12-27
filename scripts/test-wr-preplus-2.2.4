@@ -1,0 +1,194 @@
+#!/bin/bash
+# meta-wr-preplus-2.2.4 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# modifications by 'andidendel' and 'John Steffes'
+# intended to flash WR PrePlus phones with a working webOS 2.2.4 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
+
+W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
+W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
+
+W224_BUILD="pre2-p224pre2-wr-2.2.4"
+W210_BUILD="preplus-p101ueu-wr-2.1.0"
+
+W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
+W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
+
+PATIENT="meta-wr-preplus-2.2.4"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+WEBOS_TARBALL="webOS.tar"
+CARRIER_TARBALL="carrier.tar"
+KERN_TARBALL="kernel.tar"
+SRC_UMTS_FW="roadrunnerumtsfw.tar"
+UMTS_FW="castleumtsfw.tar"
+SRC_BOOT_FW="boot-roadrunner.bin"
+BOOT_FW="boot-castle.bin"
+INSTALLER_XML="installer.xml"
+SRC_CUST_FW="nova-cust-image-roadrunner.rootfs.tar"
+CUST_FW="nova-cust-image-castle.rootfs.tar"
+SRC_INSTALLER_FW="nova-installer-image-roadrunner.uImage"
+INSTALLER_FW="nova-installer-image-castle.uImage"
+SRC_XML_FW="roadrunner.xml"
+XML_FW="castle.xml"
+
+rm -f ${UMTS_FW} ${BUILD_INFO} ${BOOT_FW} ${INSTALLER_XML} ${CUST_FW}.gz ${INSTALLER_FW} ${XML_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${KERN_TARBALL}
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+W224_IPKS=
+W210_IPKS=
+
+W224_IPKS="\
+pmvoicecommand-*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+com.palm.app.skype_*.ipk \
+crotestcastleplus-images_*.ipk \
+audiod-config-eu_*.ipk \
+"
+
+W210_IPKS="\
+sweatshop-wr-castle_*.ipk \
+"
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+fi
+
+ARGS="${ARGS} DISABLE_MODEM_UPDATE=1 ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo
+
+mkdir -p downloads
+
+[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+
+[ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
+        echo "${W224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W224_FILE} && exit
+[ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
+        echo "${W210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W210_FILE} && exit
+
+# $make clobber
+
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
+
+cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
+
+# Use the modem firmware from the Pre 2 - same comms board as Pre+
+cp build/${W224_BUILD}/webOS/${SRC_UMTS_FW} ${UMTS_FW}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_UMTS_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
+
+# Use bootie from the Pre+, as it is device specific
+cp build/${W210_BUILD}/webOS/${BOOT_FW} ${BOOT_FW}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_BOOT_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${BOOT_FW} || exit
+
+# Use the installer uImage from the Pre+, as it is device specific
+cp build/${W210_BUILD}/webOS/${INSTALLER_FW} ${INSTALLER_FW}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_INSTALLER_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_FW} || exit
+
+# Use the trenchcoat XML file from the Pre+, as it is device specific
+cp build/${W210_BUILD}/webOS/${XML_FW} ${XML_FW}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_XML_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${XML_FW} || exit
+
+# Use the installer.xml from the Pre+, to ensure the dmSets is valid
+cp build/${W210_BUILD}/webOS/${INSTALLER_XML} ${INSTALLER_XML}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${INSTALLER_XML} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_XML} || exit
+
+cp build/${W224_BUILD}/webOS/${SRC_CUST_FW} ${CUST_FW}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${SRC_CUST_FW}.gz || exit
+# %%% Need to document the rationale for the following ...
+$tar -C ./ -f ./${CUST_FW} --delete ./etc/camd/vx6953-load-firmware || exit
+$tar -C ./ -f ./${CUST_FW} --delete ./etc/camd/vx6953-once-2.0.bin || exit
+$tar -C ./ -f ./${CUST_FW} --delete ./etc/camd/vx6953-once-3.0.bin || exit
+$tar -C ./ -f ./${CUST_FW} --delete ./etc/event.d/vx6953 || exit
+$tar -C ./ -f ./${CUST_FW} --delete ./lib/firmware/vx6953-once.bin || exit
+gzip ${CUST_FW}
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CUST_FW}.gz || exit
+
+mkdir -p carrier
+
+( cd build/${W210_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${W224_BUILD}/carrier ; \
+    $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${W210_IPKS})
+
+rm -rf carrier
+
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan kernel-modules kernel libcompass luna-keymaps palmbuildinfo pmmedia pmtelephony pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx opengles-omap3 palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmnetworking-castle pmtelephony-msm6xxx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tiopenmax tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
+    EXTRA_ROOTFS_TARBALL=${KERN_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p preplus
+cd preplus
+$tar -x -f ../${KERN_TARBALL}
+rm -f ../${KERN_TARBALL}
+mv ./usr/lib/ipkg/info/camd-omap34xx.control ./usr/lib/ipkg/info/camd-omap36xx.control
+mv ./usr/lib/ipkg/info/camd-omap34xx.list ./usr/lib/ipkg/info/camd-omap36xx.list
+mv ./usr/lib/ipkg/info/camd-omap34xx.md5sums ./usr/lib/ipkg/info/camd-omap36xx.md5sums
+mv ./usr/lib/ipkg/info/camsrc-omap34xx.control ./usr/lib/ipkg/info/camsrc-omap36xx.control
+mv ./usr/lib/ipkg/info/camsrc-omap34xx.list ./usr/lib/ipkg/info/camsrc-omap36xx.list
+mv ./usr/lib/ipkg/info/camsrc-omap34xx.md5sums ./usr/lib/ipkg/info/camsrc-omap36xx.md5sums
+mv ./usr/lib/ipkg/info/pmmedia-omap34xx.control ./usr/lib/ipkg/info/pmmedia-omap36xx.control
+mv ./usr/lib/ipkg/info/pmmedia-omap34xx.list ./usr/lib/ipkg/info/pmmedia-omap36xx.list
+mv ./usr/lib/ipkg/info/pmmedia-omap34xx.md5sums ./usr/lib/ipkg/info/pmmedia-omap36xx.md5sums
+mv ./usr/lib/ipkg/info/tisgxgfx.control ./usr/lib/ipkg/info/tisgxgfx-roadrunner.control
+mv ./usr/lib/ipkg/info/tisgxgfx.list ./usr/lib/ipkg/info/tisgxgfx-roadrunner.list
+mv ./usr/lib/ipkg/info/tisgxgfx.md5sums ./usr/lib/ipkg/info/tisgxgfx-roadrunner.md5sums
+$tar -cf ../${KERN_TARBALL} ./* || exit
+cd ..
+rm -rf preplus
+
+$make ${ARGS} \
+    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan kernel-modules kernel libcompass luna-keymaps palmbuildinfo pmmedia pmtelephony pmtpupdater baseimage camd-omap36xx camsrc-omap36xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx opengles-omap3 palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap36xx pmnetworking-castle pmtelephony-msm6xxx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tiopenmax tisgxgfx-roadrunner tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
+    EXTRA_ROOTFS_TARBALL=${KERN_TARBALL} clobber-build settings all || exit
+
+$java -jar build/${PATIENT}/${W210_FILE} --auto
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo
+
+rm -f ${UMTS_FW} ${BUILD_INFO} ${BOOT_FW} ${INSTALLER_XML} ${CUST_FW}.gz ${INSTALLER_FW} ${XML_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${KERN_TARBALL}
