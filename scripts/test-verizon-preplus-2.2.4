@@ -190,7 +190,7 @@ $tar -x -f ../luna224.tar
 cp -r ../luna210/etc/prefs/properties/* ./etc/prefs/properties
 head -n 8 ./usr/lib/ipkg/info/luna-prefs.md5sums > ./luna-prefs.md5sums
 tail -n 5 ../luna210/usr/lib/ipkg/info/luna-prefs.md5sums >> ./luna-prefs.md5sums
-tail -n 1 ./usr/lib/ipkg/info/luna-prefs.md5sums >> ./luna-prefs.md5sums
+tail -n 2 ./usr/lib/ipkg/info/luna-prefs.md5sums >> ./luna-prefs.md5sums
 mv luna-prefs.md5sums ./usr/lib/ipkg/info/luna-prefs.md5sums
 $tar -f ../${LEGACY_TARBALL} --append ./* || exit
 cd ..
