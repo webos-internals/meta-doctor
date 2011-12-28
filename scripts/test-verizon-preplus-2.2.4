@@ -67,12 +67,12 @@ for f in $git $wget $make $java $patch $python $tar ; do
 done
 
 ARGS=
-WR_IPKS=
-WR2_IPKS=
-VZW_IPKS=
-VZW2_IPKS=
+W224_IPKS=
+W210_IPKS=
+V224_IPKS=
+V210_IPKS=
 
-WR_IPKS="\
+W224_IPKS="\
 pmvoicecommand-*.ipk \
 com.palm.app.mobilehotspot_*.ipk \
 com.palm.app.skype_*.ipk \
@@ -80,28 +80,27 @@ crotestcastleplus-images_*.ipk \
 audiod-config-eu_*.ipk \
 "
 
-WR2_IPKS="\
+W210_IPKS="\
 sweatshop-wr-castle_*.ipk \
 "
 
-VZW_IPKS="\
-palmcustomizationinfo-verizon_*.ipk \
-roadrunnercdmafw-verizon_*.ipk \
-"
-
-VZW2_IPKS="\
+V224_IPKS="\
 com.nim.vznavigator_*.ipk \
 com.nim.app.vznavigator_*.ipk \
 "
 
+V210_IPKS="\
+palmcustomizationinfo-verizon_*.ipk \
+roadrunnercdmafw-verizon_*.ipk \
+"
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
-    VZW_IPKS=
-    VZW2_IPKS=
+    V224_IPKS=
+    V210_IPKS=
 fi
 
-VZW2_IPKS="${VZW2_IPKS} \
+V224_IPKS="${V224_IPKS} \
 amazonservice_*.ipk \
 com.palm.app.amazonstore_*.ipk \
 "
@@ -157,23 +156,22 @@ $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
 mkdir -p carrier
 
 ( cd build/${W210_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${WR2_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W224_BUILD}/carrier ; \
-    $tar -c -f - ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V210_BUILD}/carrier ; \
-    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V224_BUILD}/carrier ; \
-    $tar -c -f - ${VZW2_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${VZW2_IPKS} ${WR_IPKS} ${WR2_IPKS})
+    $tar -c -f - ${V224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${V210_IPKS} ${V224_IPKS} ${W224_IPKS} ${W210_IPKS})
 
 rm -rf carrier
 
-$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
-    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
-    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
+EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps luna-prefs palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache"
 
-#removed mopdules: palmaudiodecoder-omap34xx palmaudioencoder-omap34xx
-#                  tiopenmax-audiomanager tiopenmax-camera tiopenmax-mp3 tisocketnode-mp3
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
+    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="luna-prefs" \
@@ -184,28 +182,28 @@ $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
     EXTRA_ROOTFS_TARBALL=luna224.tar extract-rootfs-ipkgs || exit
 
 mkdir -p luna210 luna224
-cd luna210
-$tar -x -f ../luna210.tar
-cd ../luna224
-$tar -x -f ../luna224.tar
-cp -r ../luna210/etc/prefs/properties/* ./etc/prefs/properties
-head -n 8 ./usr/lib/ipkg/info/luna-prefs.md5sums > ./luna-prefs.md5sums
-tail -n 5 ../luna210/usr/lib/ipkg/info/luna-prefs.md5sums >> ./luna-prefs.md5sums
-tail -n 2 ./usr/lib/ipkg/info/luna-prefs.md5sums >> ./luna-prefs.md5sums
-mv luna-prefs.md5sums ./usr/lib/ipkg/info/luna-prefs.md5sums
-$tar -f ../${LEGACY_TARBALL} --append ./* || exit
-cd ..
-rm -rf luna210 luna224 luna210.tar luna224.tar
 
-# removed modules: palmaudiodecoder-omap34xx palmaudioencoder-omap34xx
-#                  tiopenmax-audiomanager tiopenmax-camera tiopenmax-mp3 tisocketnode-mp3
+$tar -C luna210 -x -f luna210.tar
+$tar -C luna224 -x -f luna224.tar
+
+cp -r luna210/etc/prefs/properties/* luna224/etc/prefs/properties
+
+mv luna224/usr/lib/ipkg/info/luna-prefs.md5sums luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old
+./scripts/replace-md5sums.py \
+	luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old luna210/usr/lib/ipkg/info/luna-prefs.md5sums \
+	      > luna224/usr/lib/ipkg/info/luna-prefs.md5sums
+rm -f luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old
+
+$tar -C luna224 -f ${LEGACY_TARBALL} --append . || exit
+
+rm -rf luna210 luna224 luna210.tar luna224.tar
 
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
-    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache luna-prefs" \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
-$java -jar build/${PATIENT}/${W210_FILE}
+$java -jar build/${PATIENT}/${W210_FILE} --auto
 
 echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"

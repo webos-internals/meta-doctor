@@ -198,7 +198,7 @@ $make ${ARGS} \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
-$java -jar build/${PATIENT}/${W210_FILE}
+$java -jar build/${PATIENT}/${W210_FILE} --auto
 
 echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
