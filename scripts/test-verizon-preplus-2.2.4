@@ -169,8 +169,11 @@ mkdir -p carrier
 rm -rf carrier
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
-    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
+    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
+
+#removed mopdules: palmaudiodecoder-omap34xx palmaudioencoder-omap34xx
+#                  tiopenmax-audiomanager tiopenmax-camera tiopenmax-mp3 tisocketnode-mp3
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="luna-prefs" \
@@ -180,12 +183,10 @@ $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="luna-prefs" \
     EXTRA_ROOTFS_TARBALL=luna224.tar extract-rootfs-ipkgs || exit
 
-mkdir -p luna210
+mkdir -p luna210 luna224
 cd luna210
 $tar -x -f ../luna210.tar
-cd ..
-mkdir -p luna224
-cd luna224
+cd ../luna224
 $tar -x -f ../luna224.tar
 cp -r ../luna210/etc/prefs/properties/* ./etc/prefs/properties
 head -n 8 ./usr/lib/ipkg/info/luna-prefs.md5sums > ./luna-prefs.md5sums
@@ -196,11 +197,12 @@ $tar -f ../${LEGACY_TARBALL} --append ./* || exit
 cd ..
 rm -rf luna210 luna224 luna210.tar luna224.tar
 
-
+# removed modules: palmaudiodecoder-omap34xx palmaudioencoder-omap34xx
+#                  tiopenmax-audiomanager tiopenmax-camera tiopenmax-mp3 tisocketnode-mp3
 
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
-    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmaudiodecoder-omap34xx palmaudioencoder-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-audiomanager tiopenmax-camera tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-mp3 tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mp3 tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache luna-prefs" \
+    EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap mm-isp omxclientlib-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx tisocketnode-control-task tisocketnode-conversions tisocketnode-dfgm tisocketnode-h264dec tisocketnode-ipp tisocketnode-jpegdec tisocketnode-jpegenc tisocketnode-mpeg4aacdec tisocketnode-mpeg4aacenc tisocketnode-mpeg4dec tisocketnode-mpeg4enc tisocketnode-nbamrdec tisocketnode-pcmdec tisocketnode-ringio tisocketnode-usn tisocketnode-vpp updatefsinfo bootie-images trenchcoat compcache luna-prefs" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
