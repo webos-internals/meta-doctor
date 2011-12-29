@@ -1,35 +1,43 @@
 #!/bin/bash
 # meta-verizon-preplus-2.1.0 script by Rod Whitby
 # based on meta-meta script by Ed Cates
-# modifications by 'rwcash' and 'John Steffes'
+# modifications by 'rwcash'
 # intended to flash Verizon PrePlus phones with a working webOS 2.1 image
 #  Your mileage may vary
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
-A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
 W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
-P220_JAR_URL="http://palm.cdnetworks.net/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar"
-T302_JAR_URL="http://palm.cdnetworks.net/rom/touchpad/p302r0d08012011/wifip302rod/webosdoctorp302hstnhwifi.jar"
+A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+V224_JAR_URL="http://palm.cdnetworks.net/rom/manta/p224r0d12192011/wdmantaverizon/webosdoctorp224mantaverizon.jar"
+V210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
+V201_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+V1451_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
 
-CDMA_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
-A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
-P220_FILE="webosdoctorp220manta-wr-2.2.0.jar"
+W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
-T302_FILE="webosdoctorp302hstnhwifi-3.0.2.jar"
+A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
+V224_FILE="webosdoctorp224mantaverizon-2.2.4.jar"
+V210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
+V201_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+V1451_FILE="webosdoctorp101ewwverizonwireless-1.4.5.1.jar"
 
-CDMA_BUILD="pre2-p102eww-verizon-2.1.0"
-A212_BUILD="veer-p160una-att-2.1.2"
+W224_BUILD="pre2-p224pre2-wr-2.2.4"
 W210_BUILD="preplus-p101ueu-wr-2.1.0"
-P220_BUILD="pre3-p220manta-wr-2.2.0"
-T302_BUILD="touchpad-p300hstnh-wifi-3.0.2"
+A212_BUILD="veer-p160una-att-2.1.2"
+V224_BUILD="pre3-p224manta-verizon-2.2.4"
+V210_BUILD="pre2-p102eww-verizon-2.1.0"
+V201_BUILD="pre2-p102eww-verizon-2.0.1"
+V1451_BUILD="preplus-p101eww-verizon-1.4.5.1"
 
-CDMA_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
-A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
+W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
 W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
-P220_MD5="319ce80db93a2fc845a004d60fc3735b"
-T302_MD5="669db17352726708486491c532a06d9d"
+A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
+V224_MD5="04648bca9d241bc0889ceaf5c8ddf790"
+V210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
+V201_MD5="643824a4c103e266fd8e2760b098815c"
+V1451_MD5="fdc62b2d6e717dc90b208d52fd6336c0"
 
 PATIENT="test-verizon-preplus-2.1.0"
 
@@ -55,13 +63,13 @@ esac
 
 WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
-ENYO_TARBALL="enyo.tar"
 FLASH_TARBALL="flash.tar"
-FLASH2_TARBALL="flash2.tar"
+CLASSIC_TARBALL="classic.tar"
+BTENYO_TARBALL="btenyo.tar"
 SRC_CDMA_FW="roadrunnercdmafw.tar"
 CDMA_FW="castlecdmafw.tar"
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${ENYO_TARBALL} ${FLASH_TARBALL} ${FLASH2_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${FLASH_TARBALL} ${CLASSIC_TARBALL} ${BTENYO_TARBALL}
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -72,6 +80,7 @@ done
 ARGS=
 ATT_IPKS=
 VZW_IPKS=
+VZW2_IPKS=
 WR_IPKS=
 
 ATT_IPKS="\
@@ -82,16 +91,20 @@ pmvoicecommand-esmx_*.ipk \
 "
 
 VZW_IPKS="\
+skyped_*.ipk \
+com.skype.app.skypesearchdirectory_*.ipk \
+"
+
+VZW2_IPKS="\
 com.nim.vznavigator_*.ipk \
 com.nim.app.vznavigator_*.ipk \
 com.palm.app.mobilehotspot_*.ipk \
-skyped_*.ipk \
-com.skype.app.skypesearchdirectory_*.ipk \
 "
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
     VZW_IPKS=
+    VZW2_IPKS=
 fi
 
 VZW_IPKS="${VZW_IPKS} \
@@ -116,85 +129,122 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
-[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
 [ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
-[ ! -f downloads/${P220_FILE} ] && $wget -c ${P220_JAR_URL} -O downloads/${P220_FILE}
-[ ! -f downloads/${T302_FILE} ] && $wget -c ${T302_JAR_URL} -O downloads/${T302_FILE}
+[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+[ ! -f downloads/${V224_FILE} ] && $wget -c ${V224_JAR_URL} -O downloads/${V224_FILE}
+[ ! -f downloads/${V210_FILE} ] && $wget -c ${V210_JAR_URL} -O downloads/${V210_FILE}
+[ ! -f downloads/${V201_FILE} ] && $wget -c ${V201_JAR_URL} -O downloads/${V201_FILE}
+[ ! -f downloads/${V1451_FILE} ] && $wget -c ${V1451_JAR_URL} -O downloads/${V1451_FILE}
 
-[ $(md5sum downloads/${CDMA_FILE} | cut -d \  -f 1) != ${CDMA_MD5} ] && \
-        echo "${CDMA_FILE} did not download properly.  Please run this script again." && \
-        rm -f downloads/${CDMA_FILE} && exit
-[ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
-        echo "${A212_FILE} did not download properly.  Please run this script again." && \
-        rm -f downloads/${A212_FILE} && exit
+[ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
+        echo "${W224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W224_FILE} && exit
 [ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
         echo "${W210_FILE} did not download properly.  Please run this script again." && \
         rm -f downloads/${W210_FILE} && exit
-[ $(md5sum downloads/${P220_FILE} | cut -d \  -f 1) != ${P220_MD5} ] && \
-        echo "${P220_FILE} did not download properly.  Please run this script again." && \
-        rm -f downloads/${P220_FILE} && exit
-[ $(md5sum downloads/${T302_FILE} | cut -d \  -f 1) != ${T302_MD5} ] && \
-        echo "${T302_FILE} did not download properly.  Please run this script again." && \
-        rm -f downloads/${T302_FILE} && exit
-
+[ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
+        echo "${A212_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${A212_FILE} && exit
+[ $(md5sum downloads/${V224_FILE} | cut -d \  -f 1) != ${V224_MD5} ] && \
+        echo "${V224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V224_FILE} && exit
+[ $(md5sum downloads/${V210_FILE} | cut -d \  -f 1) != ${V210_MD5} ] && \
+        echo "${V210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V210_FILE} && exit
+[ $(md5sum downloads/${V201_FILE} | cut -d \  -f 1) != ${V201_MD5} ] && \
+        echo "${V201_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V201_FILE} && exit
+[ $(md5sum downloads/${V1451_FILE} | cut -d \  -f 1) != ${V1451_MD5} ] && \
+        echo "${V1451_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V1451_FILE} && exit
 
 # $make clobber
 
-$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
-$make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack || exit
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
-$make VERSION=2.2.0 DEVICE=pre3 CARRIER=wr unpack || exit
-$make VERSION=3.0.2 DEVICE=touchpad CARRIER=wifi unpack || exit
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack || exit
+$make VERSION=2.2.4 DEVICE=pre3 CARRIER=verizon unpack || exit
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon unpack || exit
+$make VERSION=1.4.5.1 DEVICE=preplus CARRIER=verizon unpack || exit
 
 cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
 
-cp build/${CDMA_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
+cp build/${V210_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
 
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
 mkdir -p carrier
 
-( cd build/${CDMA_BUILD}/carrier ; \
-    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${A212_BUILD}/carrier ; \
-    $tar -c -f - ${ATT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${ATT_IPKS} ${WR_IPKS} )
+( cd build/${A212_BUILD}/carrier ; \
+    $tar -c -f - ${ATT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V224_BUILD}/carrier ; \
+    $tar -c -f - ${VZW2_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V210_BUILD}/carrier ; \
+    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${VZW2_IPKS} ${ATT_IPKS} ${WR_IPKS} )
 
 rm -rf carrier
 
-$make VERSION=3.0.2 DEVICE=touchpad CARRIER=wifi \
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flashplugin" \
     EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} extract-rootfs-ipkgs || exit
 
-$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
-    EXTRA_ROOTFS_IPKGS="flame" \
-    EXTRA_ROOTFS_TARBALL=${FLASH2_TARBALL} extract-rootfs-ipkgs || exit
+mkdir -p flashfix
+cd flashfix
+$tar -x -f ../${FLASH_TARBALL}
+rm -f ../${FLASH_TARBALL}
+mv ./usr/lib/ipkg/info/flashplugin.control ./usr/lib/ipkg/info/flame.control
+mv ./usr/lib/ipkg/info/flashplugin.list ./usr/lib/ipkg/info/flame.list
+mv ./usr/lib/ipkg/info/flashplugin.md5sums ./usr/lib/ipkg/info/flame.md5sums
+$tar -cf ../${FLASH_TARBALL} ./* || exit
+cd ..
+rm -rf flashfix
 
-mkdir -p flash2
-cd flash2
-$tar -x -f ../${FLASH2_TARBALL}
-rm -rf usr
+$make VERSION=1.4.5.1 DEVICE=preplus CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p classic.1451
+cd classic.1451
+$tar -x -f ../${CLASSIC_TARBALL}
+cd ..
+
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.service.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p classic.201
+cd classic.201
+$tar -x -f ../${CLASSIC_TARBALL}
+rm -f ../${CLASSIC_TARBALL}
+cp -r ../classic.1451/* ./
+mv ./usr/lib/palmos/Read\ Me.txt ./usr/lib/palmos/Read_Me.txt
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.list > ./usr/lib/ipkg/info/com.motionapps.service.classic.list2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.list2 ./usr/lib/ipkg/info/com.motionapps.service.classic.list
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums > ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2 ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums
 $tar -f ../${FLASH_TARBALL} --append ./* || exit
 cd ..
-rm -rf flash2 ${FLASH2_TARBALL}
+rm -rf classic.1451 classic.201
 
-$make VERSION=2.2.0 DEVICE=pre3 CARRIER=wr \
-    EXTRA_ROOTFS_IPKGS="enyo" \
-    EXTRA_ROOTFS_TARBALL=${ENYO_TARBALL} extract-rootfs-ipkgs || exit
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="enyo com.palm.app.bluetooth com.palm.service.bluetooth.spp pmbtcontacts pmbtengine pmbtos pmbtstack pmbtstartup com.palm.service.calendar.google com.palm.service.calendar.yahoo com.palm.service.contacts.yahoo" \
+    EXTRA_ROOTFS_TARBALL=${BTENYO_TARBALL}  extract-rootfs-ipkgs || exit
 
-mkdir -p enyo
-cd enyo
-$tar -x -f ../${ENYO_TARBALL}
+mkdir -p btenyo
+cd btenyo
+$tar -x -f ../${BTENYO_TARBALL}
 $tar -f ../${FLASH_TARBALL} --append ./* || exit
 cd ..
-rm -rf enyo
+rm -rf btenyo ${BTENYO_TARBALL}
 
 $make ${ARGS} \
-    EXTRA_ROOTFS_IPKGS="enyo flash flash-mini-adapter flame flashplugin" \
+    EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flame enyo com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.bluetooth com.palm.service.bluetooth.spp pmbtcontacts pmbtengine pmbtos pmbtstack pmbtstartup com.palm.service.calendar.google com.palm.service.calendar.yahoo com.palm.service.contacts.yahoo" \
     EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE}
@@ -203,4 +253,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${ENYO_TARBALL} ${FLASH_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${FLASH_TARBALL}
