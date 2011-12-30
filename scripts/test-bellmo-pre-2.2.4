@@ -1,0 +1,204 @@
+#!/bin/bash
+# meta-bellmo-pre-2.2.4 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# modified by John Steffes
+# intended to flash BellMobility Pre phones with a working webOS 2.2.4 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
+V210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
+B145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d07142010/b11ep145rod/webosdoctorp100ewwbellmo.jar"
+
+W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
+W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
+V210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
+B145_FILE="webosdoctorp100ewwbellmo-1.4.5.jar"
+
+W224_BUILD="pre2-p224pre2-wr-2.2.4"
+W210_BUILD="preplus-p101ueu-wr-2.1.0"
+V210_BUILD="pre2-p102eww-verizon-2.1.0"
+B145_BUILD="pre-p100eww-bellmo-1.4.5"
+
+W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
+W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
+V210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
+B145_MD5="e11d44f00d7d9b44e7dcddb3f5b45bee"
+
+PATIENT="test-bellmo-pre-2.2.4"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+WEBOS_TARBALL="webOS.tar"
+CARRIER_TARBALL="carrier.tar"
+LEGACY_TARBALL="legacy.tar"
+CUSTOM_ROOTFS="rootfs.tar"
+SRC_CDMA_FW="roadrunnercdmafw.tar"
+CDMA_FW="castlecdmafw.tar"
+SRC_UMTS_FW="roadrunnerumtsfw.tar"
+UMTS_FW="castleumtsfw.tar"
+BUILD_INFO="palm-build-info"
+
+rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${INSTALLER_FW} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL}
+
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+W224_IPKS=
+W210_IPKS=
+V210_IPKS=
+
+W224_IPKS="\
+pmvoicecommand-*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+com.palm.app.skype_*.ipk \
+crotestcastleplus-images_*.ipk \
+audiod-config-eu_*.ipk \
+"
+
+W210_IPKS="\
+palmcustomizationinfo-wr-castle-plus_*.ipk \
+sweatshop-wr-castle_*.ipk \
+"
+
+V210_IPKS="\
+roadrunnercdmafw-verizon_*.ipk \
+"
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+    V210_IPKS=
+fi
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=bell CUSTOM_MODEL_CHECK=P100EWW CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo
+
+mkdir -p downloads
+
+[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+[ ! -f downloads/${V210_FILE} ] && $wget -c ${V210_JAR_URL} -O downloads/${V210_FILE}
+[ ! -f downloads/${B145_FILE} ] && $wget -c ${B145_JAR_URL} -O downloads/${B145_FILE}
+
+[ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
+        echo "${W224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W224_FILE} && exit
+[ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
+        echo "${W210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W210_FILE} && exit
+[ $(md5sum downloads/${V210_FILE} | cut -d \  -f 1) != ${V210_MD5} ] && \
+        echo "${V210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V210_FILE} && exit
+[ $(md5sum downloads/${B145_FILE} | cut -d \  -f 1) != ${B145_MD5} ] && \
+        echo "${B145_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${B145_FILE} && exit
+
+# $make clobber
+
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
+$make VERSION=1.4.5 DEVICE=pre CARRIER=bellmo unpack || exit
+
+cp build/${W224_BUILD}/webOS/nova-cust-image-roadrunner.rootfs.tar ${CUSTOM_ROOTFS}
+gzip ${CUSTOM_ROOTFS}
+
+cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
+
+# Use the modem firmware from the Pre 2 - same comms board as Pre+
+cp build/${V210_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
+cp build/${W224_BUILD}/webOS/${SRC_UMTS_FW} ${UMTS_FW}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
+
+head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
+tail -n 4 build/${B145_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
+
+mkdir -p carrier
+
+( cd build/${W210_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${W224_BUILD}/carrier ; \
+    $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V210_BUILD}/carrier ; \
+    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${V210_IPKS} ${W224_IPKS} ${W210_IPKS})
+
+rm -rf carrier
+
+EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-prefs pmtpupdater camd-omap34xx camsrc-omap34xx castletpfw kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
+
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
+    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
+
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="luna-prefs" \
+    EXTRA_ROOTFS_TARBALL=luna210.tar extract-rootfs-ipkgs || exit
+
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="luna-prefs" \
+    EXTRA_ROOTFS_TARBALL=luna224.tar extract-rootfs-ipkgs || exit
+
+mkdir -p luna210 luna224
+
+$tar -C luna210 -x -f luna210.tar
+$tar -C luna224 -x -f luna224.tar
+
+cp -r luna210/etc/prefs/properties/* luna224/etc/prefs/properties
+
+mv luna224/usr/lib/ipkg/info/luna-prefs.md5sums luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old
+./scripts/replace-md5sums.py \
+	luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old luna210/usr/lib/ipkg/info/luna-prefs.md5sums \
+	      > luna224/usr/lib/ipkg/info/luna-prefs.md5sums
+rm -f luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old
+
+$tar -C luna224 -f ${LEGACY_TARBALL} --append . || exit
+
+rm -rf luna210 luna224 luna210.tar luna224.tar
+
+$make ${ARGS} \
+    DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
+    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
+
+$java -jar build/${PATIENT}/${W210_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo
+
+rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${INSTALLER_FW} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL}
