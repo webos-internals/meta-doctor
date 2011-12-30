@@ -157,7 +157,7 @@ $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
 
 head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
-tail -n 4 build/${V210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
+tail -n 4 build/${W210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 
 mkdir -p carrier
 
