@@ -111,7 +111,7 @@ mkdir -p carrier
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-keymaps luna-prefs palmbuildinfo pmtpupdater baseimage camd-omap34xx camsrc-omap34xx castletpfw dspmon-omap34xx jpegdecodelib-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc marvell8686microap omxclientlib-omap34xx palmjpgencsink-omap34xx palmvideodecoder-omap34xx palmvideoencoder-omap34xx palmvideosink-omap34xx pmlegacyhcilinklayer pmmedia-omap34xx pmwifidriver tidspbridge-extra tidspbridge-lib tidspbridge-module tidspbridge-mpusamples tiopenmax-aacdec tiopenmax-aacenc tiopenmax-clock tiopenmax-common tiopenmax-core tiopenmax-inst2 tiopenmax-jpegdec tiopenmax-jpegenc tiopenmax-lcml tiopenmax-nbamrdec tiopenmax-pcmdec tiopenmax-policymanager tiopenmax-postproc tiopenmax-prepostproc tiopenmax-ram tiopenmax-resourcemanager tiopenmax-rmproxy tiopenmax-videodec tiopenmax-videoenc tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
+EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-prefs palmbuildinfo pmtpupdater camd-omap34xx camsrc-omap34xx castletpfw kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
