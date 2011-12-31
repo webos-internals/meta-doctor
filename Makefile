@@ -973,6 +973,13 @@ endif
 		zip -q ${DOCTOR} META-INF/MANIFEST.MF ${CLASSES:%=%*.class} \
 			resources/webOS.tar resources/recoverytool.config )
 ifndef REMOVE_CARRIER_CHECK
+ifeq (${DISABLE_MODEM_UPDATE},1)
+	modem_fw_ipk=$(shell egrep '^${CODENAME}(umts|cdma)fw.*ipk' build/${PATIENT}/carrier-file-list.txt) ; \
+	  sed -i.orig -e "/$$modem_fw_ipk/d" \
+		  build/${PATIENT}/carrier-file-list.txt ;\
+	  rm -f build/${PATIENT}/carrier-file-list.txt.orig ;\
+	  rm -f build/${PATIENT}/carrier/$$modem_fw_ipk
+endif
 	( cd build/${PATIENT}/carrier ; \
 		${TAR} -f ../resources/${CARRIER_TARBALL} \
 			--numeric-owner --owner=0 --group=0 -h \
