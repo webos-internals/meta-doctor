@@ -173,7 +173,7 @@ $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flashplugin" \
     EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} extract-rootfs-ipkgs || exit
 
-mkdir -p flash fix
+mkdir -p flashfix
 cd flashfix
 $tar -x -f ../${FLASH_TARBALL}
 rm -f ../${FLASH_TARBALL}
@@ -222,8 +222,39 @@ $tar -f ../${FLASH_TARBALL} --append ./* || exit
 cd ..
 rm -rf btenyo ${BTENYO_TARBALL}
 
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.maps" \
+    EXTRA_ROOTFS_TARBALL=googlemaps.tar extract-rootfs-ipkgs || exit
+
+mkdir -p mapsfix
+cd mapsfix
+$tar -x -f ../googlemaps.tar
+rm -f ../googlemaps.tar
+mv ./usr/palm/applications/com.palm.app.maps ./usr/palm/applications/com.palm.app.googlemaps
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.control > ./usr/lib/ipkg/info/com.palm.app.googlemaps.control
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.control
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.list > ./usr/lib/ipkg/info/com.palm.app.googlemaps.list
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.list
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.md5sums > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2
+mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
+sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
+mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
+md5 -r ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5 -r ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
+	      > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -f ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+$tar -f ../${FLASH_TARBALL} --append ./* || exit
+cd ..
+rm -rf mapsfix
+
 $make ${ARGS} \
-    EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flame enyo com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.bluetooth com.palm.service.bluetooth.spp pmbtcontacts pmbtengine pmbtos pmbtstack pmbtstartup com.palm.service.calendar.google com.palm.service.calendar.yahoo com.palm.service.contacts.yahoo" \
+    DELETE_ROOTFS_IPKGS="com.palm.app.maps" \
+    EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flame enyo com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.bluetooth com.palm.service.bluetooth.spp pmbtcontacts pmbtengine pmbtos pmbtstack pmbtstartup com.palm.service.calendar.google com.palm.service.calendar.yahoo com.palm.service.contacts.yahoo com.palm.app.googlemaps" \
     EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${V210_FILE}
