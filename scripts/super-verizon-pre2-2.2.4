@@ -1,0 +1,243 @@
+#!/bin/bash
+# meta-verizon-pre2-2.2.4 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# modifications by 'andidendel' and 'John Steffes'
+# intended to flash Verizon Pre2 phones with a working webOS 2.2.4 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+V224_JAR_URL="http://palm.cdnetworks.net/rom/manta/p224r0d12192011/wdmantaverizon/webosdoctorp224mantaverizon.jar"
+V210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
+V201_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+V1451_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
+
+W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
+V224_FILE="webosdoctorp224mantaverizon-2.2.4.jar"
+V210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
+V201_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+V1451_FILE="webosdoctorp101ewwverizonwireless-1.4.5.1.jar"
+
+W224_BUILD="pre2-p224pre2-wr-2.2.4"
+V224_BUILD="pre3-p224manta-verizon-2.2.4"
+V210_BUILD="pre2-p102eww-verizon-2.1.0"
+V201_BUILD="pre2-p102eww-verizon-2.0.1"
+V1451_BUILD="preplus-p101eww-verizon-1.4.5.1"
+
+W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
+V224_MD5="04648bca9d241bc0889ceaf5c8ddf790"
+V210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
+V201_MD5="643824a4c103e266fd8e2760b098815c"
+V1451_MD5="fdc62b2d6e717dc90b208d52fd6336c0"
+
+PATIENT="test-verizon-pre2-2.2.4"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+WEBOS_TARBALL="webOS.tar"
+CARRIER_TARBALL="carrier.tar"
+CLASSIC_TARBALL="classic.tar"
+CDMA_FW="roadrunnercdmafw.tar"
+
+rm -f ${CDMA_FW} ${UMTS_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+WR_IPKS=
+VZW_IPKS=
+VZW2_IPKS=
+
+WR_IPKS="\
+pmvoicecommand-*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+com.palm.app.skype_*.ipk \
+sweatshop-wr-roadrunner_*.ipk \
+crotestcastleplus-images_*.ipk \
+audiod-config-eu_*.ipk \
+"
+
+VZW_IPKS="\
+palmcustomizationinfo-verizon_*.ipk \
+roadrunnercdmafw-verizon_*.ipk \
+"
+
+VZW2_IPKS="\
+com.nim.vznavigator_*.ipk \
+com.nim.app.vznavigator_*.ipk \
+"
+
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+    VZW_IPKS=
+    VZW2_IPKS=
+fi
+
+VZW2_IPKS="${VZW2_IPKS} \
+amazonservice_*.ipk \
+com.palm.app.amazonstore_*.ipk \
+"
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${W224_FILE}"
+echo
+
+mkdir -p downloads
+
+[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
+[ ! -f downloads/${V224_FILE} ] && $wget -c ${V224_JAR_URL} -O downloads/${V224_FILE}
+[ ! -f downloads/${V210_FILE} ] && $wget -c ${V210_JAR_URL} -O downloads/${V210_FILE}
+[ ! -f downloads/${V201_FILE} ] && $wget -c ${V201_JAR_URL} -O downloads/${V201_FILE}
+[ ! -f downloads/${V1451_FILE} ] && $wget -c ${V1451_JAR_URL} -O downloads/${V1451_FILE}
+
+[ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
+        echo "${W224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W224_FILE} && exit
+[ $(md5sum downloads/${V224_FILE} | cut -d \  -f 1) != ${V224_MD5} ] && \
+        echo "${V224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V224_FILE} && exit
+[ $(md5sum downloads/${V210_FILE} | cut -d \  -f 1) != ${V210_MD5} ] && \
+        echo "${V210_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V210_FILE} && exit
+[ $(md5sum downloads/${V201_FILE} | cut -d \  -f 1) != ${V201_MD5} ] && \
+        echo "${V201_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V201_FILE} && exit
+[ $(md5sum downloads/${V1451_FILE} | cut -d \  -f 1) != ${V1451_MD5} ] && \
+        echo "${V1451_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V1451_FILE} && exit
+
+# $make clobber
+
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
+$make VERSION=2.2.4 DEVICE=pre3 CARRIER=verizon unpack || exit
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon unpack || exit
+$make VERSION=1.4.5.1 DEVICE=preplus CARRIER=verizon unpack || exit
+
+cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
+
+cp build/${V210_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
+
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
+
+mkdir -p carrier
+
+( cd build/${W224_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V210_BUILD}/carrier ; \
+    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V224_BUILD}/carrier ; \
+    $tar -c -f - ${VZW2_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${VZW2_IPKS} ${WR_IPKS} )
+
+rm -rf carrier
+
+$make VERSION=1.4.5.1 DEVICE=preplus CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p classic.1451
+cd classic.1451
+$tar -x -f ../${CLASSIC_TARBALL}
+cd ..
+
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.service.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p classic.201
+cd classic.201
+$tar -x -f ../${CLASSIC_TARBALL}
+rm -f ../${CLASSIC_TARBALL}
+cp -r ../classic.1451/* ./
+mv ./usr/lib/palmos/Read\ Me.txt ./usr/lib/palmos/Read_Me.txt
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.list > ./usr/lib/ipkg/info/com.motionapps.service.classic.list2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.list2 ./usr/lib/ipkg/info/com.motionapps.service.classic.list
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums > ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2 ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums
+$tar -cf ../${CLASSIC_TARBALL} ./* || exit
+cd ..
+rm -rf classic.1451 classic.201
+
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.youtube" \
+    EXTRA_ROOTFS_TARBALL=youtube.tar extract-rootfs-ipkgs || exit
+
+mkdir -p youtube
+cd youtube
+$tar -x -f ../youtube.tar
+rm -f ../youtube.tar
+$tar -f ../${CLASSIC_TARBALL} --append ./* || exit
+cd ..
+rm -rf youtube
+
+$make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.maps" \
+    EXTRA_ROOTFS_TARBALL=googlemaps.tar extract-rootfs-ipkgs || exit
+
+mkdir -p mapsfix
+cd mapsfix
+$tar -x -f ../googlemaps.tar
+rm -f ../googlemaps.tar
+mv ./usr/palm/applications/com.palm.app.maps ./usr/palm/applications/com.palm.app.googlemaps
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.control > ./usr/lib/ipkg/info/com.palm.app.googlemaps.control
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.control
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.list > ./usr/lib/ipkg/info/com.palm.app.googlemaps.list
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.list
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.md5sums > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2
+mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
+sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
+mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
+md5 -r ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5 -r ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
+	      > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -f ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+$tar -f ../${CLASSIC_TARBALL} --append ./* || exit
+cd ..
+rm -rf mapsfix
+
+$make ${ARGS} \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.youtube com.palm.app.googlemaps" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} clobber-build settings all || exit
+
+$java -jar build/${PATIENT}/${W224_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
+echo
+
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
