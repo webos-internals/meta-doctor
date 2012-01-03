@@ -1097,12 +1097,38 @@ backup: mount
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.media.tar.gz
 
+.PHONY: wipe
+wipe: unmount
+	echo "Wiping boot"
+	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 -L /boot /dev/${BOOT_PARTITION}
+	novacom -w run file://sbin/tune2fs -- -i 0 /dev/${BOOT_PARTITION}
+	echo "Wiping var"
+	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 -L /var /dev/mapper/store-var
+	novacom -w run file://sbin/tune2fs -- -i 0 /dev/mapper/store-var
+	echo "Wiping root"
+	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 -L / /dev/mapper/store-root
+	novacom -w run file://sbin/tune2fs -- -i 0 /dev/mapper/store-root
+	echo "Wiping media"
+	novacom -w run file://usr/sbin/mkdosfs -- -f 1 /dev/mapper/store-media
+
 .PHONY: restore-%
 restore-%:
 	${MAKE} CARRIER=$* restore
 
 .PHONY: restore
 restore: mountrw
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/boot/ --no-same-owner --totals -zxf - . ) \
+	  < clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.var.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/var/ --no-same-owner --totals -zxf - . ) \
+	  < clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/root/ --no-same-owner --totals -zxf - . ) \
+	  < clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --no-same-owner --totals -zxf - ./.palm ) \

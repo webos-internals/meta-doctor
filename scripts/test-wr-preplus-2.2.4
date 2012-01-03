@@ -44,6 +44,7 @@ esac
 CARRIER_TARBALL="carrier.tar"
 LEGACY_TARBALL="legacy.tar"
 CUSTOM_ROOTFS="rootfs.tar"
+BUILD_INFO="palm-build-info"
 
 rm -f ${BUILD_INFO} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz
 
@@ -73,7 +74,7 @@ if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr CUSTOM_MODEL_CHECK=P100UNA,P100UEU,P101UNA,P101UEU"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr CUSTOM_MODEL_CHECK=P100UNA,P100UEU,P101UNA,P101UEU"
 
 $make ${ARGS} settings
 
@@ -101,6 +102,9 @@ $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 cp build/${W224_BUILD}/webOS/nova-cust-image-roadrunner.rootfs.tar ${CUSTOM_ROOTFS}
 gzip ${CUSTOM_ROOTFS}
 
+head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
+tail -n 4 build/${W210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
+
 mkdir -p carrier
 
 ( cd build/${W210_BUILD}/carrier ; \
@@ -111,7 +115,7 @@ mkdir -p carrier
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-prefs palmbuildinfo pmtpupdater camd-omap34xx camsrc-omap34xx castletpfw kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
+EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-prefs pmtpupdater camd-omap34xx camsrc-omap34xx castletpfw kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
