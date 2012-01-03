@@ -68,8 +68,8 @@ CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 ######################################
 
 ifeq (${LOGNAME},rwhitby)
-DEVICE = pre3
-CARRIER = wr
+# DEVICE = pre3
+# CARRIER = wr
 ifeq (${VERSION},1.4.5)
 BYPASS_ACTIVATION     = 1
 BYPASS_FIRST_USE_APP  = 1
