@@ -1065,6 +1065,10 @@ backup: mount
 	( novacom -w run file://bin/dd -- if=/dev/${NVRAM_PARTITION} ) > \
 	   clones/$$id/${CUSTIMAGEOLD}.nvram.bin
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/boot/ --totals -cf - . ) | \
+	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/var/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.varfs.tar.gz
@@ -1072,10 +1076,6 @@ backup: mount
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/root/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz
-	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
-	echo "Creating clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz" ; \
-	( novacom -w run file://bin/tar -- -C /tmp/boot/ --totals -cf - . ) | \
-	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.boot.tar.gz
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Creating clones/$$id/${CUSTIMAGEOLD}.log.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/log/ --totals -cf - . ) | \
@@ -1085,11 +1085,11 @@ backup: mount
 	( novacom -w run file://bin/tar -- -C /tmp/update/ --totals -cf - . ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.update.tar.gz
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
-	echo "Creating clones/$$id/${CUSTIMAGEOLD}.mojodb.enc" ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.mojodb.enc.gz" ; \
 	( novacom -w run file://bin/dd -- if=/dev/mapper/store-mojodb ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.mojodb.enc.gz
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
-	echo "Creating clones/$$id/${CUSTIMAGEOLD}.filecache.enc" ; \
+	echo "Creating clones/$$id/${CUSTIMAGEOLD}.filecache.enc.gz" ; \
 	( novacom -w run file://bin/dd -- if=/dev/mapper/store-filecache ) | \
 	  gzip -c > clones/$$id/${CUSTIMAGEOLD}.filecache.enc.gz
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
@@ -1108,6 +1108,18 @@ wipe: unmount
 	echo "Wiping root"
 	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 -L / /dev/mapper/store-root
 	novacom -w run file://sbin/tune2fs -- -i 0 /dev/mapper/store-root
+	echo "Wiping log"
+	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 -L /var/log /dev/mapper/store-log
+	novacom -w run file://sbin/tune2fs -- -i 0 /dev/mapper/store-log
+	echo "Wiping update"
+	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 -L /var/lib/update /dev/mapper/store-update
+	novacom -w run file://sbin/tune2fs -- -i 0 /dev/mapper/store-update
+	echo "Wiping mojodb"
+	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 /dev/mapper/store-mojodb
+	novacom -w run file://sbin/tune2fs -- -i 0 /dev/mapper/store-mojodb
+	echo "Wiping filecache"
+	novacom -w run file://sbin/mke2fs -- -q -j -b4096 -m0 -t ext3 /dev/mapper/store-filecache
+	novacom -w run file://sbin/tune2fs -- -i 0 /dev/mapper/store-filecache
 	echo "Wiping media"
 	novacom -w run file://usr/sbin/mkdosfs -- -f 1 /dev/mapper/store-media
 
@@ -1129,6 +1141,22 @@ restore: mountrw
 	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/root/ --no-same-owner --totals -zxf - . ) \
 	  < clones/$$id/${CUSTIMAGEOLD}.rootfs.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.log.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/log/ --no-same-owner --totals -zxf - . ) \
+	  < clones/$$id/${CUSTIMAGEOLD}.log.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.update.tar.gz" ; \
+	( novacom -w run file://bin/tar -- -C /tmp/update/ --no-same-owner --totals -zxf - . ) \
+	  < clones/$$id/${CUSTIMAGEOLD}.update.tar.gz
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.mojodb.enc.gz" ; \
+	gunzip -c clones/$$id/${CUSTIMAGEOLD}.mojodb.enc.gz | \
+	( novacom -w run file://bin/dd -- of=/dev/mapper/store-mojodb )
+	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
+	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.filecache.enc.gz" ; \
+	gunzip -c clones/$$id/${CUSTIMAGEOLD}.filecache.enc.gz | \
+	( novacom -w run file://bin/dd -- of=/dev/mapper/store-filecache )
 	@export id="`novacom -w run file://bin/cat -- /proc/nduid | cut -c 1-8`" ; \
 	echo "Restoring clones/$$id/${CUSTIMAGEOLD}.media.tar.gz" ; \
 	( novacom -w run file://bin/tar -- -C /tmp/media/ --no-same-owner --totals -zxf - ./.palm ) \
