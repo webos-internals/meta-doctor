@@ -232,6 +232,16 @@ $tar -f ../${FLASH_TARBALL} --append ./* || exit
 cd ..
 rm -rf classic.1451 classic.201
 
+$make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.bluetooth" \
+    EXTRA_ROOTFS_TARBALL=${BTENYO_TARBALL} extract-rootfs-ipkgs || exit
+
+mkdir -p btold
+cd btold
+$tar -x -f ../${BTENYO_TARBALL}
+rm -f ../${BTENYO_TARBALL}
+cd ..
+
 $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="enyo com.palm.app.bluetooth com.palm.service.bluetooth.spp pmbtcontacts pmbtengine pmbtos pmbtstack pmbtstartup com.palm.service.calendar.google com.palm.service.calendar.yahoo com.palm.service.contacts.yahoo" \
     EXTRA_ROOTFS_TARBALL=${BTENYO_TARBALL}  extract-rootfs-ipkgs || exit
@@ -239,9 +249,13 @@ $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
 mkdir -p btenyo
 cd btenyo
 $tar -x -f ../${BTENYO_TARBALL}
+mv ../btold/usr/lib/ipkg/info/com.palm.app.bluetooth.control ./usr/lib/ipkg/info/com.palm.app.bluetooth.old.control
+mv ../btold/usr/lib/ipkg/info/com.palm.app.bluetooth.list ./usr/lib/ipkg/info/com.palm.app.bluetooth.old.list
+mv ../btold/usr/lib/ipkg/info/com.palm.app.bluetooth.md5sums ./usr/lib/ipkg/info/com.palm.app.bluetooth.old.md5sums
+
 $tar -f ../${FLASH_TARBALL} --append ./* || exit
 cd ..
-rm -rf btenyo ${BTENYO_TARBALL}
+rm -rf btenyo btold ${BTENYO_TARBALL}
 
 $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon \
     EXTRA_ROOTFS_IPKGS="com.palm.app.maps" \
@@ -275,7 +289,7 @@ rm -rf mapsfix
 
 
 $make ${ARGS} \
-    DELETE_ROOTFS_IPKGS="com.palm.app.maps" \
+    DELETE_ROOTFS_IPKGS="com.palm.app.maps com.palm.app.bluetooth.old" \
     EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flame enyo com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.bluetooth com.palm.service.bluetooth.spp pmbtcontacts pmbtengine pmbtos pmbtstack pmbtstartup com.palm.service.calendar.google com.palm.service.calendar.yahoo com.palm.service.contacts.yahoo com.palm.app.googlemaps" \
     EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build settings all || exit
 

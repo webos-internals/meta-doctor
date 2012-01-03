@@ -97,7 +97,7 @@ if [ "$1" = "--wifi-only" ] ; then
     VZW2_IPKS=
 fi
 
-VZW2_IPKS="${VZW2_IPKS} \
+VZW_IPKS="${VZW_IPKS} \
 amazonservice_*.ipk \
 com.palm.app.amazonstore_*.ipk \
 "
@@ -190,15 +190,23 @@ rm -rf classic.1451 classic.201
 
 $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon \
     EXTRA_ROOTFS_IPKGS="com.palm.app.youtube" \
-    EXTRA_ROOTFS_TARBALL=youtube.tar extract-rootfs-ipkgs || exit
+    EXTRA_ROOTFS_TARBALL=youtube210.tar extract-rootfs-ipkgs || exit
 
-mkdir -p youtube
-cd youtube
-$tar -x -f ../youtube.tar
-rm -f ../youtube.tar
-$tar -f ../${CLASSIC_TARBALL} --append ./* || exit
-cd ..
-rm -rf youtube
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.youtube" \
+    EXTRA_ROOTFS_TARBALL=youtube224.tar extract-rootfs-ipkgs || exit
+
+mkdir -p youtube210 youtube224
+
+$tar -C youtube210 -x -f youtube210.tar
+$tar -C youtube224 -x -f youtube224.tar
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.control
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
+
+$tar -C youtube210 -f ${LEGACY_TARBALL} --append . || exit
+
+rm -rf youtube210 youtube224 youtube210.tar youtube224.tar
 
 $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon \
     EXTRA_ROOTFS_IPKGS="com.palm.app.maps" \
@@ -231,6 +239,7 @@ cd ..
 rm -rf mapsfix
 
 $make ${ARGS} \
+    DELETE_ROOTFS_IPKGS="com.palm.app.youtube.old" \
     EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.youtube com.palm.app.googlemaps" \
     EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} clobber-build settings all || exit
 
