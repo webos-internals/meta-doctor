@@ -1,8 +1,8 @@
 #!/bin/bash
-# meta-verizon-preplus-2.2.4 script by Rod Whitby
+# meta-sprint-pre-2.2.4 script by Rod Whitby
 # based on meta-meta script by Ed Cates
 # modifications by 'andidendel' and 'John Steffes'
-# intended to flash Verizon PrePlus phones with a working webOS 2.2.4 image
+# intended to flash Sprint Pre phones with a working webOS 2.2.4 image
 #  Your mileage may vary
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
@@ -58,6 +58,7 @@ SRC_CDMA_FW="roadrunnercdmafw.tar"
 CDMA_FW="castlecdmafw.tar"
 SRC_UMTS_FW="roadrunnerumtsfw.tar"
 UMTS_FW="castleumtsfw.tar"
+BUILD_INFO="palm-build-info"
 
 rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${INSTALLER_FW} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL}
 
@@ -102,7 +103,7 @@ crotest-images_*.ipk \
 audiod-config-cdma_*.ipk \
 "
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Sprint CUSTOM_MODEL_CHECK=P100EWW CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Sprint CUSTOM_MODEL_CHECK=P100EWW CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -150,6 +151,9 @@ $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
 
+head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
+tail -n 4 build/${W210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
+
 mkdir -p carrier
 
 ( cd build/${W210_BUILD}/carrier ; \
@@ -162,7 +166,7 @@ mkdir -p carrier
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan luna-prefs palmbuildinfo pmtpupdater camd-omap34xx camsrc-omap34xx castletpfw kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
+EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan camd-omap34xx camsrc-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
@@ -195,7 +199,7 @@ rm -rf luna210 luna224 luna210.tar luna224.tar
 
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
-    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
 $java -jar build/${PATIENT}/${W210_FILE} --auto
