@@ -200,9 +200,9 @@ mkdir -p youtube210 youtube224
 
 $tar -C youtube210 -x -f youtube210.tar
 $tar -C youtube224 -x -f youtube224.tar
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.control
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.control
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
 
 $tar -C youtube210 -f ${LEGACY_TARBALL} --append . || exit
 
