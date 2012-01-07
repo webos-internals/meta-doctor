@@ -67,39 +67,42 @@ for f in $git $wget $make $java $patch $python $tar ; do
 done
 
 ARGS=
-WR_IPKS=
-VZW_IPKS=
-VZW2_IPKS=
+W224_IPKS=
+V224_IPKS=
+V210_IPKS=
 
-WR_IPKS="\
-pmvoicecommand-*.ipk \
-com.palm.app.mobilehotspot_*.ipk \
-com.palm.app.skype_*.ipk \
+W224_IPKS="\
 crotestcastleplus-images_*.ipk \
 "
 
-VZW_IPKS="\
-palmcustomizationinfo-verizon_*.ipk \
-roadrunnercdmafw-verizon_*.ipk \
-sweatshop-verizon-roadrunner_*.ipk \
-"
-
-VZW2_IPKS="\
+V224_IPKS="\
 com.nim.vznavigator_*.ipk \
 com.nim.app.vznavigator_*.ipk \
 "
 
+V210_IPKS="\
+roadrunnercdmafw-verizon_*.ipk \
+"
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
-    VZW_IPKS=
-    VZW2_IPKS=
+    V224_IPKS=
+    V210_IPKS=
 fi
 
-VZW_IPKS="${VZW_IPKS} \
+V224_IPKS="${V224_IPKS} \
+pmvoicecommand-*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+com.palm.app.skype_*.ipk \
+"
+
+V210_IPKS="${V210_IPKS} \
 amazonservice_*.ipk \
 com.palm.app.amazonstore_*.ipk \
+sweatshop-verizon-roadrunner_*.ipk \
+palmcustomizationinfo-verizon_*.ipk \
 "
+
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
@@ -151,12 +154,12 @@ $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 mkdir -p carrier
 
 ( cd build/${W224_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${V210_BUILD}/carrier ; \
-    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - installer.xml ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V224_BUILD}/carrier ; \
-    $tar -c -f - ${VZW2_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${VZW2_IPKS} ${WR_IPKS} )
+    $tar -c -f - ${V224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V210_BUILD}/carrier ; \
+    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${V224_IPKS} ${V210_IPKS} )
 
 rm -rf carrier
 
