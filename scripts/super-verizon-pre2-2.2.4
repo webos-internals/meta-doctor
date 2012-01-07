@@ -31,7 +31,7 @@ V210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
 V201_MD5="643824a4c103e266fd8e2760b098815c"
 V1451_MD5="fdc62b2d6e717dc90b208d52fd6336c0"
 
-PATIENT="test-verizon-pre2-2.2.4"
+PATIENT="super-verizon-pre2-2.2.4"
 
 git="git"
 wget="wget"
@@ -204,7 +204,7 @@ mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control ./youtube210/usr/
 mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
 mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
 
-$tar -C youtube210 -f ${LEGACY_TARBALL} --append . || exit
+$tar -C youtube210 -f ${CLASSIC_TARBALL} --append . || exit
 
 rm -rf youtube210 youtube224 youtube210.tar youtube224.tar
 
