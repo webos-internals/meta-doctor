@@ -9,19 +9,15 @@
 
 W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
 W210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
-V224_JAR_URL="http://palm.cdnetworks.net/rom/manta/p224r0d12192011/wdmantaverizon/webosdoctorp224mantaverizon.jar"
 
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
 W210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
-V224_FILE="webosdoctorp224mantaverizon-2.2.4.jar"
 
 W224_BUILD="pre2-p224pre2-wr-2.2.4"
 W210_BUILD="pre2-p102eww-verizon-2.1.0"
-V224_BUILD="pre3-p224manta-verizon-2.2.4"
 
 W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
 W210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
-V224_MD5="04648bca9d241bc0889ceaf5c8ddf790"
 
 PATIENT="test-verizon-pre2-2.2.4"
 
@@ -60,7 +56,6 @@ done
 ARGS=
 WR_IPKS=
 VZW_IPKS=
-VZW2_IPKS=
 
 WR_IPKS="\
 pmvoicecommand-*.ipk \
@@ -82,21 +77,10 @@ VZW_IPKS="\
 roadrunnercdmafw-verizon_*.ipk \
 "
 
-VZW2_IPKS="\
-com.nim.vznavigator_*.ipk \
-com.nim.app.vznavigator_*.ipk \
-"
-
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
     VZW_IPKS=
-    VZW2_IPKS=
 fi
-
-VZW_IPKS="${VZW_IPKS} \
-amazonservice_*.ipk \
-com.palm.app.amazonstore_*.ipk \
-"
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
@@ -110,7 +94,6 @@ mkdir -p downloads
 
 [ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
 [ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
-[ ! -f downloads/${V224_FILE} ] && $wget -c ${V224_JAR_URL} -O downloads/${V224_FILE}
 
 [ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
         echo "${W224_FILE} did not download properly.  Please run this script again." && \
@@ -118,15 +101,11 @@ mkdir -p downloads
 [ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
         echo "${W210_FILE} did not download properly.  Please run this script again." && \
         rm -f downloads/${W210_FILE} && exit
-[ $(md5sum downloads/${V224_FILE} | cut -d \  -f 1) != ${V224_MD5} ] && \
-        echo "${V224_FILE} did not download properly.  Please run this script again." && \
-        rm -f downloads/${V224_FILE} && exit
 
 # $make clobber
 
 $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
-$make VERSION=2.2.4 DEVICE=pre3 CARRIER=verizon unpack || exit
 
 cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
 
@@ -141,9 +120,7 @@ mkdir -p carrier
     $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${V224_BUILD}/carrier ; \
-    $tar -c -f - ${VZW2_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${VZW2_IPKS} ${WR_IPKS} )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${WR_IPKS} )
 
 rm -rf carrier
 
