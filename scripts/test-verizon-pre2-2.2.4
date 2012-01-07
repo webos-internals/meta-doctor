@@ -74,20 +74,13 @@ palmcustomizationinfo-wr_*.ipk
 "
 
 VZW_IPKS="\
-com.nim.vznavigator_*.ipk \
-com.nim.app.vznavigator_*.ipk \
+roadrunnercdmafw-verizon_*.ipk \
 "
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
     VZW_IPKS=
 fi
-
-VZW_IPKS="${VZW_IPKS} \
-amazonservice_*.ipk \
-com.palm.app.amazonstore_*.ipk \
-roadrunnercdmafw-verizon_*.ipk \
-"
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
