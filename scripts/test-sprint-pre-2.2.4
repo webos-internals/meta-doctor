@@ -166,7 +166,7 @@ mkdir -p carrier
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan camd-omap34xx camsrc-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
+EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan camd-omap34xx camsrc-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
@@ -198,7 +198,7 @@ $tar -C luna224 -f ${LEGACY_TARBALL} --append . || exit
 rm -rf luna210 luna224 luna210.tar luna224.tar
 
 $make ${ARGS} \
-    DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
+    DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx tisgxgfx-roadrunner" \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
