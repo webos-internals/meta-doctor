@@ -57,8 +57,11 @@ WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
 CLASSIC_TARBALL="classic.tar"
 CDMA_FW="roadrunnercdmafw.tar"
+BUILD_INFO="palm-build-info"
 
-rm -f ${CDMA_FW} ${UMTS_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -104,7 +107,7 @@ palmcustomizationinfo-verizon_*.ipk \
 "
 
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO}  PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -151,14 +154,17 @@ cp build/${V210_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
+head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
+tail -n 4 build/${V210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
+
 mkdir -p carrier
 
 ( cd build/${W224_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V224_BUILD}/carrier ; \
     $tar -c -f - ${V224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V210_BUILD}/carrier ; \
-    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - installer.xml ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${V224_IPKS} ${V210_IPKS} )
 
 rm -rf carrier
@@ -251,4 +257,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${BUILD_INFO} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
