@@ -57,9 +57,10 @@ WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
 CLASSIC_TARBALL="classic.tar"
 CDMA_FW="roadrunnercdmafw.tar"
+INSTALLER_XML="installer.xml"
 BUILD_INFO="palm-build-info"
 
-rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${UMTS_FW} ${INSTALLER_XML} ${BUILD_INFO} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
 
 echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
@@ -153,6 +154,11 @@ cp build/${V210_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
 
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
+
+cp build/${V210_BUILD}/webOS/${INSTALLER_XML} ./
+
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${INSTALLER_XML} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_XML} || exit
 
 head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
 tail -n 4 build/${V210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
@@ -257,4 +263,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${BUILD_INFO} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${INSTALLER_XML} ${BUILD_INFO} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
