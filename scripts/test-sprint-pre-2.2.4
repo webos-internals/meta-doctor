@@ -15,16 +15,19 @@ S145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d08102010/spr1ntp145rod/w
 
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
+V224_FILE="webosdoctorp224mantaverizon-2.2.4.jar"
 V210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
 S145_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
 
 W224_BUILD="pre2-p224pre2-wr-2.2.4"
 W210_BUILD="preplus-p101ueu-wr-2.1.0"
+V224_BUILD="pre3-p224manta-verizon-2.2.4"
 V210_BUILD="pre2-p102eww-verizon-2.1.0"
 S145_BUILD="pre-p100eww-sprint-1.4.5"
 
 W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
 W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
+V224_MD5="04648bca9d241bc0889ceaf5c8ddf790"
 V210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
 S145_MD5="a55a377dd38fd7a8e94ba9514e1d9e18"
 
@@ -69,25 +72,33 @@ for f in $git $wget $make $java $patch $python $tar ; do
 done
 
 ARGS=
-W224_IPKS=
 W210_IPKS=
-SPRINT_IPKS=
-
-W224_IPKS="\
-pmvoicecommand-*.ipk \
-com.palm.app.mobilehotspot_*.ipk \
-com.palm.app.skype_*.ipk \
-"
+V224_IPKS=
+V210_IPKS=
+S145_IPKS=
 
 W210_IPKS="\
 palmcustomizationinfo-wr-castle-plus_*.ipk \
 sweatshop-wr-castle_*.ipk \
 "
 
-SPRINT_IPKS="\
+V224_IPKS="\
+pmvoicecommand-*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+com.palm.app.skype_*.ipk \
+"
+
+V210_IPKS="\
+amazonservice_*.ipk \
+com.palm.app.amazonstore_*.ipk \
+"
+
+S145_IPKS="\
 dmtree-sprint_*.ipk \
 com.handson.app.nascar_*.ipk \
 com.handson.app.nfl_*.ipk \
+com.mobitv.app.sprinttv_*.ipk \
+com.palm.app.sprintportal_*.ipk \
 com.palm.app.sprintportal_*.ipk \
 mobitv-sprint-rtspsrc_*.ipk \
 com.mobitv.app.sprinttv_*.ipk \
@@ -95,13 +106,12 @@ com.mobitv.app.sprinttv_*.ipk \
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
-    SPRINT_IPKS=
+    S145_IPKS=
 fi
 
-SPRINT_IPKS="${SPRINT_IPKS} \
+S145_IPKS="${S145_IPKS} \
 crotest-images_*.ipk \
-audiod-config-cdma_*.ipk \
-"
+" 
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Sprint CUSTOM_MODEL_CHECK=P100EWW CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
 
@@ -115,6 +125,7 @@ mkdir -p downloads
 
 [ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
 [ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+[ ! -f downloads/${V224_FILE} ] && $wget -c ${V224_JAR_URL} -O downloads/${V224_FILE}
 [ ! -f downloads/${V210_FILE} ] && $wget -c ${V210_JAR_URL} -O downloads/${V210_FILE}
 [ ! -f downloads/${S145_FILE} ]  && $wget -c ${S145_JAR_URL}  -O downloads/${S145_FILE}
 
@@ -124,6 +135,9 @@ mkdir -p downloads
 [ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
         echo "${W210_FILE} did not download properly.  Please run this script again." && \
         rm -f downloads/${W210_FILE} && exit
+[ $(md5sum downloads/${V224_FILE} | cut -d \  -f 1) != ${V224_MD5} ] && \
+        echo "${V224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V224_FILE} && exit
 [ $(md5sum downloads/${V210_FILE} | cut -d \  -f 1) != ${V210_MD5} ] && \
         echo "${V210_FILE} did not download properly.  Please run this script again." && \
         rm -f downloads/${V210_FILE} && exit
@@ -134,6 +148,7 @@ mkdir -p downloads
 # $make clobber
 
 $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
+$make VERSION=2.2.4 DEVICE=pre3 CARRIER=verizon unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
 $make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
@@ -158,11 +173,13 @@ mkdir -p carrier
 
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${W224_BUILD}/carrier ; \
-    $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${W145_BUILD}/carrier ; \
-    $tar -c -f - ${SPRINT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${VZW2_IPKS} ${W224_IPKS} ${W210_IPKS})
+( cd build/${V224_BUILD}/carrier ; \
+    $tar -c -f - ${V224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V210_BUILD}/carrier ; \
+    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${S145_BUILD}/carrier ; \
+    $tar -c -f - ${S145_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W210_IPKS} ${V224_IPKS} ${V210_IPKS} ${S145_IPKS} )
 
 rm -rf carrier
 
@@ -209,3 +226,4 @@ echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
 echo
 
 rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${INSTALLER_FW} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL}
+
