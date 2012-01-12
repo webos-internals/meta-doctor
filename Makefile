@@ -293,17 +293,12 @@ ifeq (${DEVICE},touchpad)
 CODENAME = topaz
 NVRAM_PARTITION=mmcblk0p12
 BOOT_PARTITION=mmcblk0p13
-MODEL = p302hstnh
-VERSION = 3.0.2
+MODEL = p305hstnh
+VERSION = 3.0.5
 ifeq (${CARRIER},wifi)
-MODEL = p304hstnh
-VERSION = 3.0.4
 CARRIER_TARBALL = hp.tar
 endif
 ifeq (${CARRIER},att)
-ifeq (${VERSION},3.0.4)
-MODEL = p304hstnh
-endif
 CARRIER_TARBALL = att.tar
 endif
 endif
