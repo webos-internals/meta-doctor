@@ -80,20 +80,11 @@ done
 
 ARGS=
 W224_IPKS=
-W210_IPKS=
 V224_IPKS=
 V210_IPKS=
 
 W224_IPKS="\
-pmvoicecommand-*.ipk \
-com.palm.app.mobilehotspot_*.ipk \
-com.palm.app.skype_*.ipk \
 crotestcastleplus-images_*.ipk \
-audiod-config-eu_*.ipk \
-"
-
-W210_IPKS="\
-sweatshop-wr-castle_*.ipk \
 "
 
 V224_IPKS="\
@@ -102,7 +93,6 @@ com.nim.app.vznavigator_*.ipk \
 "
 
 V210_IPKS="\
-palmcustomizationinfo-verizon_*.ipk \
 roadrunnercdmafw-verizon_*.ipk \
 "
 
@@ -115,7 +105,16 @@ fi
 V210_IPKS="${V210_IPKS} \
 amazonservice_*.ipk \
 com.palm.app.amazonstore_*.ipk \
+sweatshop-verizon-roadrunner_*.ipk \
+palmcustomizationinfo-verizon_*.ipk \
 "
+
+V224_IPKS="${V224_IPKS} \
+pmvoicecommand-*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+com.palm.app.skype_*.ipk \
+"
+
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P101EWW CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
 
@@ -181,18 +180,18 @@ tail -n 4 build/${W210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 mkdir -p carrier
 
 ( cd build/${W210_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - installer.xml ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W224_BUILD}/carrier ; \
     $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${V210_BUILD}/carrier ; \
-    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V224_BUILD}/carrier ; \
     $tar -c -f - ${V224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${V210_IPKS} ${V224_IPKS} ${W224_IPKS} ${W210_IPKS})
+( cd build/${V210_BUILD}/carrier ; \
+    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${V224_IPKS} ${V210_IPKS} )
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan camd-omap34xx camsrc-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver pmmedia-omap34xx tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
+EXTRA_ROOTFS_IPKGS="bootloader kernel-dev kernel-module-oprofile kernel-module-scsi-wait-scan camd-omap34xx camsrc-omap34xx kernel-image-2.6.24-palm-joplin-3430 kernel-module-ecb kernel-module-ifb kernel-module-nbd kernel-module-pcbc pmwifidriver tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
@@ -262,9 +261,9 @@ mkdir -p youtube210 youtube224
 
 $tar -C youtube210 -x -f youtube210.tar
 $tar -C youtube224 -x -f youtube224.tar
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.control
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.control
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
 
 $tar -C youtube210 -f ${LEGACY_TARBALL} --append . || exit
 
@@ -301,7 +300,7 @@ cd ..
 rm -rf mapsfix
 
 $make ${ARGS} \
-    DELETE_ROOTFS_IPKGS="com.palm.app.youtube.old camd-omap36xx camsrc-omap36xx pmmedia-omap36xx tisgxgfx-roadrunner" \
+    DELETE_ROOTFS_IPKGS="com.palm.app.youtube.old camd-omap36xx camsrc-omap36xx tisgxgfx-roadrunner" \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.youtube com.palm.app.googlemaps" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 

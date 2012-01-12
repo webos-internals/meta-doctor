@@ -31,7 +31,7 @@ V210_MD5="b586ef0cd8a5b41aa926c4f6f96e1874"
 V201_MD5="643824a4c103e266fd8e2760b098815c"
 V1451_MD5="fdc62b2d6e717dc90b208d52fd6336c0"
 
-PATIENT="test-verizon-pre2-2.2.4"
+PATIENT="super-verizon-pre2-2.2.4"
 
 git="git"
 wget="wget"
@@ -57,8 +57,12 @@ WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
 CLASSIC_TARBALL="classic.tar"
 CDMA_FW="roadrunnercdmafw.tar"
+INSTALLER_XML="installer.xml"
+BUILD_INFO="palm-build-info"
 
-rm -f ${CDMA_FW} ${UMTS_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${UMTS_FW} ${INSTALLER_XML} ${BUILD_INFO} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
 for f in $git $wget $make $java $patch $python $tar ; do
 	
@@ -67,42 +71,44 @@ for f in $git $wget $make $java $patch $python $tar ; do
 done
 
 ARGS=
-WR_IPKS=
-VZW_IPKS=
-VZW2_IPKS=
+W224_IPKS=
+V224_IPKS=
+V210_IPKS=
 
-WR_IPKS="\
-pmvoicecommand-*.ipk \
-com.palm.app.mobilehotspot_*.ipk \
-com.palm.app.skype_*.ipk \
-sweatshop-wr-roadrunner_*.ipk \
+W224_IPKS="\
 crotestcastleplus-images_*.ipk \
-audiod-config-eu_*.ipk \
 "
 
-VZW_IPKS="\
-palmcustomizationinfo-verizon_*.ipk \
-roadrunnercdmafw-verizon_*.ipk \
-"
-
-VZW2_IPKS="\
+V224_IPKS="\
 com.nim.vznavigator_*.ipk \
 com.nim.app.vznavigator_*.ipk \
 "
 
+V210_IPKS="\
+roadrunnercdmafw-verizon_*.ipk \
+"
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
-    VZW_IPKS=
-    VZW2_IPKS=
+    V224_IPKS=
+    V210_IPKS=
 fi
 
-VZW_IPKS="${VZW_IPKS} \
-amazonservice_*.ipk \
-com.palm.app.amazonstore_*.ipk \
+V224_IPKS="${V224_IPKS} \
+pmvoicecommand-*.ipk \
+com.palm.app.mobilehotspot_*.ipk \
+com.palm.app.skype_*.ipk \
 "
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
+V210_IPKS="${V210_IPKS} \
+amazonservice_*.ipk \
+com.palm.app.amazonstore_*.ipk \
+sweatshop-verizon-roadrunner_*.ipk \
+palmcustomizationinfo-verizon_*.ipk \
+"
+
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO}  PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
 $make ${ARGS} settings
 
@@ -149,15 +155,23 @@ cp build/${V210_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
+cp build/${V210_BUILD}/webOS/${INSTALLER_XML} ./
+
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${INSTALLER_XML} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_XML} || exit
+
+head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
+tail -n 4 build/${V210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
+
 mkdir -p carrier
 
 ( cd build/${W224_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${V210_BUILD}/carrier ; \
-    $tar -c -f - ${VZW_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V224_BUILD}/carrier ; \
-    $tar -c -f - ${VZW2_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${VZW_IPKS} ${VZW2_IPKS} ${WR_IPKS} )
+    $tar -c -f - ${V224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${V210_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${V224_IPKS} ${V210_IPKS} )
 
 rm -rf carrier
 
@@ -200,11 +214,11 @@ mkdir -p youtube210 youtube224
 
 $tar -C youtube210 -x -f youtube210.tar
 $tar -C youtube224 -x -f youtube224.tar
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.control
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
-mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums .youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.control
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.list
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums ./youtube210/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
 
-$tar -C youtube210 -f ${LEGACY_TARBALL} --append . || exit
+$tar -C youtube210 -f ${CLASSIC_TARBALL} --append . || exit
 
 rm -rf youtube210 youtube224 youtube210.tar youtube224.tar
 
@@ -249,4 +263,4 @@ echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${INSTALLER_XML} ${BUILD_INFO} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
