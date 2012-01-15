@@ -873,6 +873,13 @@ ifeq (${PATCH_DOCTOR},1)
 	( cd patches/doctor ; cat ${DOCTOR_PATCHES} ) | \
 	( cd build/${PATIENT} ; patch -p0 --no-backup-if-mismatch )
 endif
+ifeq (${DISABLE_MODEM_UPDATE},1)
+	modem_fw_ipk=$(shell egrep '^${CODENAME}(umts|cdma)fw.*ipk' build/${PATIENT}/carrier-file-list.txt) ; \
+	  sed -i.orig -e "/$$modem_fw_ipk/d" \
+		  build/${PATIENT}/carrier-file-list.txt ;\
+	  rm -f build/${PATIENT}/carrier-file-list.txt.orig ;\
+	  rm -f build/${PATIENT}/carrier/$$modem_fw_ipk
+endif
 	touch $@
 
 .PHONY: pack-%
