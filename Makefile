@@ -830,6 +830,11 @@ ifeq (${DISABLE_MODEM_UPDATE},1)
 	sed -i.orig -e '/ModemUpdater/d' \
 		build/${PATIENT}/webOS/installer.xml
 	rm -f build/${PATIENT}/webOS/installer.xml.orig
+	modem_fw_ipk=$(shell egrep '^${CODENAME}(umts|cdma)fw.*ipk' build/${PATIENT}/carrier-file-list.txt) ; \
+	  sed -i.orig -e "/$$modem_fw_ipk/d" \
+		  build/${PATIENT}/carrier-file-list.txt ;\
+	  rm -f build/${PATIENT}/carrier-file-list.txt.orig ;\
+	  rm -f build/${PATIENT}/carrier/$$modem_fw_ipk
 endif
 ifdef CUSTOM_DEVICETYPE
 	sed -i.orig -e 's/target="[^"]*"/target="${CUSTOM_DEVICETYPE}"/' \
