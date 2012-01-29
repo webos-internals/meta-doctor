@@ -1,5 +1,5 @@
 #!/bin/bash
-# meta-bellmo-pre-2.2.4 script by Rod Whitby
+# test-bellmo-pre-2.2.4 script by Rod Whitby
 # based on meta-meta script by Ed Cates
 # modified by John Steffes
 # intended to flash BellMobility Pre phones with a working webOS 2.2.4 image
@@ -49,17 +49,18 @@ case "`uname -s`" in
 	;;
 esac
 
-WEBOS_TARBALL="webOS.tar"
-CARRIER_TARBALL="carrier.tar"
-LEGACY_TARBALL="legacy.tar"
-CUSTOM_ROOTFS="rootfs.tar"
-SRC_CDMA_FW="roadrunnercdmafw.tar"
-CDMA_FW="castlecdmafw.tar"
-SRC_UMTS_FW="roadrunnerumtsfw.tar"
-UMTS_FW="castleumtsfw.tar"
 BUILD_INFO="palm-build-info"
+BOOTIMG_210="boot-castle.bin"
+BOOTIMG_224="boot-roadrunner.bin"
+CARRIER_TARBALL="carrier.tar"
+CDMA_FW="roadrunnercdmafw.tar"
+CLASSIC_TARBALL="classic.tar"
+LEGACY_TARBALL="legacy.tar"
+UIMAGE_210="nova-installer-image-castle.uImage"
+UIMAGE_224="nova-installer-image-roadrunner.uImage"
+WEBOS_TARBALL="webOS.tar"
 
-rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${INSTALLER_FW} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL}
+rm -f ${BUILD_INFO} ${BOOTIMG_224} ${CARRIER_TARBALL} ${CDMA_FW} ${LEGACY_TARBALL} ${UIMAGE_224} ${WEBOS_TARBALL}
 
 echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
@@ -96,12 +97,12 @@ if [ "$1" = "--wifi-only" ] ; then
     V210_IPKS=
 fi
 
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=bell CUSTOM_MODEL_CHECK=P100EWW CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=preplus CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=bell CUSTOM_MODEL_CHECK=P100EWW CUSTOM_DEVICETYPE=castle CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
 $make ${ARGS} settings
 
 echo
-echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo "Your custom doctor file will be created at build/${PATIENT}/${W224_FILE}"
 echo
 
 mkdir -p downloads
@@ -131,35 +132,39 @@ $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
 $make VERSION=1.4.5 DEVICE=pre CARRIER=bellmo unpack || exit
 
-cp build/${W224_BUILD}/webOS/nova-cust-image-roadrunner.rootfs.tar ${CUSTOM_ROOTFS}
-gzip ${CUSTOM_ROOTFS}
-
-cp build/${W210_BUILD}/resources/${WEBOS_TARBALL} ./
+cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
 
 # Use the modem firmware from the Pre 2 - same comms board as Pre+
-cp build/${V210_BUILD}/webOS/${SRC_CDMA_FW} ${CDMA_FW}
-cp build/${W224_BUILD}/webOS/${SRC_UMTS_FW} ${UMTS_FW}
+cp build/${V210_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
+
+# Use PrePlus uImage...
+cp build/${W210_BUILD}/webOS/${UIMAGE_210} ${UIMAGE_224}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UIMAGE_224} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UIMAGE_224} || exit
+
+# Use PrePlus boot-image...
+cp build/${W210_BUILD}/webOS/${BOOTIMG_210} ${BOOTIMG_224}
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${BOOTIMG_224} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${BOOTIMG_224} || exit
 
 head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
 tail -n 4 build/${B145_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 
 mkdir -p carrier
 
-( cd build/${W210_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W224_BUILD}/carrier ; \
     $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${W210_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V210_BUILD}/carrier ; \
     $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${V210_IPKS} ${W224_IPKS} ${W210_IPKS})
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${W210_IPKS} ${V210_IPKS} )
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx kernel-dev kernel-image-2.6.24-palm-joplin-3430 pmwifidriver tisgxgfx updatefsinfo bootie-images trenchcoat compcache"
+EXTRA_ROOTFS_IPKGS="bootie-images bootloader camd-omap34xx camsrc-omap34xx compcache kernel-dev kernel-image-2.6.24-palm-joplin-3430 pmwifidriver tisgxgfx updatefsinfo"
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
@@ -190,15 +195,42 @@ $tar -C luna224 -f ${LEGACY_TARBALL} --append . || exit
 
 rm -rf luna210 luna224 luna210.tar luna224.tar
 
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="trenchcoat" \
+    EXTRA_ROOTFS_TARBALL=trenchcoat.tar extract-rootfs-ipkgs || exit
+
+mkdir -p trenchcoat
+
+$tar -C trenchcoat -x -f trenchcoat.tar
+
+mv ./trenchcoat/etc/fstab ./trenchcoat/etc/fstab.old
+tail -n 14 ./trenchcoat/etc/fstab.old >> ./trenchcoat/etc/fstab
+
+cd trenchcoat
+md5 -r ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
+
+mv ./usr/lib/ipkg/info/trenchcoat.md5sums ./usr/lib/ipkg/info/trenchcoat.md5sums.old
+
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/trenchcoat.md5sums.old ./usr/lib/ipkg/info/trenchcoat.md5sums.new \
+	      > ./usr/lib/ipkg/info/trenchcoat.md5sums
+cd ..
+
+rm -f ./trenchcoat/usr/lib/ipkg/info/trenchcoat.md5sums.old ./trenchcoat/usr/lib/ipkg/info/trenchcoat.md5sums.new ./trenchcoat/etc/fstab.old
+
+$tar -C trenchcoat -f ${LEGACY_TARBALL} --append . || exit
+
+rm -rf trenchcoat trenchcoat.tar
+
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx tisgxgfx-roadrunner" \
-    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs" \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs trenchcoat" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
-$java -jar build/${PATIENT}/${W210_FILE}
+$java -jar build/${PATIENT}/${W224_FILE} --auto
 
 echo
-echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${UMTS_FW} ${BUILD_INFO} ${INSTALLER_FW} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL}
+rm -f ${BUILD_INFO} ${BOOTIMG_224} ${CARRIER_TARBALL} ${CDMA_FW} ${LEGACY_TARBALL} ${UIMAGE_224} ${WEBOS_TARBALL}
