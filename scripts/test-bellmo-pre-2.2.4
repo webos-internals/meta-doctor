@@ -12,6 +12,7 @@ W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod
 V210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
 B145_JAR_URL="http://palm.cdnetworks.net/rom/pre/p145r0d07142010/b11ep145rod/webosdoctorp100ewwbellmo.jar"
 
+P224_FILE="webosdoctorp224pre-bellmo-2.2.4.jar"
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 V210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
@@ -102,7 +103,7 @@ ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAE
 $make ${ARGS} settings
 
 echo
-echo "Your custom doctor file will be created at build/${PATIENT}/${W224_FILE}"
+echo "Your custom doctor file will be created at build/${PATIENT}/${P224_FILE}"
 echo
 
 mkdir -p downloads
@@ -164,7 +165,7 @@ mkdir -p carrier
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootie-images bootloader camd-omap34xx camsrc-omap34xx compcache kernel-dev kernel-image-2.6.24-palm-joplin-3430 pmwifidriver tisgxgfx updatefsinfo"
+EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx compcache kernel-dev kernel-image-2.6.24-palm-joplin-3430 pmwifidriver tisgxgfx"
 
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
@@ -227,10 +228,12 @@ $make ${ARGS} \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs trenchcoat" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
-$java -jar build/${PATIENT}/${W224_FILE} --auto
+mv build/${PATIENT}/${W224_FILE} build/${PATIENT}/${P224_FILE}
+
+$java -jar build/${PATIENT}/${P224_FILE} --auto
 
 echo
-echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
+echo "Your custom doctor file has been created at build/${PATIENT}/${P224_FILE}"
 echo
 
 rm -f ${BUILD_INFO} ${BOOTIMG_224} ${CARRIER_TARBALL} ${CDMA_FW} ${LEGACY_TARBALL} ${UIMAGE_224} ${WEBOS_TARBALL}
