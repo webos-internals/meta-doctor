@@ -92,6 +92,7 @@ echo
 
 mkdir -p downloads
 
+echo "***** Download and unpack dependent JAR files *****"
 [ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
 [ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
 
@@ -107,23 +108,28 @@ mkdir -p downloads
 $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 
+echo "***** copying webOS 2.2.4 tarball to modify *****"
 cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
 
-# Use PrePlus uImage...
+# Use PrePlus uImage installer...
+echo "***** Use PrePlus uImage installer *****"
 cp build/${W210_BUILD}/webOS/${UIMAGE_210} ${UIMAGE_224}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UIMAGE_224} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UIMAGE_224} || exit
 
 # Use PrePlus boot-image...
+echo "***** Use PrePlus boot-image *****"
 cp build/${W210_BUILD}/webOS/${BOOTIMG_210} ${BOOTIMG_224}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${BOOTIMG_224} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${BOOTIMG_224} || exit
 
+echo "***** Build webOS 2.2.4 Build Info *****"
 head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
 tail -n 4 build/${W210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
 
 mkdir -p carrier
 
+echo "***** Build carrier tarball *****" 
 ( cd build/${W224_BUILD}/carrier ; \
     $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W210_BUILD}/carrier ; \
@@ -132,12 +138,36 @@ mkdir -p carrier
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx compcache kernel-dev kernel-image-2.6.24-palm-joplin-3430 pmwifidriver tisgxgfx"
+EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx compcache pmwifidriver tisgxgfx"
 
+echo "***** Extracting webOS 2.1.0 PrePlus Drivers *****"
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
 
+#Extract Palm Kernel for Build...
+if [ ! -d kernels/palm.preplus ] ; then \
+    echo "***** Extracting webOS 2.1.0 Palm PrePlus Kernel *****" ; \
+    $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
+        EXTRA_ROOTFS_IPKGS="kernel-dev kernel-image-2.6.24-palm-joplin-3430" \
+        EXTRA_ROOTFS_TARBALL=kernel.tar extract-rootfs-ipkgs || exit ; \
+    mkdir -p kernels/palm.preplus ; \
+    $tar -C kernels/palm.preplus -xf kernel.tar ; \
+    rm -rf kernel.tar ; \
+else \
+    echo "***** webOS 2.1.0 Palm PrePlus Kernel already extracted *****" ; \
+fi
+
+#Use already Extracted F105 Thundercheilf or Palm PrePlus Kernel for Build...
+if [ -f kernels/f105.preplus/boot/uImage-2.6.24-palm-joplin-3430 ] ; then \
+    echo "***** Using F105 Thundercheif Kernel as the default *****" ; \
+    $tar -C kernels/f105.preplus -f ${LEGACY_TARBALL} --append . || exit ; \
+elif [ -f kernels/palm.preplus/boot/uImage-2.6.24-palm-joplin-3430 ] ; then \
+    echo "***** Using Palm PrePlus Kernel as the default *****" ; \
+    $tar -C kernels/palm.preplus -f ${LEGACY_TARBALL} --append . || exit ; \
+fi
+
+echo "***** Extracting luna-prefs merging PrePlus parts into Pre2 module *****"
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="luna-prefs" \
     EXTRA_ROOTFS_TARBALL=luna210.tar extract-rootfs-ipkgs || exit
@@ -163,6 +193,7 @@ $tar -C luna224 -f ${LEGACY_TARBALL} --append . || exit
 
 rm -rf luna210 luna224 luna210.tar luna224.tar
 
+echo "***** Extracting webOS 2.2.4 trenchcoat and fixing fstab md5 hash issue *****"
 $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="trenchcoat" \
     EXTRA_ROOTFS_TARBALL=trenchcoat.tar extract-rootfs-ipkgs || exit
@@ -190,9 +221,10 @@ $tar -C trenchcoat -f ${LEGACY_TARBALL} --append . || exit
 
 rm -rf trenchcoat trenchcoat.tar
 
+echo "***** Building PrePlus webOS 2.2.4 Doctor *****"
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx tisgxgfx-roadrunner" \
-    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs trenchcoat" \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} kernel-dev kernel-image-2.6.24-palm-joplin-3430 luna-prefs trenchcoat" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
 mv build/${PATIENT}/${W224_FILE} build/${PATIENT}/${P224_FILE}
