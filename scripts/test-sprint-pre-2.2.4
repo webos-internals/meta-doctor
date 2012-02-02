@@ -156,7 +156,7 @@ $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr unpack || exit
 $make VERSION=2.1.0 DEVICE=pre2 CARRIER=verizon unpack || exit
 $make VERSION=1.4.5 DEVICE=pre CARRIER=sprint unpack || exit
 
-echo "***** copying webOS 2.2.4 tarball to modify *****"
+echo "***** Copying webOS 2.2.4 tarball to modify *****"
 cp build/${W224_BUILD}/resources/${WEBOS_TARBALL} ./
 
 # Use the modem firmware from the Pre 2 - same comms board as Pre+
@@ -196,33 +196,32 @@ echo "***** Build carrier tarball *****"
 
 rm -rf carrier
 
-EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx compcache pmwifidriver tisgxgfx"
+#Clear older build Palm PrePlus kernels...
+if [ -d kernels/palm.preplus ] ; then \
+    rm -rf kernels/palm.preplus ; \
+fi
 
-echo "***** Extracting webOS 2.1.0 PrePlus Drivers *****"
+#Check for parameters...
+if [[ -d kernels/$1.preplus && -f kernels/control/$1 ]] ; then \
+    EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx compcache pmwifidriver tisgxgfx" ;\
+  else \
+    echo "***** Use webOS 2.1.0 Palm PrePlus Kernel *****" ; \
+    EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx compcache kernel-dev kernel-image-2.6.24-palm-joplin-3430 pmwifidriver tisgxgfx" ; \
+fi
+
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS}" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
 
-#Extract Palm Kernel for Build...
-if [ ! -d kernels/palm.preplus ] ; then \
-    echo "***** Extracting webOS 2.1.0 Palm PrePlus Kernel *****" ; \
-    $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
-        EXTRA_ROOTFS_IPKGS="kernel-dev kernel-image-2.6.24-palm-joplin-3430" \
-        EXTRA_ROOTFS_TARBALL=kernel.tar extract-rootfs-ipkgs || exit ; \
-    mkdir -p kernels/palm.preplus ; \
-    $tar -C kernels/palm.preplus -xf kernel.tar ; \
-    rm -rf kernel.tar ; \
-else \
-    echo "***** webOS 2.1.0 Palm PrePlus Kernel already extracted *****" ; \
-fi
-
-#Use already Extracted F105 Thundercheilf or Palm PrePlus Kernel for Build...
-if [ -f kernels/f105.preplus/boot/uImage-2.6.24-palm-joplin-3430 ] ; then \
-    echo "***** Using F105 Thundercheif Kernel as the default *****" ; \
-    $tar -C kernels/f105.preplus -f ${LEGACY_TARBALL} --append . || exit ; \
-elif [ -f kernels/palm.preplus/boot/uImage-2.6.24-palm-joplin-3430 ] ; then \
-    echo "***** Using Palm PrePlus Kernel as the default *****" ; \
-    $tar -C kernels/palm.preplus -f ${LEGACY_TARBALL} --append . || exit ; \
+#Use already extracted Kernel for Build...
+if [[ -d kernels/$1.preplus && -f kernels/control/$1 ]] ; then 
+    echo "***** Using ${1} kernel as the default *****"
+    CONTROL="`cat kernels/control/${1}`"
+    for X in $CONTROL
+    do
+      EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} $X"
+    done
+    $tar -C kernels/${1}.preplus -f ${LEGACY_TARBALL} --append . || exit
 fi
 
 echo "***** Extracting luna-prefs merging PrePlus parts into Pre2 module *****"
@@ -282,7 +281,7 @@ rm -rf trenchcoat trenchcoat.tar
 echo "***** Building PrePlus webOS 2.2.4 Doctor *****"
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx tisgxgfx-roadrunner" \
-    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} kernel-dev kernel-image-2.6.24-palm-joplin-3430 luna-prefs trenchcoat" \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs trenchcoat" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
 mv build/${PATIENT}/${W224_FILE} build/${PATIENT}/${P224_FILE}
