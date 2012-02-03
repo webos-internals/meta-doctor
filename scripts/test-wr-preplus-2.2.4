@@ -65,6 +65,18 @@ done
 ARGS=
 W224_IPKS=
 W210_IPKS=
+KERNEL=
+WIFI=
+
+#Check for parameters...
+while (( "$#" )); do
+if [ "$1" = "--wifi-only" ] ; then
+    WIFI="--wifi-only" ; \
+elif [[ -d kernels/$1.preplus && -f kernels/control/$1 ]] ; then \
+    KERNEL="${1}" ; \
+fi
+shift
+done 
 
 W224_IPKS="\
 pmvoicecommand-*.ipk \
@@ -78,7 +90,8 @@ W210_IPKS="\
 sweatshop-wr-castle_*.ipk \
 "
 
-if [ "$1" = "--wifi-only" ] ; then
+if [ "${WIFI}" = "--wifi-only" ] ; then
+    echo "***** WiFi Only ****"
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
 fi
 
@@ -143,8 +156,8 @@ if [ -d kernels/palm.preplus ] ; then \
     rm -rf kernels/palm.preplus ; \
 fi
 
-#Check for parameters...
-if [[ -d kernels/$1.preplus && -f kernels/control/$1 ]] ; then \
+#Check for Kernel parameters...
+if [[ -d kernels/${KERNEL}.preplus && -f kernels/control/${KERNEL} ]] ; then \
     EXTRA_ROOTFS_IPKGS="bootloader camd-omap34xx camsrc-omap34xx compcache pmwifidriver tisgxgfx" ;\
   else \
     echo "***** Use webOS 2.1.0 Palm PrePlus Kernel *****" ; \
@@ -156,14 +169,14 @@ $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs || exit
 
 #Use already extracted Kernel for Build...
-if [[ -d kernels/$1.preplus && -f kernels/control/$1 ]] ; then 
-    echo "***** Using ${1} kernel as the default *****"
-    CONTROL="`cat kernels/control/${1}`"
+if [[ -d kernels/${KERNEL}.preplus && -f kernels/control/${KERNEL} ]] ; then 
+    echo "***** Using ${KERNEL} kernel as the default *****"
+    CONTROL="`cat kernels/control/${KERNEL}`"
     for X in $CONTROL
     do
       EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} $X"
     done
-    $tar -C kernels/${1}.preplus -f ${LEGACY_TARBALL} --append . || exit
+    $tar -C kernels/${KERNEL}.preplus -f ${LEGACY_TARBALL} --append . || exit
 fi
 
 echo "***** Extracting luna-prefs merging PrePlus parts into Pre2 module *****"
