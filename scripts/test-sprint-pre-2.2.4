@@ -41,6 +41,8 @@ java="java"
 patch="patch"
 tar="tar"
 python="python"
+dd="dd"
+md5sum="md5sum"
 
 case "`uname -s`" in
     "CYGWIN"* )
@@ -69,7 +71,7 @@ rm -f ${BUILD_INFO} ${BOOTIMG_224} ${CARRIER_TARBALL} ${CDMA_FW} ${LEGACY_TARBAL
 
 echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
-for f in $git $wget $make $java $patch $python $tar ; do
+for f in $git $wget $make $java $patch $python $tar $dd $md5sum ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 
@@ -237,6 +239,35 @@ if [[ -d kernels/${KERNEL}.preplus && -f kernels/control/${KERNEL} ]] ; then
     $tar -C kernels/${KERNEL}.preplus -f ${LEGACY_TARBALL} --append . || exit
 fi
 
+echo "***** Fix novacomd and jailer reporting castle instead of roadrunner *****"
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="novacomd jail" \
+    EXTRA_ROOTFS_TARBALL=extra.tar extract-rootfs-ipkgs || exit
+
+mkdir -p extra
+$tar -C extra -x -f extra.tar
+
+cd extra
+in='\x'63'\x'61'\x'73'\x'74'\x'6c'\x'65'\x'00'\x'00'\x'00'\x'00
+printf "${in}" | $dd bs=1 count=10 seek=61720 conv=notrunc of=./sbin/novacomd
+printf "${in}" | $dd bs=1 count=10 seek=92316 conv=notrunc of=./usr/bin/jailer
+$md5sum ./sbin/novacomd > ./usr/lib/ipkg/info/novacomd.md5sums2
+mv ./usr/lib/ipkg/info/novacomd.md5sums ./usr/lib/ipkg/info/novacomd.md5sums.old
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/novacomd.md5sums.old ./usr/lib/ipkg/info/novacomd.md5sums2 \
+	      > ./usr/lib/ipkg/info/novacomd.md5sums
+rm -f ./usr/lib/ipkg/info/novacomd.md5sums.old ./usr/lib/ipkg/info/novacomd.md5sums2
+$md5sum ./usr/bin/jailer > ./usr/lib/ipkg/info/jail.md5sums2
+mv ./usr/lib/ipkg/info/jail.md5sums ./usr/lib/ipkg/info/jail.md5sums.old
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/jail.md5sums.old ./usr/lib/ipkg/info/jail.md5sums2 \
+	      > ./usr/lib/ipkg/info/jail.md5sums
+rm -f ./usr/lib/ipkg/info/jail.md5sums.old ./usr/lib/ipkg/info/jail.md5sums2
+cd ..
+in=
+$tar -C extra -f ${LEGACY_TARBALL} --append . || exit
+rm -rf extra extra.tar
+
 echo "***** Extracting luna-prefs merging PrePlus parts into Pre2 module *****"
 $make VERSION=2.1.0 DEVICE=preplus CARRIER=wr \
     EXTRA_ROOTFS_IPKGS="luna-prefs" \
@@ -276,7 +307,7 @@ mv ./trenchcoat/etc/fstab ./trenchcoat/etc/fstab.old
 tail -n 14 ./trenchcoat/etc/fstab.old >> ./trenchcoat/etc/fstab
 
 cd trenchcoat
-md5 -r ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
+$md5sum ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
 
 mv ./usr/lib/ipkg/info/trenchcoat.md5sums ./usr/lib/ipkg/info/trenchcoat.md5sums.old
 
@@ -294,7 +325,7 @@ rm -rf trenchcoat trenchcoat.tar
 echo "***** Building PrePlus webOS 2.2.4 Doctor *****"
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="camd-omap36xx camsrc-omap36xx tisgxgfx-roadrunner" \
-    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} luna-prefs trenchcoat" \
+    EXTRA_ROOTFS_IPKGS="${EXTRA_ROOTFS_IPKGS} novacomd jail luna-prefs trenchcoat" \
     EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all || exit
 
 mv build/${PATIENT}/${W224_FILE} build/${PATIENT}/${P224_FILE}
