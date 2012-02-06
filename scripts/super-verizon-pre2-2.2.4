@@ -1,5 +1,5 @@
 #!/bin/bash
-# meta-verizon-pre2-2.2.4 script by Rod Whitby
+# super-verizon-pre2-2.2.4 script by Rod Whitby
 # based on meta-meta script by Ed Cates
 # modifications by 'andidendel' and 'John Steffes'
 # intended to flash Verizon Pre2 phones with a working webOS 2.2.4 image
@@ -13,6 +13,7 @@ V210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod
 V201_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
 V1451_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
 
+P224_FILE="webosdoctorp224pre2-verizon-2.2.4.jar"
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
 V224_FILE="webosdoctorp224mantaverizon-2.2.4.jar"
 V210_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
@@ -57,10 +58,8 @@ WEBOS_TARBALL="webOS.tar"
 CARRIER_TARBALL="carrier.tar"
 CLASSIC_TARBALL="classic.tar"
 CDMA_FW="roadrunnercdmafw.tar"
-INSTALLER_XML="installer.xml"
-BUILD_INFO="palm-build-info"
 
-rm -f ${CDMA_FW} ${UMTS_FW} ${INSTALLER_XML} ${BUILD_INFO} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
 
 echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
@@ -107,13 +106,12 @@ sweatshop-verizon-roadrunner_*.ipk \
 palmcustomizationinfo-verizon_*.ipk \
 "
 
-
-ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO}  PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P102EWW CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
 $make ${ARGS} settings
 
 echo
-echo "Your custom doctor file will be created at build/${PATIENT}/${W224_FILE}"
+echo "Your custom doctor file will be created at build/${PATIENT}/${P224_FILE}"
 echo
 
 mkdir -p downloads
@@ -155,22 +153,14 @@ cp build/${V210_BUILD}/webOS/${CDMA_FW} ${CDMA_FW}
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${CDMA_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${CDMA_FW} || exit
 
-cp build/${V210_BUILD}/webOS/${INSTALLER_XML} ./
-
-$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${INSTALLER_XML} || exit
-$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${INSTALLER_XML} || exit
-
-head -n 1 build/${W224_BUILD}/rootfs/etc/${BUILD_INFO} > ./${BUILD_INFO}
-tail -n 4 build/${V210_BUILD}/rootfs/etc/${BUILD_INFO} >> ./${BUILD_INFO}
-
 mkdir -p carrier
 
 ( cd build/${W224_BUILD}/carrier ; \
-    $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - installer.xml ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V224_BUILD}/carrier ; \
     $tar -c -f - ${V224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${V210_BUILD}/carrier ; \
-    $tar -c -f - installer.xml ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${V224_IPKS} ${V210_IPKS} )
 
 rm -rf carrier
@@ -241,8 +231,8 @@ sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/c
 mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
 sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
 mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
-md5 -r ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
-md5 -r ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
 mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
@@ -257,10 +247,12 @@ $make ${ARGS} \
     EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.youtube com.palm.app.googlemaps" \
     EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} clobber-build settings all || exit
 
-$java -jar build/${PATIENT}/${W224_FILE}
+mv build/${PATIENT}/${W224_FILE} build/${PATIENT}/${P224_FILE}
+
+$java -jar build/${PATIENT}/${P224_FILE}
 
 echo
-echo "Your custom doctor file has been created at build/${PATIENT}/${W224_FILE}"
+echo "Your custom doctor file has been created at build/${PATIENT}/${P224_FILE}"
 echo
 
-rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${INSTALLER_XML} ${BUILD_INFO} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}
+rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${CLASSIC_TARBALL}

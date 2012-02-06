@@ -1,5 +1,5 @@
 #!/bin/bash
-# meta-verizon-preplus-2.1.0 script by Rod Whitby
+# test-verizon-preplus-2.1.0 script by Rod Whitby
 # based on meta-meta script by Ed Cates
 # modifications by 'rwcash'
 # intended to flash Verizon PrePlus phones with a working webOS 2.1 image
@@ -15,6 +15,7 @@ V210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod
 V201_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
 V1451_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
 
+P210_FILE="webosdoctorp224preplus-verizon-2.1.0.jar"
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
@@ -124,7 +125,7 @@ ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAE
 $make ${ARGS} settings
 
 echo
-echo "Your custom doctor file will be created at build/${PATIENT}/${W210_FILE}"
+echo "Your custom doctor file will be created at build/${PATIENT}/${P210_FILE}"
 echo
 
 mkdir -p downloads
@@ -276,8 +277,8 @@ sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/c
 mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
 sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
 mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
-md5 -r ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
-md5 -r ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
 mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
@@ -287,16 +288,17 @@ $tar -f ../${FLASH_TARBALL} --append ./* || exit
 cd ..
 rm -rf mapsfix
 
-
 $make ${ARGS} \
     DELETE_ROOTFS_IPKGS="com.palm.app.maps com.palm.app.bluetooth.old" \
     EXTRA_ROOTFS_IPKGS="flash flash-mini-adapter flame enyo com.motionapps.rom.classic com.motionapps.service.classic com.palm.app.bluetooth com.palm.service.bluetooth.spp pmbtcontacts pmbtengine pmbtos pmbtstack pmbtstartup com.palm.service.calendar.google com.palm.service.calendar.yahoo com.palm.service.contacts.yahoo com.palm.app.googlemaps" \
     EXTRA_ROOTFS_TARBALL=${FLASH_TARBALL} clobber-build settings all || exit
 
-$java -jar build/${PATIENT}/${W210_FILE}
+mv build/${PATIENT}/${W210_FILE} build/${PATIENT}/${P210_FILE}
+
+$java -jar build/${PATIENT}/${P210_FILE}
 
 echo
-echo "Your custom doctor file has been created at build/${PATIENT}/${W210_FILE}"
+echo "Your custom doctor file has been created at build/${PATIENT}/${P210_FILE}"
 echo
 
 rm -f ${CDMA_FW} ${WEBOS_TARBALL} ${CARRIER_TARBALL} ${FLASH_TARBALL}
