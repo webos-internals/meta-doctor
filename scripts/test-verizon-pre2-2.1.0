@@ -1,5 +1,5 @@
 #!/bin/bash
-# meta-verizon-pre2-2.1.0 script by Rod Whitby
+# test-verizon-pre2-2.1.0 script by Rod Whitby
 # based on meta-meta script by Ed Cates
 # modifications by 'andidendel' and 'John Steffes'
 # intended to flash Verizon Pre2 phones with a working webOS 2.1 image
@@ -93,7 +93,6 @@ com.nim.vznavigator_*.ipk \
 com.nim.app.vznavigator_*.ipk \
 com.palm.app.mobilehotspot_*.ipk \
 "
-
 
 if [ "$1" = "--wifi-only" ] ; then
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
@@ -255,8 +254,8 @@ sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/c
 mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
 sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
 mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
-md5 -r ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
-md5 -r ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
 mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
