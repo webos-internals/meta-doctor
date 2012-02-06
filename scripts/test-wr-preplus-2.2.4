@@ -30,7 +30,6 @@ patch="patch"
 tar="tar"
 python="python"
 dd="dd"
-md5sum="md5sum"
 
 case "`uname -s`" in
     "CYGWIN"* )
@@ -58,7 +57,7 @@ rm -f ${BUILD_INFO} ${BOOTIMG_224} ${CARRIER_TARBALL} ${LEGACY_TARBALL} ${UIMAGE
 
 echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
-for f in $git $wget $make $java $patch $python $tar $dd $md5sum ; do
+for f in $git $wget $make $java $patch $python $tar $dd ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 
@@ -193,13 +192,13 @@ cd extra
 in='\x'63'\x'61'\x'73'\x'74'\x'6c'\x'65'\x'00'\x'00'\x'00'\x'00
 printf "${in}" | $dd bs=1 count=10 seek=61720 conv=notrunc of=./sbin/novacomd
 printf "${in}" | $dd bs=1 count=10 seek=92316 conv=notrunc of=./usr/bin/jailer
-$md5sum ./sbin/novacomd > ./usr/lib/ipkg/info/novacomd.md5sums2
+md5sum ./sbin/novacomd > ./usr/lib/ipkg/info/novacomd.md5sums2
 mv ./usr/lib/ipkg/info/novacomd.md5sums ./usr/lib/ipkg/info/novacomd.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/novacomd.md5sums.old ./usr/lib/ipkg/info/novacomd.md5sums2 \
 	      > ./usr/lib/ipkg/info/novacomd.md5sums
 rm -f ./usr/lib/ipkg/info/novacomd.md5sums.old ./usr/lib/ipkg/info/novacomd.md5sums2
-$md5sum ./usr/bin/jailer > ./usr/lib/ipkg/info/jail.md5sums2
+md5sum ./usr/bin/jailer > ./usr/lib/ipkg/info/jail.md5sums2
 mv ./usr/lib/ipkg/info/jail.md5sums ./usr/lib/ipkg/info/jail.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/jail.md5sums.old ./usr/lib/ipkg/info/jail.md5sums2 \
@@ -249,7 +248,7 @@ mv ./trenchcoat/etc/fstab ./trenchcoat/etc/fstab.old
 tail -n 14 ./trenchcoat/etc/fstab.old >> ./trenchcoat/etc/fstab
 
 cd trenchcoat
-$md5sum ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
+md5sum ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
 
 mv ./usr/lib/ipkg/info/trenchcoat.md5sums ./usr/lib/ipkg/info/trenchcoat.md5sums.old
 

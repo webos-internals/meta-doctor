@@ -46,7 +46,6 @@ patch="patch"
 tar="tar"
 python="python"
 dd="dd"
-md5sum="md5sum"
 
 case "`uname -s`" in
     "CYGWIN"* )
@@ -75,7 +74,7 @@ rm -f ${BUILD_INFO} ${BOOTIMG_224} ${CARRIER_TARBALL} ${CDMA_FW} ${LEGACY_TARBAL
 
 echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
-for f in $git $wget $make $java $patch $python $tar $dd $md5sum ; do
+for f in $git $wget $make $java $patch $python $tar $dd ; do
 	
     which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
 
@@ -130,7 +129,6 @@ pmvoicecommand-*.ipk \
 com.palm.app.mobilehotspot_*.ipk \
 com.palm.app.skype_*.ipk \
 "
-
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=Verizon CUSTOM_MODEL_CHECK=P101EWW CUSTOM_DEVICETYPE=castle CUSTOM_WEBOS_DMSET=312 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
 
@@ -258,13 +256,13 @@ cd extra
 in='\x'63'\x'61'\x'73'\x'74'\x'6c'\x'65'\x'00'\x'00'\x'00'\x'00
 printf "${in}" | $dd bs=1 count=10 seek=61720 conv=notrunc of=./sbin/novacomd
 printf "${in}" | $dd bs=1 count=10 seek=92316 conv=notrunc of=./usr/bin/jailer
-$md5sum ./sbin/novacomd > ./usr/lib/ipkg/info/novacomd.md5sums2
+md5sum ./sbin/novacomd > ./usr/lib/ipkg/info/novacomd.md5sums2
 mv ./usr/lib/ipkg/info/novacomd.md5sums ./usr/lib/ipkg/info/novacomd.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/novacomd.md5sums.old ./usr/lib/ipkg/info/novacomd.md5sums2 \
 	      > ./usr/lib/ipkg/info/novacomd.md5sums
 rm -f ./usr/lib/ipkg/info/novacomd.md5sums.old ./usr/lib/ipkg/info/novacomd.md5sums2
-$md5sum ./usr/bin/jailer > ./usr/lib/ipkg/info/jail.md5sums2
+md5sum ./usr/bin/jailer > ./usr/lib/ipkg/info/jail.md5sums2
 mv ./usr/lib/ipkg/info/jail.md5sums ./usr/lib/ipkg/info/jail.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/jail.md5sums.old ./usr/lib/ipkg/info/jail.md5sums2 \
@@ -314,7 +312,7 @@ mv ./trenchcoat/etc/fstab ./trenchcoat/etc/fstab.old
 tail -n 14 ./trenchcoat/etc/fstab.old >> ./trenchcoat/etc/fstab
 
 cd trenchcoat
-$md5sum ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
+md5sum ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
 
 mv ./usr/lib/ipkg/info/trenchcoat.md5sums ./usr/lib/ipkg/info/trenchcoat.md5sums.old
 
@@ -398,8 +396,8 @@ sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/c
 mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
 sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
 mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
-$md5sum ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
-$md5sum ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
 mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
 ../scripts/replace-md5sums.py \
 	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
