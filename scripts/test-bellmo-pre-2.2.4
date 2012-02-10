@@ -94,7 +94,6 @@ pmvoicecommand-*.ipk \
 com.palm.app.mobilehotspot_*.ipk \
 com.palm.app.skype_*.ipk \
 crotestcastleplus-images_*.ipk \
-audiod-config-eu_*.ipk \
 "
 
 W210_IPKS="\
@@ -102,14 +101,9 @@ palmcustomizationinfo-wr-castle-plus_*.ipk \
 sweatshop-wr-castle_*.ipk \
 "
 
-V210_IPKS="\
-roadrunnercdmafw-verizon_*.ipk \
-"
-
 if [ "${WIFI}" = "--wifi-only" ] ; then
     echo "***** WiFi Only ****"
     ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
-    V210_IPKS=
 fi
 
 ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_CHECK=bell CUSTOM_MODEL_CHECK=P100EWW CUSTOM_DEVICETYPE=castle CUSTOM_WEBOS_DMSET=393 CUSTOM_CARRIER_DMSET=398 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre2 CARRIER=wr"
@@ -180,9 +174,7 @@ echo "***** Build carrier tarball *****"
     $tar -c -f - ${W224_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
 ( cd build/${W210_BUILD}/carrier ; \
     $tar -c -f - installer.xml ${W210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd build/${V210_BUILD}/carrier ; \
-    $tar -c -f - ${V210_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
-( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${W210_IPKS} ${V210_IPKS} )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W224_IPKS} ${W210_IPKS} )
 
 rm -rf carrier
 
