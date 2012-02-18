@@ -281,13 +281,21 @@ mkdir -p luna210 luna224
 $tar -C luna210 -x -f luna210.tar
 $tar -C luna224 -x -f luna224.tar
 
-cp -r luna210/etc/prefs/properties/* luna224/etc/prefs/properties
+mv luna210/etc/prefs/properties/deviceName luna224/etc/prefs/properties
+mv luna210/etc/prefs/properties/deviceNameBranded luna224/etc/prefs/properties
+mv luna210/etc/prefs/properties/machineName luna224/etc/prefs/properties
+
+cd luna224
+md5sum ./etc/prefs/properties/deviceName > ./usr/lib/ipkg/info/luna-prefs.md5sums.new
+md5sum ./etc/prefs/properties/deviceNameBranded >> ./usr/lib/ipkg/info/luna-prefs.md5sums.new
+md5sum ./etc/prefs/properties/machineName >> ./usr/lib/ipkg/info/luna-prefs.md5sums.new
+cd ..
 
 mv luna224/usr/lib/ipkg/info/luna-prefs.md5sums luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old
 ./scripts/replace-md5sums.py \
-	luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old luna210/usr/lib/ipkg/info/luna-prefs.md5sums \
+	luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old luna224/usr/lib/ipkg/info/luna-prefs.md5sums.new \
 	      > luna224/usr/lib/ipkg/info/luna-prefs.md5sums
-rm -f luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old
+rm -f luna224/usr/lib/ipkg/info/luna-prefs.md5sums.old luna224/usr/lib/ipkg/info/luna-prefs.md5sums.new
 
 $tar -C luna224 -f ${LEGACY_TARBALL} --append . || exit
 
@@ -329,7 +337,7 @@ $make ${ARGS} \
 
 mv build/${PATIENT}/${W224_FILE} build/${PATIENT}/${P224_FILE}
 
-$java -jar build/${PATIENT}/${P224_FILE} --auto
+$java -jar build/${PATIENT}/${P224_FILE}
 
 echo
 echo "Your custom doctor file has been created at build/${PATIENT}/${P224_FILE}"
