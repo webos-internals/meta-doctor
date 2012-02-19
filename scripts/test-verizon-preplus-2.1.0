@@ -1,7 +1,7 @@
 #!/bin/bash
 # test-verizon-preplus-2.1.0 script by Rod Whitby
 # based on meta-meta script by Ed Cates
-# modifications by 'rwcash'
+# modifications by 'rwcash' and 'John Steffes'
 # intended to flash Verizon PrePlus phones with a working webOS 2.1 image
 #  Your mileage may vary
 
