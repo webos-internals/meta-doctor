@@ -1,0 +1,356 @@
+#!/bin/bash
+# build-veer-2.2.4 script by John Steffes
+# based on meta-meta script by Ed Cates and Rod Whitby
+# intended to flash Veer phones with a working webOS 2.2.4 image
+#  Your mileage may vary
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+CARRIER="no"
+
+#Check for parameters...
+while (( "$#" )); do
+if [[ "$1" = "att" || "$1" = "wr" ]] ; then
+    CARRIER="${1}" ; \
+else echo "No parameter given want att or wr you gave ${1}" ; echo "script usage ${0} carrier optional --wifi-only " ; exit ; \
+fi
+shift
+done 
+
+if [ "$CARRIER" = "no" ] ; then
+  echo "No parameter given want att or wr"
+  echo "script usage ${0} carrier optional --wifi-only"
+  exit
+fi
+
+if [ "$CARRIER" = "att" ] ; then
+  A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+  A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
+  A212_BUILD="veer-p160una-att-2.1.2"
+  A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
+  P224_FILE="webosdoctorp160unaatt-2.2.4.jar"
+  DOCTOR="veer-p160una-att-2.1.2"
+  VERSION="2.1.2"
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+  W211_JAR_URL="http://palm.cdnetworks.net/rom/veer/p211r0d06292011/wrp211rod/webosdoctorp160unawr.jar"
+  W211_FILE="webosdoctorp160una-wr-2.1.1.jar"
+  W211_BUILD="veer-p160una-wr-2.1.1"
+  W211_MD5="fb6ae25e15c809836bbe73931839ccf0"
+  P224_FILE="webosdoctorp160una-wr-2.2.4.jar"
+  DOCTOR="veer-p160una-wr-2.1.1"
+  VERSION="2.1.1"
+fi
+
+PATIENT="build-${CARRIER}-veer-2.2.4"
+
+echo "Carrier ${CARRIER} directory ${PATIENT} will be used"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+
+CARRIER_TARBALL="carrier.tar"
+VEERXML="broadway.xml"
+BUILD_INFO="palm-build-info"
+CUSTOM_ROOTFS="rootfs.tar"
+LEGACY_TARBALL="legacy.tar"
+WEBOS_TARBALL="webOS.tar"
+UMTS_FW="broadwayumtsfw.tar"
+
+rm -rf ${CARRIER_TARBALL} ${VEERXML} ${BUILD_INFO} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL} ${LEGACY_TARBALL} ${UMTS_FW}
+
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+A212_IPKS=
+W211_IPKS=
+
+if [ "$2" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+    A212_IPKS=
+    W211_IPKS=
+fi
+
+A212_IPKS="${A212_IPKS} \
+"
+
+W211_IPKS="${W211_IPKS} \
+"
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 CUSTOM_BOOTLOGO=scripts/BootLogo.tga CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_ROOTFS=${CUSTOM_ROOTFS}.gz CUSTOM_XML=${VEERXML} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} CUSTOM_BUILD_INFO=${BUILD_INFO} PATIENT=${PATIENT} VERSION=${VERSION} DEVICE=veer CARRIER=${CARRIER}"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${P224_FILE}"
+echo
+
+mkdir -p downloads
+
+echo "Will download if needed Veer ${CARRIER} webOS ${VERSION} Doctor"
+case $CARRIER in
+    "att" )
+        [ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+        [ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
+        echo "${A212_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${A212_FILE} && exit
+	;;
+    "wr" )
+        [ ! -f downloads/${W211_FILE} ] && $wget -c ${W211_JAR_URL} -O downloads/${W211_FILE}
+        [ $(md5sum downloads/${W211_FILE} | cut -d \  -f 1) != ${W211_MD5} ] && \
+        echo "${W211_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W211_FILE} && exit	
+	;;
+esac
+
+echo "Will unpack if needed Veer ${CARRIER} webOS ${VERSION} Doctor"
+$make VERSION=$VERSION DEVICE=veer CARRIER=$CARRIER unpack > /dev/null || exit
+
+[ -d ./build/${DOCTOR}/224 ] || { echo "Not prepared for webOS 2.2.4 build extract" ; echo "Please create 224 directory under ${DOCTOR}" ; exit ; }
+[ ! -f ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar.gz ] || { echo "Ungziping rootfs tar file" ; gzip -d ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar.gz ; echo "Renaming rootfs tar file" ; mv ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.org.tar ; }
+[ ! -f ./build/${DOCTOR}/224/nova-cust-image-broadway.boot.tar.gz ] || { echo "Ungziping boot tar file" ; gzip -d ./build/${DOCTOR}/224/nova-cust-image-broadway.boot.tar.gz ;  }
+[ -f ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.org.tar ] || { echo "Not prepared for webOS 2.2.4 Build extract" ; echo "webOS 2.2.4 rootfs file not present" ;  exit ; }
+[ -f ./build/${DOCTOR}/224/nova-cust-image-broadway.boot.tar ] || { echo "Not prepared for webOS 2.2.4 Build extract" ; echo "webOS 2.2.4 boot file not present" ;  exit ; }
+[ -f ./scripts/BootLogo.tga ] || { echo "Not prepared for webOS 2.2.4 build extract" ; echo "Copy your custom BootLogo.tga to the scripts directory" ; exit ; }
+
+echo "Fixing Veer webOS 2.2.4 XML file for DARE file structure"
+if [ "$CARRIER" = "att" ] ; then
+  cp build/${A212_BUILD}/webOS/${VEERXML} ${VEERXML}
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+  cp build/${W211_BUILD}/webOS/${VEERXML}  ${VEERXML}
+fi
+
+sed -e 's!Volume id="mojodb" type="ext3" size="144MB" mount="/var/db"!Volume id="mojodb" type="ext3" size="144MB"!g' ${VEERXML} > ${VEERXML}.old
+sed -e 's!Volume id="filecache" type="ext3" size="136MB" inode_size="256" mount="/var/file-cache"!Volume id="filecache" type="ext3" size="136MB" inode_size="256"!g' ${VEERXML}.old > ${VEERXML}
+sed -e 's!Mount id="mojodb" options="noatime" freq="0" passno="0"!Mount device="/dev/mapper/store-cryptodb" type="ext3" options="noatime,noauto,data=ordered" freq="0" passno="0" mount="/var/db"!g' ${VEERXML} > ${VEERXML}.old
+sed -e 's!Mount id="filecache" options="noatime,user_xattr" freq="0" passno="0"!Mount device="/dev/mapper/store-cryptofilecache" type="ext3" options="noatime,noauto,user_xattr" freq="0" passno="0" mount="/var/file-cache"!g' ${VEERXML}.old > ${VEERXML}
+
+rm -rf ${VEERXML}.old
+
+echo "Fixing Veer webOS 2.2.4 rootfs tar missing files"
+rm -rf ./build/${DOCTOR}/224/files ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar
+mkdir -p ./build/${DOCTOR}/224/files/boot
+cp ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.org.tar ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar
+
+echo "Fixing Veer webOS 2.2.4 boot files"
+echo "./boot-images.tar.gz" > ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+echo "./image-update.xml" >> ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+echo "./boot.bin" >> ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+echo "./System.map-2.6.29-palm-shank" >> ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+echo "./config-2.6.29-palm-shank" >> ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+echo "./uImage-2.6.29-palm-shank" >> ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+echo "./uImage" >> ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+echo "./updatefs-info" >> ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+
+$tar -C build/${DOCTOR}/224/files/boot --wildcards \
+  -f build/${DOCTOR}/224/nova-cust-image-broadway.boot.tar \
+  -x -T ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+
+rm -f ./build/${DOCTOR}/224/ipkgs-extract-list.txt
+
+#if [ "$CARRIER" = "att" ] ; then
+  #Remove WR apps...
+#fi
+
+echo "Fixing fstab for webOS 2.2.4 base build and md5hash issue"
+echo "Will swap webOS ${VERSION} rootfs with webOS 2.2.4 rootfs"
+mv ./build/${DOCTOR}/webOS/nova-cust-image-broadway.rootfs.tar ./build/${DOCTOR}/webOS/nova-cust-image-broadway.rootfs.21x.tar
+mv ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar ./build/${DOCTOR}/webOS/
+mv ./build/${DOCTOR}/rootfs/usr/lib/ipkg/info ./build/${DOCTOR}/rootfs/usr/lib/ipkg/info.21x
+
+echo "Will build webOS 2.2.4 info directory"
+$tar -C build/${DOCTOR}/rootfs --wildcards \
+  -f build/${DOCTOR}/webOS/nova-cust-image-broadway.rootfs.tar \
+  -x ./usr/lib/ipkg/info
+
+$make VERSION=${VERSION} DEVICE=veer CARRIER=${CARRIER} \
+    EXTRA_ROOTFS_IPKGS="trenchcoat" \
+    EXTRA_ROOTFS_TARBALL=trenchcoat.tar extract-rootfs-ipkgs > ./build/${DOCTOR}/224/VEERBLD.TXT || exit
+
+echo "Reverting ${DOCTOR} back to stock webOS ${VERSION}"
+mv ./build/${DOCTOR}/webOS/nova-cust-image-broadway.rootfs.tar ./build/${DOCTOR}/224/
+rm -rf ./build/${DOCTOR}/rootfs/usr/lib/ipkg/info
+mv ./build/${DOCTOR}/webOS/nova-cust-image-broadway.rootfs.21x.tar ./build/${DOCTOR}/webOS/nova-cust-image-broadway.rootfs.tar 
+mv ./build/${DOCTOR}/rootfs/usr/lib/ipkg/info.21x ./build/${DOCTOR}/rootfs/usr/lib/ipkg/info
+
+mkdir -p trenchcoat
+
+$tar -C trenchcoat -x -f trenchcoat.tar
+
+mv ./trenchcoat/etc/fstab ./trenchcoat/etc/fstab.old
+tail -n 14 ./trenchcoat/etc/fstab.old >> ./trenchcoat/etc/fstab
+
+cd trenchcoat
+md5sum ./etc/fstab >> ./usr/lib/ipkg/info/trenchcoat.md5sums.new
+
+mv ./usr/lib/ipkg/info/trenchcoat.md5sums ./usr/lib/ipkg/info/trenchcoat.md5sums.old
+
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/trenchcoat.md5sums.old ./usr/lib/ipkg/info/trenchcoat.md5sums.new \
+	      > ./usr/lib/ipkg/info/trenchcoat.md5sums
+cd ..
+
+rm -f ./trenchcoat/usr/lib/ipkg/info/trenchcoat.md5sums.old ./trenchcoat/usr/lib/ipkg/info/trenchcoat.md5sums.new ./trenchcoat/etc/fstab.old
+
+$tar -C trenchcoat -c -f ${LEGACY_TARBALL} . || exit
+
+rm -rf trenchcoat trenchcoat.tar
+
+echo "Extracting UMTS Modem firmware file"
+$tar --wildcards \
+  -f build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar \
+  -x ./usr/lib/modem/broadwayumts.tar.gz
+
+mv ./usr/lib/modem/broadwayumts.tar.gz ./broadwayumts.tar.gz
+gzip -d broadwayumts.tar.gz
+mv ./broadwayumts.tar ./${UMTS_FW}
+rm -rf usr
+
+echo "Removing files that do not belong in rootfs tar"
+echo "./etc/fs.d/do_format_dev_mapper_store-var.sh" > ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/fs.d/do_format_dev_mapper_store-update.sh" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/fs.d/do_format_dev_mapper_store-root.sh" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/fs.d/do_format_dev_mapper_store-mojodb.sh" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/fs.d/do_format_dev_mapper_store-media.sh" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/fs.d/do_format_dev_mapper_store-log.sh" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/fs.d/do_format_dev_mapper_store-filecache.sh" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/fs.d/" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./etc/palm-install-info" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+echo "./lost+found/" >> ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+
+$tar -C build/${DOCTOR}/224 --wildcards \
+  -f build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar \
+  --delete -T build/${DOCTOR}/224/ipkgs-delete-list.txt
+
+rm -f ./build/${DOCTOR}/224/ipkgs-delete-list.txt
+
+$tar -C build/${DOCTOR}/224/files/ -f ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar --append . || exit
+
+rm -rf ./build/${DOCTOR}/224/files
+
+echo "Moving new rootfs to be used for meta doctor"
+mv build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.tar ${CUSTOM_ROOTFS}
+
+echo "Compressing rootfs file"
+gzip ${CUSTOM_ROOTFS}
+
+echo "Copying webOS ${VERSION} tarball to modify"
+if [ "$CARRIER" = "att" ] ; then
+  cp build/${A212_BUILD}/resources/${WEBOS_TARBALL} ./
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+  cp build/${W211_BUILD}/resources/${WEBOS_TARBALL} ./
+fi
+
+echo "Updating webOS tarball with webOS 2.2.4 WoRld modem firmware"
+$tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
+$tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
+
+echo "Copying Veer webOS ${VERSION} ${BUILD_INFO}"
+if [ "$CARRIER" = "att" ] ; then
+  cp build/${A212_BUILD}/rootfs/etc/${BUILD_INFO} ./${BUILD_INFO}.old
+  sed -e "s/HP webOS 2.1.2/HP webOS 2.2.4/g" ./${BUILD_INFO}.old > ./${BUILD_INFO}
+  rm -rf ./${BUILD_INFO}.old
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+  cp build/${W211_BUILD}/rootfs/etc/${BUILD_INFO} ./${BUILD_INFO}.old
+  sed -e "s/HP webOS 2.1.1/HP webOS 2.2.4/g" ./${BUILD_INFO}.old > ./${BUILD_INFO}
+  rm -rf ./${BUILD_INFO}.old
+fi
+
+echo "Building ${CARRIER} Carrier Apps"
+mkdir -p carrier
+if [ "$CARRIER" = "att" ] ; then
+( cd build/${A212_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${A212_IPKS}) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${A212_IPKS} )
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+( cd build/${W211_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${W211_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${W211_IPKS} )
+fi
+
+rm -rf carrier
+
+echo "Transforming Veer ${CARRIER} webOS ${VERSION} Doctor into webOS 2.2.4"
+
+if [ "$CARRIER" = "att" ] ; then
+  mv downloads/${A212_FILE} downloads/${A212_FILE}.org
+  mv build/${A212_BUILD}/${A212_FILE} build/${A212_BUILD}/${A212_FILE}.org
+  cp build/${A212_BUILD}/${A212_FILE}.org build/${A212_BUILD}/${A212_FILE}
+  ( cd build/${A212_BUILD} ; zip -q -d ${A212_FILE} resources/recoverytool.config )
+  mv build/${A212_BUILD}/resources/recoverytool.config build/${A212_BUILD}/resources/recoverytool.config.org
+  sed -e "s/HP webOS 2.1.2/HP webOS 2.2.4/g" build/${A212_BUILD}/resources/recoverytool.config.org > build/${A212_BUILD}/resources/recoverytool.config
+  sed -e "s/ForceModemUpdate=true/ForceModemUpdate=false/g" build/${A212_BUILD}/resources/recoverytool.config > build/${A212_BUILD}/resources/recoverytool.config.old
+  mv build/${A212_BUILD}/resources/recoverytool.config.old build/${A212_BUILD}/resources/recoverytool.config
+  ( cd build/${A212_BUILD} ; zip -q ${A212_FILE} resources/recoverytool.config )
+  mv build/${A212_BUILD}/resources/recoverytool.config.org build/${A212_BUILD}/resources/recoverytool.config
+  mv build/${A212_BUILD}/${A212_FILE} downloads/${A212_FILE}
+  mv build/${A212_BUILD}/${A212_FILE}.org build/${A212_BUILD}/${A212_FILE}
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+  mv downloads/${W211_FILE} downloads/${W211_FILE}.org
+  mv build/${W211_BUILD}/${W211_FILE} build/${W211_BUILD}/${W211_FILE}.org
+  cp build/${W211_BUILD}/${W211_FILE}.org build/${W211_BUILD}/${W211_FILE}
+  ( cd build/${W211_BUILD} ; zip -q -d ${W211_FILE} resources/recoverytool.config )
+  mv build/${W211_BUILD}/resources/recoverytool.config build/${W211_BUILD}/resources/recoverytool.config.org
+  sed -e "s/HP webOS 2.1.1/HP webOS 2.2.4/g" build/${W211_BUILD}/resources/recoverytool.config.org > build/${W211_BUILD}/resources/recoverytool.config
+  sed -e "s/ForceModemUpdate=true/ForceModemUpdate=false/g" build/${W211_BUILD}/resources/recoverytool.config > build/${W211_BUILD}/resources/recoverytool.config.old
+  mv build/${W211_BUILD}/resources/recoverytool.config.old build/${W211_BUILD}/resources/recoverytool.config
+  ( cd build/${W211_BUILD} ; zip -q ${W211_FILE} resources/recoverytool.config )
+  mv build/${W211_BUILD}/resources/recoverytool.config.org build/${W211_BUILD}/resources/recoverytool.config
+  mv build/${W211_BUILD}/${W211_FILE} downloads/${W211_FILE}
+  mv build/${W211_BUILD}/${W211_FILE}.org build/${W211_BUILD}/${W211_FILE}
+fi
+
+echo "Building ${CARRIER} Veer webOS 2.2.4 base build doctor"
+$make ${ARGS} EXTRA_ROOTFS_IPKGS="trenchcoat" EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all >> ./build/${DOCTOR}/224/VEERBLD.TXT || exit
+
+if [ "$CARRIER" = "att" ] ; then
+  mv downloads/${A212_FILE}.org downloads/${A212_FILE}
+  mv build/${PATIENT}/${A212_FILE} build/${PATIENT}/${P224_FILE}
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+  mv downloads/${W211_FILE}.org downloads/${W211_FILE}
+  mv build/${PATIENT}/${W211_FILE} build/${PATIENT}/${P224_FILE}
+fi
+
+echo "Moving ${CARRIER} Veer webOS 2.2.4 base build to downloads"
+mv build/${PATIENT}/${P224_FILE} downloads
+
+rm -rf ${CARRIER_TARBALL} ${VEERXML} ${BUILD_INFO} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL} ${LEGACY_TARBALL} ${UMTS_FW} build/${PATIENT} build/veer-p160una-${CARRIER}-2.2.4
+
+echo "You can now remove the 224 directory and it's content under ${A212_BUILD}${W211_BUILD}"
+echo "Your custom doctor file was created at downloads/${P224_FILE}"
