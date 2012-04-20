@@ -15,8 +15,6 @@ P210_FILE="webosdoctorp121ewwverizonwireless-2.1.0.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 V1451_FILE="webosdoctorp121ewwverizonwireless-1.4.5.1.jar"
 A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
-BR210_FILE="e4014e63a755ac02a63478047ad21d7e"
-BB210_FILE="fixi"
 
 W210_BUILD="preplus-p101ueu-wr-2.1.0"
 V1451_BUILD="pixiplus-p121eww-verizon-1.4.5.1"
@@ -25,8 +23,6 @@ A212_BUILD="veer-p160una-att-2.1.2"
 W210_MD5="03566ac546d72c59d1cdc1af5a4da920"
 V1451_MD5="0cd21b1f65b021787c8c83d7529adfaa"
 A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
-BR210_MD5="a3aaf25dbcd55255fb580be562f24893"
-BB210_MD5="159a156e9c25ddb42c94b454f799bcf9"
 
 PATIENT="build-verizon-pixiplus-2.1.0"
 DOCTOR="pixiplus-p121eww-verizon-1.4.5.1"
@@ -122,25 +118,17 @@ $make VERSION=1.4.5.1 DEVICE=pixiplus CARRIER=verizon unpack > /dev/null || exit
 $make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack > /dev/null || exit
 
 [ -d ./build/${DOCTOR}/210 ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "Please create 210 directory under ${DOCTOR}" ; exit ; }
-[ ! -f ./build/${DOCTOR}/210/${BR210_FILE}.tgz ] || { echo "Ungziping rootfs tar file" ; gzip -d ./build/${DOCTOR}/210/${BR210_FILE}.tgz ; }
-[ ! -f ./build/${DOCTOR}/210/${BB210_FILE}.tgz ] || { echo "Ungziping boot tar file" ; gzip -d ./build/${DOCTOR}/210/${BB210_FILE}.tgz ; }
+[ ! -f ./build/${DOCTOR}/210/e4014e63a755ac02a63478047ad21d7e.tgz ] || { echo "Ungziping rootfs tar file" ; gzip -d ./build/${DOCTOR}/210/e4014e63a755ac02a63478047ad21d7e.tgz ; }
+[ ! -f ./build/${DOCTOR}/210/fixi.tgz ] || { echo "Ungziping fixi tar file" ; gzip -d ./build/${DOCTOR}/210/fixi.tgz ; }
 [ -f ./build/${DOCTOR}/210/nova-cust-image-broadway.rootfs.tar ] || { echo "Copying Veer rootfs for webOS 2.1.2 build extract" ; cp ./build/veer-p160una-att-2.1.2/webOS/nova-cust-image-broadway.rootfs.tar ./build/${DOCTOR}/210/nova-cust-image-broadway.rootfs.tar ; }
-[ -f ./build/${DOCTOR}/210/${BR210_FILE}.tar ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "webOS 2.1.0 rootfs file not present" ;  exit ; }
-[ -f ./build/${DOCTOR}/210/${BB210_FILE}.tar ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "webOS 2.1.0 boot file not present" ;  exit ; }
+[ -f ./build/${DOCTOR}/210/e4014e63a755ac02a63478047ad21d7e.tar ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "webOS 2.1.0 rootfs file not present" ;  exit ; }
+[ -f ./build/${DOCTOR}/210/fixi.tar ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "webOS 2.1.0 fixi file not present" ;  exit ; }
 [ -f ./scripts/BootLogo.tga ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "Copy your custom BootLogo.tga to the scripts directory" ; exit ; }
-
-[ $(md5sum ./build/${DOCTOR}/210/${BR210_FILE}.tar | cut -d \  -f 1) != ${BR210_MD5} ] && \
-        echo "${BR210_FILE} did not download properly.  Please run this script again." && \
-        rm -f ./build/${DOCTOR}/210/${BR210_FILE}.tar && exit
-
-[ $(md5sum ./build/${DOCTOR}/210/${BB210_FILE}.tar | cut -d \  -f 1) != ${BB210_MD5} ] && \
-        echo "${BB210_FILE} did not download properly.  Please run this script again." && \
-        rm -f ./build/${DOCTOR}/210/${BB210_FILE}.tar && exit
 
 echo "Fixing PixiPlus webOS 2.1.0 rootfs tar missing files"
 rm -rf ./build/${DOCTOR}/210/files ./build/${DOCTOR}/210/rootfs ./build/${DOCTOR}/210/flash.tar ./build/${DOCTOR}/210/nova-cust-image-pixie.rootfs.tar
 mkdir -p ./build/${DOCTOR}/210/files/boot ./build/${DOCTOR}/210/rootfs 
-cp ./build/${DOCTOR}/210/${BR210_FILE}.tar ./build/${DOCTOR}/210/nova-cust-image-pixie.rootfs.tar
+cp ./build/${DOCTOR}/210/e4014e63a755ac02a63478047ad21d7e.tar ./build/${DOCTOR}/210/nova-cust-image-pixie.rootfs.tar
 
 echo "Fixing PixiPlus webOS 2.1.0 boot files"
 echo "./boot-images.tar.gz" > ./build/${DOCTOR}/210/ipkgs-extract-list.txt
@@ -156,7 +144,7 @@ echo "./lib/libc-2.8.so" >> ./build/${DOCTOR}/210/ipkgs-extract-list.txt
 echo "./lib/libm-2.8.so" >> ./build/${DOCTOR}/210/ipkgs-extract-list.txt
 
 $tar -C build/${DOCTOR}/210/files/boot --wildcards \
-  -f build/${DOCTOR}/210/${BB210_FILE}.tar \
+  -f build/${DOCTOR}/210/fixi.tar \
   -x -T ./build/${DOCTOR}/210/ipkgs-extract-list.txt
 
 rm -f ./build/${DOCTOR}/210/ipkgs-extract-list.txt
