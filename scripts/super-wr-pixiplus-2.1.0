@@ -1,0 +1,540 @@
+#!/bin/bash
+# super-wr-pixiplus-2.1.0 script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# modifications by 'rwcash' and 'John Steffes'
+# intended to flash WoRld PixiPlus phones with a working webOS 2.1.0 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+V201_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+V1451_JAR_URL="http://palm.cdnetworks.net/rom/pixiplus/px1451r0d05182011/ver1z0np1451rod/webosdoctorp121ewwverizonwireless.jar"
+A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+
+P210_FILE="webosdoctorp121pixiplus-wr-2.1.0.jar"
+W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
+W210_FILE="webosdoctorp121ewweu-wr-2.1.0.jar"
+V201_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+V1451_FILE="webosdoctorp121ewwverizonwireless-1.4.5.1.jar"
+A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
+
+W224_BUILD="pre2-p224pre2-wr-2.2.4"
+W210_BUILD="pixiplus-p121ewweu-wr-2.1.0"
+V201_BUILD="pre2-p102eww-verizon-2.0.1"
+V1451_BUILD="pixiplus-p121eww-verizon-1.4.5.1"
+A212_BUILD="veer-p160una-att-2.1.2"
+
+W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
+V201_MD5="643824a4c103e266fd8e2760b098815c"
+V1451_MD5="0cd21b1f65b021787c8c83d7529adfaa"
+A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
+
+PATIENT="super-wr-pixiplus-2.1.0"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+CLASSIC_TARBALL="classic.tar"
+LEGACY_TARBALL="legacy.tar"
+
+
+rm -rf ${LEGACY_TARBALL}
+
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+fi
+
+ARGS="${ARGS} ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_BOOTLOGO=scripts/BootLogo.tga PATIENT=${PATIENT} VERSION=2.1.0 DEVICE=pixiplus CARRIER=wr"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${P210_FILE}"
+echo
+
+mkdir -p downloads
+
+# $make clobber
+
+[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
+[ ! -f downloads/${V201_FILE} ] && $wget -c ${V201_JAR_URL} -O downloads/${V201_FILE}
+[ ! -f downloads/${V1451_FILE} ] && $wget -c ${V1451_JAR_URL} -O downloads/${V1451_FILE}
+[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+
+[ -f ./downloads/${W210_FILE} ] || { echo "Not prepared for Super webOS 2.1.0 build" ; echo "Please run the Build Doctor first" ; exit ; }
+[ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
+        echo "${W224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W224_FILE} && exit
+[ $(md5sum downloads/${V201_FILE} | cut -d \  -f 1) != ${V201_MD5} ] && \
+        echo "${V201_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V201_FILE} && exit
+[ $(md5sum downloads/${V1451_FILE} | cut -d \  -f 1) != ${V1451_MD5} ] && \
+        echo "${V1451_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V1451_FILE} && exit
+[ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
+        echo "${A212_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${A212_FILE} && exit
+
+$make VERSION=2.1.0 DEVICE=pixiplus CARRIER=wr unpack || exit
+$make VERSION=1.4.5.1 DEVICE=pixiplus CARRIER=verizon unpack || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon unpack || exit
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack || exit
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack || exit
+
+echo "***** Extracting Enyo from webOS 2.2.4 *****"
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="enyo" \
+    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} extract-rootfs-ipkgs > superpixi.txt || exit
+
+echo "***** Extracting updated webOS 2.2.4 ipkgs apps *****"
+$make VERSION=2.1.0 DEVICE=pixiplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="app-ipkgs" \
+    EXTRA_ROOTFS_TARBALL=pixiapp.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="app-ipkgs" \
+    EXTRA_ROOTFS_TARBALL=pre2app.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+mkdir -p appspixi appspre2
+$tar -C appspixi -x -f pixiapp.tar
+$tar -C appspre2 -x -f pre2app.tar
+rm -rf appspixi/usr/palm/ipkgs/com.palm.app.findapps_2.0.20800_all.ipk
+cp appspixi/usr/lib/ipkg/info/app-ipkgs.control appspixi/usr/lib/ipkg/info/app-ipkgs-old.control
+cp appspixi/usr/lib/ipkg/info/app-ipkgs.list appspixi/usr/lib/ipkg/info/app-ipkgs-old.list
+cp appspixi/usr/lib/ipkg/info/app-ipkgs.md5sums appspixi/usr/lib/ipkg/info/app-ipkgs-old.md5sums
+mv appspre2/usr/palm/ipkgs/com.palm.app.findapps_2.0.23300_all.ipk appspixi/usr/palm/ipkgs/
+mv appspre2/usr/palm/ipkgs/findapps-icon.png appspixi/usr/palm/ipkgs/
+mv appspre2/usr/palm/ipkgs/com.palm.app.maps_3.1.32_all.ipk appspixi/usr/palm/ipkgs/
+mv appspre2/usr/palm/ipkgs/maps-icon.png appspixi/usr/palm/ipkgs/
+mv appspre2/usr/palm/ipkgs/com.quickoffice.webos_1.0.10_all.ipk appspixi/usr/palm/ipkgs/
+mv appspre2/usr/palm/ipkgs/qo-icon.png appspixi/usr/palm/ipkgs/
+mv appspre2/usr/palm/ipkgs/manifest.json appspixi/usr/palm/ipkgs/
+mv appspixi/usr/lib/ipkg/info/app-ipkgs.list appspre2/usr/lib/ipkg/info/app-ipkgs.list2
+mv appspixi/usr/lib/ipkg/info/app-ipkgs.md5sums appspre2/usr/lib/ipkg/info/app-ipkgs.md5sums2
+head -n 1 appspre2/usr/lib/ipkg/info/app-ipkgs.list2 > appspixi/usr/lib/ipkg/info/app-ipkgs.list
+tail -n 7 appspre2/usr/lib/ipkg/info/app-ipkgs.list >> appspixi/usr/lib/ipkg/info/app-ipkgs.list
+tail -n 8 appspre2/usr/lib/ipkg/info/app-ipkgs.md5sums > appspre2/usr/lib/ipkg/info/app-ipkgs.md5sums3
+head -n 7 appspre2/usr/lib/ipkg/info/app-ipkgs.md5sums3 > appspixi/usr/lib/ipkg/info/app-ipkgs.md5sums
+tail -n 1 appspre2/usr/lib/ipkg/info/app-ipkgs.md5sums2 >> appspixi/usr/lib/ipkg/info/app-ipkgs.md5sums
+$tar -C appspixi -f ./${LEGACY_TARBALL} --append . || exit
+rm -rf appspixi appspre2 pixiapp.tar pre2app.tar
+
+echo "***** Extracting Motionapps Classic bits *****"
+$make VERSION=1.4.5.1 DEVICE=pixiplus CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs >> superpixi.txt || exit
+
+mkdir -p classic.1451
+cd classic.1451
+$tar -x -f ../${CLASSIC_TARBALL}
+cd ..
+
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.service.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs >> superpixi.txt || exit
+
+mkdir -p classic.201
+cd classic.201
+$tar -x -f ../${CLASSIC_TARBALL}
+rm -f ../${CLASSIC_TARBALL}
+cp -r ../classic.1451/* ./
+mv ./usr/lib/palmos/Read\ Me.txt ./usr/lib/palmos/Read_Me.txt
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.list > ./usr/lib/ipkg/info/com.motionapps.service.classic.list2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.list2 ./usr/lib/ipkg/info/com.motionapps.service.classic.list
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums > ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2 ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.control > ./usr/lib/ipkg/info/com.motionapps.service.classic.control2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.control2 ./usr/lib/ipkg/info/com.motionapps.service.classic.control
+$tar -f ../${LEGACY_TARBALL} --append ./* || exit
+cd ..
+rm -rf classic.1451 classic.201
+
+echo "***** Extracting webOS 2.1.2 maps and turning it into GoogleMaps *****"
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.maps" \
+    EXTRA_ROOTFS_TARBALL=googlemaps.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+mkdir -p mapsfix
+cd mapsfix
+$tar -x -f ../googlemaps.tar
+rm -f ../googlemaps.tar
+mv ./usr/palm/applications/com.palm.app.maps ./usr/palm/applications/com.palm.app.googlemaps
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.maps.control > ./usr/lib/ipkg/info/com.palm.app.googlemaps.control
+mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.control ./usr/lib/ipkg/info/com.palm.app.maps.control
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.control > ./usr/lib/ipkg/info/com.palm.app.googlemaps.control
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.control
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.list > ./usr/lib/ipkg/info/com.palm.app.googlemaps.list
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.list
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.md5sums > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2
+mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
+sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
+mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
+	      > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -f ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+$tar -f ../${LEGACY_TARBALL} --append ./* || exit
+cd ..
+rm -rf mapsfix webos210 webos212 pixiapp pixiapp.tar webos210.tar cal210.tar webos212.tar cal212.tar
+
+echo "***** Extracting sweatshop-wr-pixie adding Amazon MP3 *****"
+$make VERSION=2.1.0 DEVICE=pixiplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="sweatshop-wr-pixie" \
+    EXTRA_ROOTFS_TARBALL=pixiapp.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+mkdir -p pixiapp
+cd pixiapp
+$tar -x -f ../pixiapp.tar
+head -n 8 ./usr/lib/luna/customization/system_customization.json > system_customization.json
+echo "        {" >> system_customization.json
+echo "            \"uri\": \"palm://com.palm.systemservice/setPreferences\"," >> system_customization.json
+echo "            \"payload\": {" >> system_customization.json
+echo "                \"musicStoreAppName\": \"Amazon MP3\"," >> system_customization.json
+echo "                \"musicStoreAppId\": \"com.palm.app.amazonstore\"" >> system_customization.json
+echo "            }" >> system_customization.json
+echo "        }," >> system_customization.json
+tail -n 192 ./usr/lib/luna/customization/system_customization.json >> system_customization.json
+mv system_customization.json ./usr/lib/luna/customization/system_customization.json 
+md5sum ./usr/lib/luna/customization/system_customization.json > ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums.new
+mv ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums.old
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums.old ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums.new \
+	      > ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums
+
+rm -rf ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums.old ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums.new
+head -n 4 ./usr/lib/ipkg/info/sweatshop-wr-pixie.list > com.palm.app.amazonstore.list
+tail -n 1 com.palm.app.amazonstore.list > ./usr/lib/ipkg/info/com.palm.app.amazonstore.list
+rm -rf com.palm.app.amazonstore.list
+cd ..
+
+echo "***** Extracting PixiPlus webOS 2.1.0 files to be deleted *****"
+$make VERSION=2.1.0 DEVICE=pixiplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="accounts.ui addressing calendar.io com.palm.app.backup \
+    com.palm.app.browser com.palm.app.calendar com.palm.app.contacts com.palm.app.email \
+    com.palm.app.firstuse com.palm.app.languagepicker com.palm.app.messaging \
+    com.palm.app.network com.palm.app.phone com.palm.app.phoneprefs \
+    com.palm.app.photos com.palm.app.screenlock com.palm.app.swmanager \
+    com.palm.app.updates com.palm.messaging.chatthreader com.palm.service.accounts \
+    com.palm.service.appcatalog com.palm.service.backup com.palm.service.calendar.google \
+    com.palm.service.calendar.yahoo com.palm.service.contacts.base \
+    com.palm.service.contacts.facebook com.palm.service.contacts.google \
+    com.palm.service.contacts.linkedin com.palm.service.contacts.linker \
+    com.palm.service.contacts.yahoo com.palm.service.customization \
+    com.palm.service.deviceprofile com.palm.service.migration \
+    com.palm.service.palmprofile contacts.base contacts.ui foundations.base \
+    foundations.json messaging.library metascene.videos.base mojo.core mojo2 \
+    mojoservice.base mojoservice.transport.base mojoservice.transport.sync" \
+    EXTRA_ROOTFS_TARBALL=webos210.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+$make VERSION=2.1.0 DEVICE=pixiplus CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="calendar" \
+    EXTRA_ROOTFS_TARBALL=cal210.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+echo "***** Extracting Veer webOS 2.1.2 Updated files *****"
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
+    EXTRA_ROOTFS_IPKGS="accounts.ui addressing calendar.io com.palm.app.backup \
+    com.palm.app.browser com.palm.app.calendar com.palm.app.contacts com.palm.app.email \
+    com.palm.app.firstuse com.palm.app.languagepicker com.palm.app.messaging \
+    com.palm.app.network com.palm.app.phone com.palm.app.phoneprefs \
+    com.palm.app.photos com.palm.app.screenlock com.palm.app.swmanager \
+    com.palm.app.updates com.palm.messaging.chatthreader com.palm.service.accounts \
+    com.palm.service.appcatalog com.palm.service.backup com.palm.service.calendar.google \
+    com.palm.service.calendar.yahoo com.palm.service.contacts.base \
+    com.palm.service.contacts.facebook com.palm.service.contacts.google \
+    com.palm.service.contacts.linkedin com.palm.service.contacts.linker \
+    com.palm.service.contacts.yahoo com.palm.service.customization \
+    com.palm.service.deviceprofile com.palm.service.migration \
+    com.palm.service.palmprofile contacts.base contacts.ui foundations.base \
+    foundations.json messaging.library metascene.videos.base mojo.core mojo2 \
+    mojoservice.base mojoservice.transport.base mojoservice.transport.sync" \
+    EXTRA_ROOTFS_TARBALL=webos212.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
+    EXTRA_ROOTFS_IPKGS="calendar" \
+    EXTRA_ROOTFS_TARBALL=cal212.tar extract-rootfs-ipkgs >> superpixi.txt || exit
+
+mkdir -p webos210 webos212 
+cd webos210
+$tar -x -f ../webos210.tar
+$tar -x -f ../cal210.tar
+rm -f ../webos210.tar ../cal210.tar
+cd ../webos212
+$tar -x -f ../webos212.tar
+$tar -x -f ../cal212.tar
+rm -f ../webos212.tar ../cal212.tar ../pixiapp.tar
+mkdir -p ./usr/lib/luna ./usr/lib/luna/customization
+mv ../pixiapp/usr/lib/luna/customization/system_customization.json ./usr/lib/luna/customization/system_customization.json
+mv ../pixiapp/usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums ./usr/lib/ipkg/info/sweatshop-wr-pixie.md5sums
+mv ../pixiapp/usr/lib/ipkg/info/com.palm.app.amazonstore.list ./usr/lib/ipkg/info/com.palm.app.amazonstore.list
+touch ./usr/lib/ipkg/info/com.palm.app.amazonstore.md5sums
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.backup.control > ./usr/lib/ipkg/info/com.palm.app.backup.control2
+mv ./usr/lib/ipkg/info/com.palm.app.backup.control2 ./usr/lib/ipkg/info/com.palm.app.backup.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.browser.control > ./usr/lib/ipkg/info/com.palm.app.browser.control2
+mv ./usr/lib/ipkg/info/com.palm.app.browser.control2 ./usr/lib/ipkg/info/com.palm.app.browser.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.calendar.control > ./usr/lib/ipkg/info/com.palm.app.calendar.control2
+mv ./usr/lib/ipkg/info/com.palm.app.calendar.control2 ./usr/lib/ipkg/info/com.palm.app.calendar.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.contacts.control > ./usr/lib/ipkg/info/com.palm.app.contacts.control2
+mv ./usr/lib/ipkg/info/com.palm.app.contacts.control2 ./usr/lib/ipkg/info/com.palm.app.contacts.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.email.control > ./usr/lib/ipkg/info/com.palm.app.email.control2
+mv ./usr/lib/ipkg/info/com.palm.app.email.control2 ./usr/lib/ipkg/info/com.palm.app.email.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.firstuse.control > ./usr/lib/ipkg/info/com.palm.app.firstuse.control2
+mv ./usr/lib/ipkg/info/com.palm.app.firstuse.control2 ./usr/lib/ipkg/info/com.palm.app.firstuse.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.languagepicker.control > ./usr/lib/ipkg/info/com.palm.app.languagepicker.control2
+mv ./usr/lib/ipkg/info/com.palm.app.languagepicker.control2 ./usr/lib/ipkg/info/com.palm.app.languagepicker.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.messaging.control > ./usr/lib/ipkg/info/com.palm.app.messaging.control2
+mv ./usr/lib/ipkg/info/com.palm.app.messaging.control2 ./usr/lib/ipkg/info/com.palm.app.messaging.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.network.control > ./usr/lib/ipkg/info/com.palm.app.network.control2
+mv ./usr/lib/ipkg/info/com.palm.app.network.control2 ./usr/lib/ipkg/info/com.palm.app.network.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.phone.control > ./usr/lib/ipkg/info/com.palm.app.phone.control2
+mv ./usr/lib/ipkg/info/com.palm.app.phone.control2 ./usr/lib/ipkg/info/com.palm.app.phone.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.phoneprefs.control > ./usr/lib/ipkg/info/com.palm.app.phoneprefs.control2
+mv ./usr/lib/ipkg/info/com.palm.app.phoneprefs.control2 ./usr/lib/ipkg/info/com.palm.app.phoneprefs.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.photos.control > ./usr/lib/ipkg/info/com.palm.app.photos.control2
+mv ./usr/lib/ipkg/info/com.palm.app.photos.control2 ./usr/lib/ipkg/info/com.palm.app.photos.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.screenlock.control > ./usr/lib/ipkg/info/com.palm.app.screenlock.control2
+mv ./usr/lib/ipkg/info/com.palm.app.screenlock.control2 ./usr/lib/ipkg/info/com.palm.app.screenlock.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.swmanager.control > ./usr/lib/ipkg/info/com.palm.app.swmanager.control2
+mv ./usr/lib/ipkg/info/com.palm.app.swmanager.control2 ./usr/lib/ipkg/info/com.palm.app.swmanager.control
+sed -e "s/armv7/armv6/g" ./usr/lib/ipkg/info/com.palm.app.updates.control > ./usr/lib/ipkg/info/com.palm.app.updates.control2
+mv ./usr/lib/ipkg/info/com.palm.app.updates.control2 ./usr/lib/ipkg/info/com.palm.app.updates.control
+
+mv ../webos210/usr/lib/ipkg/info/accounts.ui.control usr/lib/ipkg/info/accounts.ui-old.control
+mv ../webos210/usr/lib/ipkg/info/addressing.control usr/lib/ipkg/info/addressing-old.control
+mv ../webos210/usr/lib/ipkg/info/calendar.control usr/lib/ipkg/info/calendar-old.control
+mv ../webos210/usr/lib/ipkg/info/calendar.io.control usr/lib/ipkg/info/calendar.io-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.backup.control usr/lib/ipkg/info/com.palm.app.backup-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.browser.control usr/lib/ipkg/info/com.palm.app.browser-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.calendar.control usr/lib/ipkg/info/com.palm.app.calendar-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.contacts.control usr/lib/ipkg/info/com.palm.app.contacts-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.email.control usr/lib/ipkg/info/com.palm.app.email-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.firstuse.control usr/lib/ipkg/info/com.palm.app.firstuse-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.languagepicker.control usr/lib/ipkg/info/com.palm.app.languagepicker-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.messaging.control usr/lib/ipkg/info/com.palm.app.messaging-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.network.control usr/lib/ipkg/info/com.palm.app.network-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.phone.control usr/lib/ipkg/info/com.palm.app.phone-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.phoneprefs.control usr/lib/ipkg/info/com.palm.app.phoneprefs-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.photos.control usr/lib/ipkg/info/com.palm.app.photos-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.screenlock.control usr/lib/ipkg/info/com.palm.app.screenlock-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.swmanager.control usr/lib/ipkg/info/com.palm.app.swmanager-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.updates.control usr/lib/ipkg/info/com.palm.app.updates-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.messaging.chatthreader.control usr/lib/ipkg/info/com.palm.messaging.chatthreader-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.accounts.control usr/lib/ipkg/info/com.palm.service.accounts-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.appcatalog.control usr/lib/ipkg/info/com.palm.service.appcatalog-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.backup.control usr/lib/ipkg/info/com.palm.service.backup-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.calendar.google.control usr/lib/ipkg/info/com.palm.service.calendar.google-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.calendar.yahoo.control usr/lib/ipkg/info/com.palm.service.calendar.yahoo-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.base.control usr/lib/ipkg/info/com.palm.service.contacts.base-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.facebook.control usr/lib/ipkg/info/com.palm.service.contacts.facebook-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.google.control usr/lib/ipkg/info/com.palm.service.contacts.google-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.linkedin.control usr/lib/ipkg/info/com.palm.service.contacts.linkedin-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.linker.control usr/lib/ipkg/info/com.palm.service.contacts.linker-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.yahoo.control usr/lib/ipkg/info/com.palm.service.contacts.yahoo-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.customization.control usr/lib/ipkg/info/com.palm.service.customization-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.deviceprofile.control usr/lib/ipkg/info/com.palm.service.deviceprofile-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.migration.control usr/lib/ipkg/info/com.palm.service.migration-old.control
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.palmprofile.control usr/lib/ipkg/info/com.palm.service.palmprofile-old.control
+mv ../webos210/usr/lib/ipkg/info/contacts.base.control usr/lib/ipkg/info/contacts.base-old.control
+mv ../webos210/usr/lib/ipkg/info/contacts.ui.control usr/lib/ipkg/info/contacts.ui-old.control
+mv ../webos210/usr/lib/ipkg/info/foundations.base.control usr/lib/ipkg/info/foundations.base-old.control
+mv ../webos210/usr/lib/ipkg/info/foundations.json.control usr/lib/ipkg/info/foundations.json-old.control
+mv ../webos210/usr/lib/ipkg/info/messaging.library.control usr/lib/ipkg/info/messaging.library-old.control
+mv ../webos210/usr/lib/ipkg/info/metascene.videos.base.control usr/lib/ipkg/info/metascene.videos.base-old.control
+mv ../webos210/usr/lib/ipkg/info/mojo.core.control usr/lib/ipkg/info/mojo.core-old.control
+mv ../webos210/usr/lib/ipkg/info/mojo2.control usr/lib/ipkg/info/mojo2-old.control
+mv ../webos210/usr/lib/ipkg/info/mojoservice.base.control usr/lib/ipkg/info/mojoservice.base-old.control
+mv ../webos210/usr/lib/ipkg/info/mojoservice.transport.base.control usr/lib/ipkg/info/mojoservice.transport.base-old.control
+mv ../webos210/usr/lib/ipkg/info/mojoservice.transport.sync.control usr/lib/ipkg/info/mojoservice.transport.sync-old.control
+mv ../webos210/usr/lib/ipkg/info/accounts.ui.list usr/lib/ipkg/info/accounts.ui-old.list
+mv ../webos210/usr/lib/ipkg/info/addressing.list usr/lib/ipkg/info/addressing-old.list
+mv ../webos210/usr/lib/ipkg/info/calendar.list usr/lib/ipkg/info/calendar-old.list
+mv ../webos210/usr/lib/ipkg/info/calendar.io.list usr/lib/ipkg/info/calendar.io-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.backup.list usr/lib/ipkg/info/com.palm.app.backup-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.browser.list usr/lib/ipkg/info/com.palm.app.browser-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.calendar.list usr/lib/ipkg/info/com.palm.app.calendar-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.contacts.list usr/lib/ipkg/info/com.palm.app.contacts-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.email.list usr/lib/ipkg/info/com.palm.app.email-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.firstuse.list usr/lib/ipkg/info/com.palm.app.firstuse-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.languagepicker.list usr/lib/ipkg/info/com.palm.app.languagepicker-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.messaging.list usr/lib/ipkg/info/com.palm.app.messaging-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.network.list usr/lib/ipkg/info/com.palm.app.network-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.phone.list usr/lib/ipkg/info/com.palm.app.phone-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.phoneprefs.list usr/lib/ipkg/info/com.palm.app.phoneprefs-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.photos.list usr/lib/ipkg/info/com.palm.app.photos-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.screenlock.list usr/lib/ipkg/info/com.palm.app.screenlock-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.swmanager.list usr/lib/ipkg/info/com.palm.app.swmanager-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.updates.list usr/lib/ipkg/info/com.palm.app.updates-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.messaging.chatthreader.list usr/lib/ipkg/info/com.palm.messaging.chatthreader-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.accounts.list usr/lib/ipkg/info/com.palm.service.accounts-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.appcatalog.list usr/lib/ipkg/info/com.palm.service.appcatalog-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.backup.list usr/lib/ipkg/info/com.palm.service.backup-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.calendar.google.list usr/lib/ipkg/info/com.palm.service.calendar.google-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.calendar.yahoo.list usr/lib/ipkg/info/com.palm.service.calendar.yahoo-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.base.list usr/lib/ipkg/info/com.palm.service.contacts.base-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.facebook.list usr/lib/ipkg/info/com.palm.service.contacts.facebook-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.google.list usr/lib/ipkg/info/com.palm.service.contacts.google-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.linkedin.list usr/lib/ipkg/info/com.palm.service.contacts.linkedin-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.linker.list usr/lib/ipkg/info/com.palm.service.contacts.linker-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.yahoo.list usr/lib/ipkg/info/com.palm.service.contacts.yahoo-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.customization.list usr/lib/ipkg/info/com.palm.service.customization-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.deviceprofile.list usr/lib/ipkg/info/com.palm.service.deviceprofile-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.migration.list usr/lib/ipkg/info/com.palm.service.migration-old.list
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.palmprofile.list usr/lib/ipkg/info/com.palm.service.palmprofile-old.list
+mv ../webos210/usr/lib/ipkg/info/contacts.base.list usr/lib/ipkg/info/contacts.base-old.list
+mv ../webos210/usr/lib/ipkg/info/contacts.ui.list usr/lib/ipkg/info/contacts.ui-old.list
+mv ../webos210/usr/lib/ipkg/info/foundations.base.list usr/lib/ipkg/info/foundations.base-old.list
+mv ../webos210/usr/lib/ipkg/info/foundations.json.list usr/lib/ipkg/info/foundations.json-old.list
+mv ../webos210/usr/lib/ipkg/info/messaging.library.list usr/lib/ipkg/info/messaging.library-old.list
+mv ../webos210/usr/lib/ipkg/info/metascene.videos.base.list usr/lib/ipkg/info/metascene.videos.base-old.list
+mv ../webos210/usr/lib/ipkg/info/mojo.core.list usr/lib/ipkg/info/mojo.core-old.list
+mv ../webos210/usr/lib/ipkg/info/mojo2.list usr/lib/ipkg/info/mojo2-old.list
+mv ../webos210/usr/lib/ipkg/info/mojoservice.base.list usr/lib/ipkg/info/mojoservice.base-old.list
+mv ../webos210/usr/lib/ipkg/info/mojoservice.transport.base.list usr/lib/ipkg/info/mojoservice.transport.base-old.list
+mv ../webos210/usr/lib/ipkg/info/mojoservice.transport.sync.list usr/lib/ipkg/info/mojoservice.transport.sync-old.list
+mv ../webos210/usr/lib/ipkg/info/accounts.ui.md5sums usr/lib/ipkg/info/accounts.ui-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/addressing.md5sums usr/lib/ipkg/info/addressing-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/calendar.md5sums usr/lib/ipkg/info/calendar-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/calendar.io.md5sums usr/lib/ipkg/info/calendar.io-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.backup.md5sums usr/lib/ipkg/info/com.palm.app.backup-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.browser.md5sums usr/lib/ipkg/info/com.palm.app.browser-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.calendar.md5sums usr/lib/ipkg/info/com.palm.app.calendar-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.contacts.md5sums usr/lib/ipkg/info/com.palm.app.contacts-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.email.md5sums usr/lib/ipkg/info/com.palm.app.email-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.firstuse.md5sums usr/lib/ipkg/info/com.palm.app.firstuse-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.languagepicker.md5sums usr/lib/ipkg/info/com.palm.app.languagepicker-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.messaging.md5sums usr/lib/ipkg/info/com.palm.app.messaging-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.network.md5sums usr/lib/ipkg/info/com.palm.app.network-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.phone.md5sums usr/lib/ipkg/info/com.palm.app.phone-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.phoneprefs.md5sums usr/lib/ipkg/info/com.palm.app.phoneprefs-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.photos.md5sums usr/lib/ipkg/info/com.palm.app.photos-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.screenlock.md5sums usr/lib/ipkg/info/com.palm.app.screenlock-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.swmanager.md5sums usr/lib/ipkg/info/com.palm.app.swmanager-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.app.updates.md5sums usr/lib/ipkg/info/com.palm.app.updates-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.messaging.chatthreader.md5sums usr/lib/ipkg/info/com.palm.messaging.chatthreader-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.accounts.md5sums usr/lib/ipkg/info/com.palm.service.accounts-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.appcatalog.md5sums usr/lib/ipkg/info/com.palm.service.appcatalog-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.backup.md5sums usr/lib/ipkg/info/com.palm.service.backup-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.calendar.google.md5sums usr/lib/ipkg/info/com.palm.service.calendar.google-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.calendar.yahoo.md5sums usr/lib/ipkg/info/com.palm.service.calendar.yahoo-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.base.md5sums usr/lib/ipkg/info/com.palm.service.contacts.base-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.facebook.md5sums usr/lib/ipkg/info/com.palm.service.contacts.facebook-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.google.md5sums usr/lib/ipkg/info/com.palm.service.contacts.google-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.linkedin.md5sums usr/lib/ipkg/info/com.palm.service.contacts.linkedin-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.linker.md5sums usr/lib/ipkg/info/com.palm.service.contacts.linker-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.contacts.yahoo.md5sums usr/lib/ipkg/info/com.palm.service.contacts.yahoo-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.customization.md5sums usr/lib/ipkg/info/com.palm.service.customization-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.deviceprofile.md5sums usr/lib/ipkg/info/com.palm.service.deviceprofile-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.migration.md5sums usr/lib/ipkg/info/com.palm.service.migration-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/com.palm.service.palmprofile.md5sums usr/lib/ipkg/info/com.palm.service.palmprofile-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/contacts.base.md5sums usr/lib/ipkg/info/contacts.base-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/contacts.ui.md5sums usr/lib/ipkg/info/contacts.ui-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/foundations.base.md5sums usr/lib/ipkg/info/foundations.base-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/foundations.json.md5sums usr/lib/ipkg/info/foundations.json-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/messaging.library.md5sums usr/lib/ipkg/info/messaging.library-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/metascene.videos.base.md5sums usr/lib/ipkg/info/metascene.videos.base-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/mojo.core.md5sums usr/lib/ipkg/info/mojo.core-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/mojo2.md5sums usr/lib/ipkg/info/mojo2-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/mojoservice.base.md5sums usr/lib/ipkg/info/mojoservice.base-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/mojoservice.transport.base.md5sums usr/lib/ipkg/info/mojoservice.transport.base-old.md5sums
+mv ../webos210/usr/lib/ipkg/info/mojoservice.transport.sync.md5sums usr/lib/ipkg/info/mojoservice.transport.sync-old.md5sums
+
+echo "/usr/palm/applications/com.palm.app.maps/" > usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/accounts.ui/submission/40.1/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/addressing/submission/33/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/calendar/submission/29/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/calendar.io/submission/20/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/contacts/submission/86/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/contacts.ui/submission/37/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/foundations/submission/102/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/foundations.json/submission/12/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/messaging.library/submission/1.2/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/metascene.videos/submission/102/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/mojo.core/submission/32/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/mojo2/submissions/98/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/mojoservice/submission/55/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/mojoservice.transport/submission/33/" >> usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/frameworks/mojoservice.transport.sync/submission/66/" >> usr/lib/ipkg/info/dirstruct.list
+
+$tar -f ../${LEGACY_TARBALL} --append . || exit
+cd ..
+rm -rf webos210 webos212 pixiapp
+
+
+echo "***** Building PixiPlus webOS 2.1.0 Doctor *****"
+$make ${ARGS} \
+    DELETE_ROOTFS_IPKGS="com.palm.app.maps app-ipkgs-old accounts.ui-old \
+    addressing-old calendar-old calendar.io-old com.palm.app.backup-old \
+    com.palm.app.browser-old com.palm.app.calendar-old com.palm.app.contacts-old \
+    com.palm.app.email-old com.palm.app.firstuse-old com.palm.app.languagepicker-old \
+    com.palm.app.messaging-old com.palm.app.network-old com.palm.app.phone-old \
+    com.palm.app.phoneprefs-old com.palm.app.photos-old com.palm.app.screenlock-old \
+    com.palm.app.swmanager-old com.palm.app.updates-old \
+    com.palm.messaging.chatthreader-old com.palm.service.accounts-old \
+    com.palm.service.appcatalog-old com.palm.service.backup-old \
+    com.palm.service.calendar.google-old com.palm.service.calendar.yahoo-old \
+    com.palm.service.contacts.base-old com.palm.service.contacts.facebook-old \
+    com.palm.service.contacts.google-old com.palm.service.contacts.linkedin-old \
+    com.palm.service.contacts.linker-old com.palm.service.contacts.yahoo-old \
+    com.palm.service.customization-old com.palm.service.deviceprofile-old \
+    com.palm.service.migration-old com.palm.service.palmprofile-old contacts.base-old \
+    contacts.ui-old foundations.base-old foundations.json-old messaging.library-old \
+    metascene.videos.base-old mojo.core-old mojo2-old mojoservice.base-old \
+    mojoservice.transport.base-old mojoservice.transport.sync-old dirstruct" \
+    EXTRA_ROOTFS_IPKGS="enyo app-ipkgs com.motionapps.rom.classic com.motionapps.service.classic \
+    com.palm.app.googlemaps calendar accounts.ui addressing calendar.io \
+    com.palm.app.backup com.palm.app.browser com.palm.app.calendar com.palm.app.contacts \
+    com.palm.app.email com.palm.app.firstuse com.palm.app.languagepicker \
+    com.palm.app.messaging com.palm.app.network com.palm.app.phone \
+    com.palm.app.phoneprefs com.palm.app.photos com.palm.app.screenlock \
+    com.palm.app.swmanager com.palm.app.updates com.palm.messaging.chatthreader \
+    com.palm.service.accounts com.palm.service.appcatalog com.palm.service.backup \
+    com.palm.service.calendar.google com.palm.service.calendar.yahoo \
+    com.palm.service.contacts.base com.palm.service.contacts.facebook \
+    com.palm.service.contacts.google com.palm.service.contacts.linkedin \
+    com.palm.service.contacts.linker com.palm.service.contacts.yahoo \
+    com.palm.service.customization com.palm.service.deviceprofile com.palm.app.amazonstore \
+    com.palm.service.migration com.palm.service.palmprofile contacts.base contacts.ui \
+    foundations.base foundations.json messaging.library metascene.videos.base mojo.core \
+    mojo2 mojoservice.base mojoservice.transport.base mojoservice.transport.sync" \
+    EXTRA_ROOTFS_TARBALL=${LEGACY_TARBALL} clobber-build settings all >> superpixi.txt || exit
+
+mv build/${PATIENT}/${W210_FILE} build/${PATIENT}/${P210_FILE}
+$java -jar build/${PATIENT}/${P210_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${P210_FILE}"
+echo
+
+rm -rf ${LEGACY_TARBALL}
