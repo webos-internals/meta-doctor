@@ -1,0 +1,273 @@
+#!/bin/bash
+# super-veer-2.2.4 (based on Pre2) script by Rod Whitby
+# based on meta-meta script by Ed Cates
+# modifications by 'andidendel' and 'John Steffes'
+# intended to flash Veer phones with a working webOS 2.2.4 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+V201_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+V1451_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
+A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+
+W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
+V201_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
+V1451_FILE="webosdoctorp101ewwverizonwireless-1.4.5.1.jar"
+A224_FILE="webosdoctorp160unaatt-2.2.4.jar"
+WR224_FILE="webosdoctorp160una-wr-2.2.4.jar"
+A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
+
+W224_BUILD="pre2-p224pre2-wr-2.2.4"
+V201_BUILD="pre2-p102eww-verizon-2.0.1"
+V1451_BUILD="preplus-p101eww-verizon-1.4.5.1"
+A212_BUILD="veer-p160una-att-2.1.2"
+
+W224_MD5="ea0cb312cb92c1e4d7f1d70820923538"
+V201_MD5="643824a4c103e266fd8e2760b098815c"
+V1451_MD5="fdc62b2d6e717dc90b208d52fd6336c0"
+A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
+
+if [[  -f ./downloads/${A224_FILE} &&  -f ./downloads/${WR224_FILE} ]] ; then
+  echo "Base Build for AT&T and WR exist rename the one you wish not to build"
+  echo "to a Super Veer webOS 2.2.4 Doctor..."
+  exit
+fi
+
+CARRIER="no"
+
+[ ! -f ./downloads/${A224_FILE} ] || { CARRIER="att" ; }
+[ ! -f ./downloads/${WR224_FILE} ] || { CARRIER="wr" ; }
+
+if [ "$CARRIER" = "no" ] ; then
+  echo "Build Script not ran first please run the build script"
+  echo "script usage: build-veer-2.2.4 carrier optional --wifi-only"
+  exit
+fi
+
+PATIENT="super-${CARRIER}-veer-2.2.4"
+P224_FILE="webosdoctorp160veer-${CARRIER}-2.2.4.jar"
+
+echo "Carrier ${CARRIER} directory ${PATIENT} will be used"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+CLASSIC_TARBALL="classic.tar"
+CARRIER_TARBALL="carrier.tar"
+
+rm -f ${CLASSIC_TARBALL} ${CARRIER_TARBALL}
+
+echo "Due to changes made to HP Cloud Services, this script may no longer work."
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+A212_IPKS=
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+    A212_IPKS=
+fi
+
+A212_IPKS="${A212_IPKS} \
+amazonservice_*.ipk \
+com.palm.app.amazonstore_*.ipk \
+"
+
+ARGS="${ARGS} CUSTOM_BOOTLOGO=scripts/BootLogo.tga ENABLE_DEVELOPER_MODE=1 DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=0 CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=veer CARRIER=${CARRIER}"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${P224_FILE}"
+echo
+
+mkdir -p downloads
+
+echo "Will download if needed webOS Doctors"
+[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
+[ ! -f downloads/${V201_FILE} ] && $wget -c ${V201_JAR_URL} -O downloads/${V201_FILE}
+[ ! -f downloads/${V1451_FILE} ] && $wget -c ${V1451_JAR_URL} -O downloads/${V1451_FILE}
+[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+
+[ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
+        echo "${W224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W224_FILE} && exit
+[ $(md5sum downloads/${V201_FILE} | cut -d \  -f 1) != ${V201_MD5} ] && \
+        echo "${V201_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V201_FILE} && exit
+[ $(md5sum downloads/${V1451_FILE} | cut -d \  -f 1) != ${V1451_MD5} ] && \
+        echo "${V1451_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${V1451_FILE} && exit
+[ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
+        echo "${A212_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${A212_FILE} && exit
+[ -f ./scripts/BootLogo.tga ] || { echo "Not prepared for Super webOS 2.2.4 build" ; echo "Copy your custom BootLogo.tga to the scripts directory" ; exit ; }
+
+# $make clobber
+
+echo "Will unpack if needed webOS Doctors"
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack > superveer.txt || exit
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon unpack >> superveer.txt || exit
+$make VERSION=1.4.5.1 DEVICE=preplus CARRIER=verizon unpack >> superveer.txt || exit
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack >> superveer.txt || exit
+ 
+echo "Extracting Motionapps Classic ROM bits"
+$make VERSION=1.4.5.1 DEVICE=preplus CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs >> superveer.txt || exit
+
+mkdir -p classic.1451
+cd classic.1451
+$tar -x -f ../${CLASSIC_TARBALL}
+cd ..
+
+echo "Extracting Motionapps Classic Service bits"
+$make VERSION=2.0.1 DEVICE=pre2 CARRIER=verizon \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.service.classic" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} extract-rootfs-ipkgs >> superveer.txt || exit
+
+echo "Extracting Pre2 webOS 2.2.4 Updated files"
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.messaging com.palm.app.phone \
+    com.palm.service.accounts com.palm.service.calendar.google \
+    com.palm.service.calendar.yahoo luna-init app-ipkgs" \
+    EXTRA_ROOTFS_TARBALL=calp224.tar extract-rootfs-ipkgs >> superveer.txt || exit
+
+echo "Extracting webOS 2.1.2 maps and turning it into GoogleMaps"
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.maps" \
+    EXTRA_ROOTFS_TARBALL=googlemaps.tar extract-rootfs-ipkgs >> superveer.txt || exit
+
+mkdir -p mapsfix
+cd mapsfix
+$tar -x -f ../googlemaps.tar
+rm -f ../googlemaps.tar
+mv ./usr/palm/applications/com.palm.app.maps ./usr/palm/applications/com.palm.app.googlemaps
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.control > ./usr/lib/ipkg/info/com.palm.app.googlemaps.control
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.control
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.list > ./usr/lib/ipkg/info/com.palm.app.googlemaps.list
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.list
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/lib/ipkg/info/com.palm.app.maps.md5sums > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -rf ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+sed -e "s/com.palm.app.maps/com.palm.app.googlemaps/g" ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2
+mv ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json2 ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json
+sed -e "s|http://maps.google.com/maps/m|http://maps.google.com/maps/mm|g" ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js > ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2
+mv ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js2 ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/appinfo.json > ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+md5sum ./usr/palm/applications/com.palm.app.googlemaps/app/assistants/app-assistant.js >>./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+mv ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old
+../scripts/replace-md5sums.py \
+	./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums \
+	      > ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums
+rm -f ./usr/lib/ipkg/info/com.palm.app.googlemaps.md5sums.old ./usr/lib/ipkg/info/com.palm.app.maps.md5sums
+$tar -f ../${CLASSIC_TARBALL} --append ./* || exit
+cd ..
+rm -rf mapsfix
+
+mkdir -p classic.201
+cd classic.201
+$tar -x -f ../${CLASSIC_TARBALL}
+$tar -x -f ../calp224.tar
+rm -f ../${CLASSIC_TARBALL} ../calp224.tar
+cp -r ../classic.1451/* ./
+mv ./usr/lib/palmos/Read\ Me.txt ./usr/lib/palmos/Read_Me.txt
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.list > ./usr/lib/ipkg/info/com.motionapps.service.classic.list2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.list2 ./usr/lib/ipkg/info/com.motionapps.service.classic.list
+sed -e "s/Read Me.txt/Read_Me.txt/g" ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums > ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2
+mv ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums2 ./usr/lib/ipkg/info/com.motionapps.service.classic.md5sums
+
+echo "/usr/palm/applications/com.palm.app.phone/shared/voicedialing/styles-overrides.css" > usr/lib/ipkg/info/dirstruct.list
+echo "/usr/palm/ipkgs/com.palm.app.maps_2.0.1310690367_all.ipk" >> usr/lib/ipkg/info/dirstruct.list
+
+$tar -cf ../${CLASSIC_TARBALL} ./* || exit
+cd ..
+rm -rf classic.1451 classic.201
+
+echo "Extracting webOS 2.1.2 youtube application"
+$make VERSION=2.1.2 DEVICE=veer CARRIER=att \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.youtube" \
+    EXTRA_ROOTFS_TARBALL=youtube212.tar extract-rootfs-ipkgs >> superveer.txt || exit
+
+$make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr \
+    EXTRA_ROOTFS_IPKGS="com.palm.app.youtube" \
+    EXTRA_ROOTFS_TARBALL=youtube224.tar extract-rootfs-ipkgs >> superveer.txt || exit
+
+mkdir -p youtube212 youtube224
+
+$tar -C youtube212 -x -f youtube212.tar
+$tar -C youtube224 -x -f youtube224.tar
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.control ./youtube212/usr/lib/ipkg/info/com.palm.app.youtube.old.control
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.list ./youtube212/usr/lib/ipkg/info/com.palm.app.youtube.old.list
+mv ./youtube224/usr/lib/ipkg/info/com.palm.app.youtube.md5sums ./youtube212/usr/lib/ipkg/info/com.palm.app.youtube.old.md5sums
+
+$tar -C youtube212 -f ${CLASSIC_TARBALL} --append . || exit
+
+rm -rf youtube212 youtube224 youtube212.tar youtube224.tar
+
+echo "Building ${CARRIER} Carrier Apps"
+mkdir -p carrier
+if [ "$CARRIER" = "att" ] ; then
+( cd build/${A212_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${A212_IPKS}) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${A212_IPKS} )
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+mv build/${A212_BUILD}/carrier/installer.xml build/${A212_BUILD}/carrier/installer.xml.org
+sed -e "s/att-broadway/wr-broadway/g" build/${A212_BUILD}/carrier/installer.xml.org > build/${A212_BUILD}/carrier/installer.xml
+sed -e "s/1056/1725/g" build/${A212_BUILD}/carrier/installer.xml > build/${A212_BUILD}/carrier/installer.xml.new
+mv build/${A212_BUILD}/carrier/installer.xml.new build/${A212_BUILD}/carrier/installer.xml
+( cd build/${A212_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${A212_IPKS}) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${A212_IPKS} )
+mv build/${A212_BUILD}/carrier/installer.xml.org build/${A212_BUILD}/carrier/installer.xml
+fi
+
+echo "Building Super ${CARRIER} Veer webOS 2.2.4 Doctor"
+$make ${ARGS} \
+    DELETE_ROOTFS_IPKGS="com.palm.app.youtube.old dirstruct" \
+    EXTRA_ROOTFS_IPKGS="com.motionapps.rom.classic com.motionapps.service.classic \
+    com.palm.app.googlemaps com.palm.app.messaging com.palm.app.phone \
+    com.palm.service.accounts com.palm.service.calendar.google \
+    com.palm.service.calendar.yahoo luna-init app-ipkgs com.palm.app.youtube" \
+    EXTRA_ROOTFS_TARBALL=${CLASSIC_TARBALL} clobber-build settings all >> superveer.txt || exit
+
+if [ "$CARRIER" = "att" ] ; then
+  mv build/${PATIENT}/${A224_FILE} build/${PATIENT}/${P224_FILE}
+fi
+
+if [ "$CARRIER" = "wr" ] ; then
+  mv build/${PATIENT}/${WR224_FILE} build/${PATIENT}/${P224_FILE}
+fi
+
+$java -jar build/${PATIENT}/${P224_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${P224_FILE}"
+echo
+
+rm -f ${CLASSIC_TARBALL} ${CARRIER_TARBALL}
