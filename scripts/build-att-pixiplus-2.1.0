@@ -138,7 +138,7 @@ $make VERSION=2.1.2 DEVICE=veer CARRIER=att unpack > /dev/null || exit
 [ -f ./build/${DOCTOR}/210/nova-cust-image-broadway.rootfs.tar ] || { echo "Copying Veer rootfs for webOS 2.1.2 build extract" ; cp ./build/veer-p160una-att-2.1.2/webOS/nova-cust-image-broadway.rootfs.tar ./build/${DOCTOR}/210/nova-cust-image-broadway.rootfs.tar ; }
 [ -f ./build/${DOCTOR}/210/e4014e63a755ac02a63478047ad21d7e.tar ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "webOS 2.1.0 rootfs file not present" ;  exit ; }
 [ -f ./build/${DOCTOR}/210/fixi.tar ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "webOS 2.1.0 fixi file not present" ;  exit ; }
-[ -f ./scripts/BootLogo.tga ] || { echo "Not prepared for webOS 2.1.0 build extract" ; echo "Copy your custom BootLogo.tga to the scripts directory" ; exit ; }
+[ -f ./scripts/BootLogo.tga ] || { echo "Custom Boot Image not found" ; echo "Ungzipping and untaring HP BootLogo.tga from Veer webOS 2.1.2" ; mkdir -p ./build/${DOCTOR}/210/BOOTIMG ; cp ./build/veer-p160una-att-2.1.2/rootfs/boot/boot-images.tar.gz ./build/${DOCTOR}/210/BOOTIMG ; gzip -d ./build/${DOCTOR}/210/BOOTIMG/boot-images.tar.gz ; $tar -xvf ./build/${DOCTOR}/210/BOOTIMG/boot-images.tar BootLogo.tga > /dev/null ; mv BootLogo.tga ./scripts/ ; rm -rf ./build/${DOCTOR}/210/BOOTIMG ; }
 
 echo "Fixing PixiPlus webOS 2.1.0 rootfs tar missing files"
 rm -rf ./build/${DOCTOR}/210/files ./build/${DOCTOR}/210/rootfs ./build/${DOCTOR}/210/flash.tar ./build/${DOCTOR}/210/nova-cust-image-pixie.rootfs.tar
