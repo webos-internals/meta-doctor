@@ -78,8 +78,10 @@ CUSTOM_ROOTFS="rootfs.tar"
 LEGACY_TARBALL="legacy.tar"
 WEBOS_TARBALL="webOS.tar"
 UMTS_FW="broadwayumtsfw.tar"
+UIMAGE="nova-installer-image-broadway.uImage"
+CUSTOM_UIMAGE="no"
 
-rm -rf ${CARRIER_TARBALL} ${VEERXML} ${BUILD_INFO} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL} ${LEGACY_TARBALL} ${UMTS_FW}
+rm -rf ${CARRIER_TARBALL} ${VEERXML} ${BUILD_INFO} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${UIMAGE} ${WEBOS_TARBALL} ${LEGACY_TARBALL} ${UMTS_FW}
 
 echo "Due to changes made to HP Cloud Services, this script may no longer work."
 
@@ -153,7 +155,9 @@ $make VERSION=2.2.4 DEVICE=pre2 CARRIER=wr unpack > /dev/null || exit
 [ ! -f ./build/${DOCTOR}/223/nova-cust-image-broadway.boot.tar.gz ] || { echo "Ungziping boot tar file" ; gzip -d ./build/${DOCTOR}/223/nova-cust-image-broadway.boot.tar.gz ;  }
 [ -f ./build/${DOCTOR}/223/nova-cust-image-broadway.rootfs.org.tar ] || { echo "Not prepared for webOS 2.2.3 Build extract" ; echo "webOS 2.2.3 rootfs file not present" ;  exit ; }
 [ -f ./build/${DOCTOR}/223/nova-cust-image-broadway.boot.tar ] || { echo "Not prepared for webOS 2.2.3 Build extract" ; echo "webOS 2.2.3 boot file not present" ;  exit ; }
-[ -f ./scripts/BootLogo.tga ] || { echo "Not prepared for webOS 2.2.3 build extract" ; echo "Copy your custom BootLogo.tga to the scripts directory" ; exit ; }
+[ ! -f ./build/${DOCTOR}/223/${UIMAGE}.gz ] || { echo "Found custom uImage ungziping uImage file" ; gzip -d ./build/${DOCTOR}/223/${UIMAGE}.gz ;  }
+[ ! -f ./build/${DOCTOR}/223/${UIMAGE} ] || { echo "Found custom uImage using that instead..." ; CUSTOM_UIMAGE="yes" ; }
+[ -f ./scripts/BootLogo.tga ] || { echo "Custom Boot Image not found" ; echo "Ungzipping and untaring HP BootLogo.tga from webOS ${VERSION}" ; mkdir -p ./build/${DOCTOR}/223/BOOTIMG ; cp ./build/${DOCTOR}/rootfs/boot/boot-images.tar.gz ./build/${DOCTOR}/223/BOOTIMG ; gzip -d ./build/${DOCTOR}/223/BOOTIMG/boot-images.tar.gz ; $tar -xvf ./build/${DOCTOR}/223/BOOTIMG/boot-images.tar BootLogo.tga > /dev/null ; mv BootLogo.tga ./scripts/ ; rm -rf ./build/${DOCTOR}/223/BOOTIMG ; }
 
 echo "Fixing Veer webOS 2.2.3 XML file for DARE file structure"
 if [ "$CARRIER" = "att" ] ; then
@@ -299,6 +303,13 @@ echo "Updating webOS tarball with webOS 2.2.3 WoRld modem firmware"
 $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UMTS_FW} || exit
 $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UMTS_FW} || exit
 
+if [ "$CUSTOM_UIMAGE" = "yes" ] ; then
+  echo "Updating webOS tarball with custom webOS uImage Boot Image"
+  cp build/${DOCTOR}/223/${UIMAGE} ${UIMAGE}
+  $tar -C ./ -f ./${WEBOS_TARBALL} --delete ./${UIMAGE} || exit
+  $tar -C ./ -f ./${WEBOS_TARBALL} --append ./${UIMAGE} || exit
+fi
+
 echo "Copying Veer webOS ${VERSION} ${BUILD_INFO}"
 if [ "$CARRIER" = "att" ] ; then
   cp build/${A212_BUILD}/rootfs/etc/${BUILD_INFO} ./${BUILD_INFO}.old
@@ -380,7 +391,7 @@ fi
 echo "Moving ${CARRIER} Veer webOS 2.2.3 base build to downloads"
 mv build/${PATIENT}/${P223_FILE} downloads
 
-rm -rf ${CARRIER_TARBALL} ${VEERXML} ${BUILD_INFO} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${WEBOS_TARBALL} ${LEGACY_TARBALL} ${UMTS_FW} build/${PATIENT} build/veer-p160una-${CARRIER}-2.2.3
+rm -rf ${CARRIER_TARBALL} ${VEERXML} ${BUILD_INFO} ${CUSTOM_ROOTFS} ${CUSTOM_ROOTFS}.gz ${UIMAGE} ${WEBOS_TARBALL} ${LEGACY_TARBALL} ${UMTS_FW} build/${PATIENT} build/veer-p160una-${CARRIER}-2.2.3
 
 echo "You can now remove the 223 directory and it's content under ${A212_BUILD}${W211_BUILD}"
 echo "Your custom doctor file was created at downloads/${P223_FILE}"
