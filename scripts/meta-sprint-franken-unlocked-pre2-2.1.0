@@ -6,8 +6,8 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-CDMA_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-W210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210sfr03082011/wrep210rod/webosdoctorp103ueuna-wr.jar"
+CDMA_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+W210_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p210sfr03082011/wrep210rod/webosdoctorp103ueuna-wr.jar"
 
 CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
 W210_FILE="webosdoctorp103ueuna-wr-2.1.0.jar"

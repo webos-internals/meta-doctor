@@ -6,7 +6,7 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
+W210_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
 
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
 

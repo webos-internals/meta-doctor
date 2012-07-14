@@ -7,13 +7,13 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W224_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
-W210_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
-A212_JAR_URL="http://palm.cdnetworks.net/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
-V224_JAR_URL="http://palm.cdnetworks.net/rom/manta/p224r0d12192011/wdmantaverizon/webosdoctorp224mantaverizon.jar"
-V210_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
-V201_JAR_URL="http://palm.cdnetworks.net/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-V1451_JAR_URL="http://palm.cdnetworks.net/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
+W224_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+W210_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
+A212_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+V224_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/manta/p224r0d12192011/wdmantaverizon/webosdoctorp224mantaverizon.jar"
+V210_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
+V201_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+V1451_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
 
 P210_FILE="webosdoctorp101preplus-verizon-2.1.0.jar"
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
