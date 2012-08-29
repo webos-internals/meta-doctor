@@ -138,7 +138,7 @@ $make VERSION=$VERSION DEVICE=veer CARRIER=$CARRIER unpack > /dev/null || exit
 [ -f ./build/${DOCTOR}/224/nova-cust-image-broadway.rootfs.org.tar ] || { echo "Not prepared for webOS 2.2.4 Build extract" ; echo "webOS 2.2.4 rootfs file not present" ;  exit ; }
 [ -f ./build/${DOCTOR}/224/nova-cust-image-broadway.boot.tar ] || { echo "Not prepared for webOS 2.2.4 Build extract" ; echo "webOS 2.2.4 boot file not present" ;  exit ; }
 [ ! -f ./build/${DOCTOR}/224/${UIMAGE}.gz ] || { echo "Found custom uImage ungziping uImage file" ; gzip -d ./build/${DOCTOR}/224/${UIMAGE}.gz ;  }
-[ ! -f ./build/${DOCTOR}/223/${UIMAGE} ] || { echo "Found custom uImage using that instead..." ; CUSTOM_UIMAGE="yes" ; }
+[ ! -f ./build/${DOCTOR}/224/${UIMAGE} ] || { echo "Found custom uImage using that instead..." ; CUSTOM_UIMAGE="yes" ; }
 [ -f ./scripts/BootLogo.tga ] || { echo "Custom Boot Image not found" ; echo "Ungzipping and untaring HP BootLogo.tga from webOS ${VERSION}" ; mkdir -p ./build/${DOCTOR}/224/BOOTIMG ; cp ./build/${DOCTOR}/rootfs/boot/boot-images.tar.gz ./build/${DOCTOR}/224/BOOTIMG ; gzip -d ./build/${DOCTOR}/224/BOOTIMG/boot-images.tar.gz ; $tar -xvf ./build/${DOCTOR}/224/BOOTIMG/boot-images.tar BootLogo.tga > /dev/null ; mv BootLogo.tga ./scripts/ ; rm -rf ./build/${DOCTOR}/224/BOOTIMG ; }
 
 echo "Fixing Veer webOS 2.2.4 XML file for DARE file structure"
