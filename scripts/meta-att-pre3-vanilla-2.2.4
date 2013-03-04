@@ -1,0 +1,117 @@
+#!/bin/bash
+# meta-att-pre3-vanilla-2.2.4 script
+# Intended to flash AT&T Pre 3 phones with an unbranded webOS 2.2.4 image
+#  Your mileage may vary
+
+[ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
+
+W220_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar"
+A224_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/manta/p224r0d12192011/wdmantaatt/webosdoctorp224mantaatt.jar"
+
+W220_FILE="webosdoctorp220manta-wr-2.2.0.jar"
+A224_FILE="webosdoctorp224mantaatt-2.2.4.jar"
+
+W220_BUILD="pre3-p220manta-wr-2.2.0"
+A224_BUILD="pre3-p224manta-att-2.2.4"
+
+W220_MD5="319ce80db93a2fc845a004d60fc3735b"
+A224_MD5="4670a65b6d35e6a4bb73905db79044a3"
+
+PATIENT="meta-att-pre3-vanilla-2.2.4"
+
+git="git"
+wget="wget"
+make="make"
+java="java"
+patch="patch"
+tar="tar"
+python="python"
+
+case "`uname -s`" in
+    "CYGWIN"* )
+	echo "Using Cygwin on Windows is not a valid MetaDoctor option.  See the Wiki page and use WUBI instead."
+	exit
+	;;
+    "Darwin" )
+	tar=gnutar
+	export COPYFILE_DISABLE=true
+	export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
+	;;
+esac
+
+WEBOS_TARBALL="webOS.tar"
+CARRIER_TARBALL="carrier.tar"
+
+for f in $git $wget $make $java $patch $python $tar ; do
+	
+    which $f > /dev/null || { echo "Cannot find $f.  Please install it." ; exit ; }
+
+done
+
+ARGS=
+WR_IPKS=
+ATT_IPKS=
+
+if [ "$1" = "--wifi-only" ] ; then
+    ARGS="BYPASS_ACTIVATION=1 BYPASS_FIRST_USE_APP=1 DISABLE_MODEM_UPDATE=1"
+fi
+
+WR_IPKS="\
+com.palm.app.mobilehotspot_*.ipk
+com.palm.app.skype_*.ipk
+com.palm.app.stk_*.ipk
+com.palm.service.contacts.sim_*.ipk
+crotest-images_*.ipk
+mantarayumtsfw-row_*.ipk
+palmcustomizationinfo-wr_*.ipk
+pmvoicecommand-enus_*.ipk
+pmvoicecommand-esmx_*.ipk
+sweatshop-wr-mantaray_*.ipk
+"
+
+ARGS="${ARGS} DISABLE_UPLOAD_DAEMON=1 DISABLE_UPDATE_DAEMON=1 CUSTOM_WEBOS_TARBALL=${WEBOS_TARBALL} CUSTOM_CARRIER_TARBALL=${CARRIER_TARBALL} PATIENT=${PATIENT} VERSION=2.2.4 DEVICE=pre3 CARRIER=att MODEL=p224manta"
+
+$make ${ARGS} settings
+
+echo
+echo "Your custom doctor file will be created at build/${PATIENT}/${A224_FILE}"
+echo
+
+mkdir -p downloads
+
+[ ! -f downloads/${W220_FILE} ] && $wget -c ${W220_JAR_URL} -O downloads/${W220_FILE}
+[ ! -f downloads/${A224_FILE} ] && $wget -c ${A224_JAR_URL} -O downloads/${A224_FILE}
+
+[ $(md5sum downloads/${W220_FILE} | cut -d \  -f 1) != ${W220_MD5} ] && \
+        echo "${W220_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${W220_FILE} && exit
+[ $(md5sum downloads/${A224_FILE} | cut -d \  -f 1) != ${A224_MD5} ] && \
+        echo "${A224_FILE} did not download properly.  Please run this script again." && \
+        rm -f downloads/${A224_FILE} && exit
+
+# $make clobber
+
+$make VERSION=2.2.0 DEVICE=pre3 CARRIER=wr MODEL=p220manta unpack || exit
+$make VERSION=2.2.4 DEVICE=pre3 CARRIER=att MODEL=p224manta unpack || exit
+
+cp build/${A224_BUILD}/resources/${WEBOS_TARBALL} ./
+
+mkdir -p carrier
+
+( cd build/${W220_BUILD}/carrier ; \
+    $tar -c -f - ${WR_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd build/${A224_BUILD}/carrier ; \
+    $tar -c -f - installer.xml ${ATT_IPKS} ) | ( cd carrier ; $tar -x -v -f - )
+( cd carrier ; $tar -c -f ../${CARRIER_TARBALL} installer.xml ${WR_IPKS} ${ATT_IPKS} )
+
+rm -rf carrier
+
+$make ${ARGS} clobber-build settings all || exit
+
+$java -jar build/${PATIENT}/${A224_FILE}
+
+echo
+echo "Your custom doctor file has been created at build/${PATIENT}/${A224_FILE}"
+echo
+
+rm -f ${WEBOS_TARBALL} ${CARRIER_TARBALL}
