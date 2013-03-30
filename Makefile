@@ -1017,6 +1017,18 @@ extract-rootfs-ipkgs:
 	rm -rf build/${PATIENT}/extras
 	rm -f build/${PATIENT}/extras-file-list.txt
 
+.PHONY: skip-first-use-%
+skip-first-use-%:
+	${MAKE} CARRIER=$* skip-first-use
+
+.PHONY: skip-first-use
+skip-first-use: mount
+	novacom -w run file://bin/mount -- /dev/mapper/store-var /tmp/var -o remount,rw
+	novacom -w run file://bin/mkdir -- -p /tmp/var/luna/preferences
+	novacom -w run file://bin/touch -- /tmp/var/luna/preferences/ran-first-use
+	novacom -w run file://bin/touch -- /tmp/var/luna/preferences/first-use-profile-created
+	novacom -w run file://bin/mount -- /dev/mapper/store-var /tmp/var -o remount,ro
+
 .PHONY: devmode-%
 devmode-%:
 	${MAKE} CARRIER=$* devmode
