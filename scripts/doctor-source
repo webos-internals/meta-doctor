@@ -1,0 +1,24 @@
+#!/bin/sh
+# This file holds variables to be loaded into meta-doctor scripts
+# to provide a single file that can be used to change the source
+# of Doctors for all scripts.
+# As of 17 September 2017 webOS Doctor jar files can still be
+# pulled from "Palm" servers (downloads.help.palm.com), but a 
+# mirror is also currently available at palm.si (downloads.help.palm.si)
+#
+# Providing the DOCTOR_SOURCE_DOMAIN and DOCTOR_SOURCE_HOST
+# variables in this sub-script hopes to simplify future adjustments that 
+# may be required.
+
+# "Palm" server at 195.22.200.42, last checked Sept. 2017
+DOCTOR_SOURCE_DOMAIN = "http://195.22.200.42"
+
+# palm.si server, last checked Sept. 2017
+#DOCTOR_SOURCE_DOMAIN = "http://downloads.help.palm.si"
+
+# Palm server does not have normal DNS resolution, so the HOST header needs to be supplied
+DOCTOR_SOURCE_HOST = "downloads.help.palm.com"
+
+# downloads.help.palm.si will resolve normally, but for use in these scripts,
+# the line below should be un-commented
+#DOCTOR_SOURCE_HOST = "downloads.help.palm.si"
