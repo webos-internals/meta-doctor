@@ -11,13 +11,13 @@
 # may be required.
 
 # "Palm" server at 195.22.200.42, last checked Sept. 2017
-DOCTOR_SOURCE_DOMAIN = "http://195.22.200.42"
+DOCTOR_SOURCE_DOMAIN="http://195.22.200.42"
 
 # palm.si server, last checked Sept. 2017
 #DOCTOR_SOURCE_DOMAIN = "http://downloads.help.palm.si"
 
 # Palm server does not have normal DNS resolution, so the HOST header needs to be supplied
-DOCTOR_SOURCE_HOST = "downloads.help.palm.com"
+DOCTOR_SOURCE_HOST="downloads.help.palm.com"
 
 # downloads.help.palm.si will resolve normally, but for use in these scripts,
 # the line below should be un-commented
