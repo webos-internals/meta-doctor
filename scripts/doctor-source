@@ -32,6 +32,19 @@ DOCTOR_SOURCE_HOST="downloads.help.palm.com"
 ## END OF EXAMPLE FOR ALTERNATE MIRROR ##
 #########################################
 
+# Here we generate the leading portion of the wget arguments: DOCTOR_SOURCE_OPTS_AND_DOMAIN
+# If DOCTOR_SOURCE_HOST has been defined we include the --header option.
+# If DOCTOR_SOURCE_HOST has NOT been defined we only include the domain.
+# DOCTOR_SOURCE_OPTS_AND_DOMAIN
+if [ -n "${DOCTOR_SOURCE_HOST+1}" ]; then
+  DOCTOR_SOURCE_OPTS_AND_DOMAIN='--header "Host: '${DOCTOR_SOURCE_HOST}" ${DOCTOR_SOURCE_DOMAIN}
+else
+  DOCTOR_SOURCE_OPTS_AND_DOMAIN=${DOCTOR_SOURCE_DOMAIN}
+fi
+# BB TEMP test
+echo ${DOCTOR_SOURCE_OPTS_AND_DOMAIN}
+
+
 ##############################################
 ## START OF ORIGINAL PALM URL DOCUMENTATION ##
 ##############################################
