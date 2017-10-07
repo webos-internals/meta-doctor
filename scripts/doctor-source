@@ -21,11 +21,11 @@ DOCTOR_SOURCE_HOST="downloads.help.palm.com"
 ###########################################
 #
 # palm.si server, last checked Sept. 2017
-# Un-comment line below and DOCTOR_SOURCE_HOST to switch to palm.si source.
+# Un-comment line below to switch to palm.si source.
 #DOCTOR_SOURCE_DOMAIN = "http://downloads.help.palm.si"
 #
-# downloads.help.palm.si will resolve normally, but for use in these scripts,
-# the line below should be un-commented
+# downloads.help.palm.si will resolve normally, but if required, the line
+# below could be un-commented to supply a custom Host header
 #DOCTOR_SOURCE_HOST = "downloads.help.palm.si"
 #
 #########################################
@@ -35,15 +35,12 @@ DOCTOR_SOURCE_HOST="downloads.help.palm.com"
 # Here we generate the leading portion of the wget arguments: DOCTOR_SOURCE_OPTS_AND_DOMAIN
 # If DOCTOR_SOURCE_HOST has been defined we include the --header option.
 # If DOCTOR_SOURCE_HOST has NOT been defined we only include the domain.
-# DOCTOR_SOURCE_OPTS_AND_DOMAIN
+# DOCTOR_SOURCE_OPTS_AND_DOMAIN will then be used by meta-doctor scripts.
 if [ -n "${DOCTOR_SOURCE_HOST+1}" ]; then
-  DOCTOR_SOURCE_OPTS_AND_DOMAIN='--header "Host: '${DOCTOR_SOURCE_HOST}" ${DOCTOR_SOURCE_DOMAIN}
+  DOCTOR_SOURCE_OPTS_AND_DOMAIN="--header \"Host: ${DOCTOR_SOURCE_HOST}\" ${DOCTOR_SOURCE_DOMAIN}"
 else
   DOCTOR_SOURCE_OPTS_AND_DOMAIN=${DOCTOR_SOURCE_DOMAIN}
 fi
-# BB TEMP test
-echo ${DOCTOR_SOURCE_OPTS_AND_DOMAIN}
-
 
 ##############################################
 ## START OF ORIGINAL PALM URL DOCUMENTATION ##
