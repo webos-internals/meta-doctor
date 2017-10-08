@@ -10,13 +10,14 @@
 # variables in this sub-script hopes to simplify future adjustments that 
 # may be required.
 
-# Default wget option for meta-doctor scripts - Do Not comment-out this assignment
+# Default wget option for meta-doctor scripts - Do Not comment-out this initial assignment
 DOCTOR_SOURCE_WGET_OPTS=( -c )
 
 # "Palm" server at 195.22.200.42, last checked Sept. 2017
 DOCTOR_SOURCE_DOMAIN="http://195.22.200.42"
 
 # Palm server does not have normal DNS resolution, so the HOST header needs to be supplied
+# Comment-out the line below or modify it to provide alternate wget options.
 DOCTOR_SOURCE_WGET_OPTS=(-c '--header=Host: downloads.help.palm.com')
 
 ###########################################
@@ -28,7 +29,7 @@ DOCTOR_SOURCE_WGET_OPTS=(-c '--header=Host: downloads.help.palm.com')
 #DOCTOR_SOURCE_DOMAIN = "http://downloads.help.palm.si"
 #
 # downloads.help.palm.si will resolve normally, but if required, the line
-# below could be un-commented to supply a custom Host header
+# below could be un-commented to supply a custom Host header and/or other wget options
 #DOCTOR_SOURCE_WGET_OPTS=(-c '--header=Host: downloads.help.palm.si')
 #
 #########################################
