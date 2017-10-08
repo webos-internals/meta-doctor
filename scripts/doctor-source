@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # This file holds variables to be loaded into meta-doctor scripts
 # to provide a single file that can be used to change the source
 # of Doctors for all scripts.
@@ -6,15 +6,18 @@
 # pulled from "Palm" servers (downloads.help.palm.com), but a 
 # mirror is also currently available at palm.si (downloads.help.palm.si)
 #
-# Providing the DOCTOR_SOURCE_DOMAIN and DOCTOR_SOURCE_HOST
+# Providing the DOCTOR_SOURCE_DOMAIN and DOCTOR_SOURCE_WGET_OPTS
 # variables in this sub-script hopes to simplify future adjustments that 
 # may be required.
+
+# Default wget option for meta-doctor scripts - Do Not comment-out this assignment
+DOCTOR_SOURCE_WGET_OPTS=( -c )
 
 # "Palm" server at 195.22.200.42, last checked Sept. 2017
 DOCTOR_SOURCE_DOMAIN="http://195.22.200.42"
 
 # Palm server does not have normal DNS resolution, so the HOST header needs to be supplied
-DOCTOR_SOURCE_HOST="downloads.help.palm.com"
+DOCTOR_SOURCE_WGET_OPTS=(-c '--header=Host: downloads.help.palm.com')
 
 ###########################################
 ## START OF EXAMPLE FOR ALTERNATE MIRROR ##
@@ -26,7 +29,7 @@ DOCTOR_SOURCE_HOST="downloads.help.palm.com"
 #
 # downloads.help.palm.si will resolve normally, but if required, the line
 # below could be un-commented to supply a custom Host header
-#DOCTOR_SOURCE_HOST = "downloads.help.palm.si"
+#DOCTOR_SOURCE_WGET_OPTS=(-c '--header=Host: downloads.help.palm.si')
 #
 #########################################
 ## END OF EXAMPLE FOR ALTERNATE MIRROR ##
@@ -36,11 +39,11 @@ DOCTOR_SOURCE_HOST="downloads.help.palm.com"
 # If DOCTOR_SOURCE_HOST has been defined we include the --header option.
 # If DOCTOR_SOURCE_HOST has NOT been defined we only include the domain.
 # DOCTOR_SOURCE_OPTS_AND_DOMAIN will then be used by meta-doctor scripts.
-if [ -n "${DOCTOR_SOURCE_HOST+1}" ]; then
-  DOCTOR_SOURCE_OPTS_AND_DOMAIN="--header \"Host: ${DOCTOR_SOURCE_HOST}\" ${DOCTOR_SOURCE_DOMAIN}"
-else
-  DOCTOR_SOURCE_OPTS_AND_DOMAIN=${DOCTOR_SOURCE_DOMAIN}
-fi
+#if [ -n "${DOCTOR_SOURCE_HOST+1}" ]; then
+#  DOCTOR_SOURCE_OPTS_AND_DOMAIN="--header \"Host: ${DOCTOR_SOURCE_HOST}\" ${DOCTOR_SOURCE_DOMAIN}"
+#else
+#  DOCTOR_SOURCE_OPTS_AND_DOMAIN=${DOCTOR_SOURCE_DOMAIN}
+#fi
 
 ##############################################
 ## START OF ORIGINAL PALM URL DOCUMENTATION ##

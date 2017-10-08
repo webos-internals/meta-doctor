@@ -7,9 +7,8 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-# Doctor server Domain and Host is now centralized in /meta-doctor/scripts/doctor-source
-# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_HOST"
-# Those variables are evaulated to produce "DOCTOR_SOURCE_OPTS_AND_DOMAIN"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
 # brought in with the "source" command below and used in these scripts.
 
 source ./scripts/doctor-source
@@ -85,8 +84,8 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${DOCTOR_SOURCE_OPTS_AND_DOMAIN}${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
-[ ! -f downloads/${W224_FILE} ] && $wget -c ${DOCTOR_SOURCE_OPTS_AND_DOMAIN}${W224_JAR_URL} -O downloads/${W224_FILE}
+[ ! -f downloads/${CDMA_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${CDMA_JAR_URL}" -O downloads/${CDMA_FILE}
+[ ! -f downloads/${W224_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W224_JAR_URL}" -O downloads/${W224_FILE}
 
 [ $(md5sum downloads/${CDMA_FILE} | cut -d \  -f 1) != ${CDMA_MD5} ] && \
         echo "${CDMA_FILE} did not download properly.  Please run this script again." && \
