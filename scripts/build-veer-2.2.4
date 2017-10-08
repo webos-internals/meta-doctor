@@ -5,6 +5,12 @@
 #  Your mileage may vary
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
 CARRIER="no"
 
 #Check for parameters...
@@ -23,7 +29,7 @@ if [ "$CARRIER" = "no" ] ; then
 fi
 
 if [ "$CARRIER" = "att" ] ; then
-  A212_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+  A212_JAR_URL="/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
   A212_FILE="webosdoctorp160unaatt-2.1.2.jar"
   A212_BUILD="veer-p160una-att-2.1.2"
   A212_MD5="bb2743f0a30abdb62c03b071d149c5a6"
@@ -33,7 +39,7 @@ if [ "$CARRIER" = "att" ] ; then
 fi
 
 if [ "$CARRIER" = "wr" ] ; then
-  W211_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/veer/p211r0d06292011/wrp211rod/webosdoctorp160unawr.jar"
+  W211_JAR_URL="/webosdoctor/rom/veer/p211r0d06292011/wrp211rod/webosdoctorp160unawr.jar"
   W211_FILE="webosdoctorp160una-wr-2.1.1.jar"
   W211_BUILD="veer-p160una-wr-2.1.1"
   W211_MD5="fb6ae25e15c809836bbe73931839ccf0"
@@ -116,13 +122,13 @@ mkdir -p downloads
 echo "Will download if needed Veer ${CARRIER} webOS ${VERSION} Doctor"
 case $CARRIER in
     "att" )
-        [ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+        [ ! -f downloads/${A212_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A212_JAR_URL}" -O downloads/${A212_FILE}
         [ $(md5sum downloads/${A212_FILE} | cut -d \  -f 1) != ${A212_MD5} ] && \
         echo "${A212_FILE} did not download properly.  Please run this script again." && \
         rm -f downloads/${A212_FILE} && exit
 	;;
     "wr" )
-        [ ! -f downloads/${W211_FILE} ] && $wget -c ${W211_JAR_URL} -O downloads/${W211_FILE}
+        [ ! -f downloads/${W211_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W211_JAR_URL}" -O downloads/${W211_FILE}
         [ $(md5sum downloads/${W211_FILE} | cut -d \  -f 1) != ${W211_MD5} ] && \
         echo "${W211_FILE} did not download properly.  Please run this script again." && \
         rm -f downloads/${W211_FILE} && exit	

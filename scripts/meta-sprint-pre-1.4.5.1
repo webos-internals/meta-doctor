@@ -6,8 +6,14 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-V1451_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
-S145_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
+V1451_JAR_URL="/webosdoctor/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar"
+S145_JAR_URL="/webosdoctor/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
 
 V1451_FILE="webosdoctorp101ewwverizonwireless-1.4.5.1.jar"
 S145_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
@@ -74,8 +80,8 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${S145_FILE} ]  && $wget -c ${S145_JAR_URL}  -O downloads/${S145_FILE}
-[ ! -f downloads/${V1451_FILE} ] && $wget -c ${V1451_JAR_URL} -O downloads/${V1451_FILE}
+[ ! -f downloads/${S145_FILE} ]  && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${S145_JAR_URL}"  -O downloads/${S145_FILE}
+[ ! -f downloads/${V1451_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${V1451_JAR_URL}" -O downloads/${V1451_FILE}
 
 [ $(md5sum downloads/${S145_FILE}  | cut -d \  -f 1) != ${S145_MD5} ]  && \
         echo "${S145_FILE} did not download properly.  Please run this script again." && \

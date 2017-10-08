@@ -5,8 +5,8 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W220_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar"
-A224_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/manta/p224r0d12192011/wdmantaatt/webosdoctorp224mantaatt.jar"
+W220_JAR_URL="/webosdoctor/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar"
+A224_JAR_URL="/webosdoctor/rom/manta/p224r0d12192011/wdmantaatt/webosdoctorp224mantaatt.jar"
 
 W220_FILE="webosdoctorp220manta-wr-2.2.0.jar"
 A224_FILE="webosdoctorp224mantaatt-2.2.4.jar"
@@ -79,8 +79,8 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${W220_FILE} ] && $wget -c ${W220_JAR_URL} -O downloads/${W220_FILE}
-[ ! -f downloads/${A224_FILE} ] && $wget -c ${A224_JAR_URL} -O downloads/${A224_FILE}
+[ ! -f downloads/${W220_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W220_JAR_URL}" -O downloads/${W220_FILE}
+[ ! -f downloads/${A224_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A224_JAR_URL}" -O downloads/${A224_FILE}
 
 [ $(md5sum downloads/${W220_FILE} | cut -d \  -f 1) != ${W220_MD5} ] && \
         echo "${W220_FILE} did not download properly.  Please run this script again." && \

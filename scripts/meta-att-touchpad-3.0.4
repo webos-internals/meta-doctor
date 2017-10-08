@@ -5,8 +5,14 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-A302_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/touchpad/p302rod10102011/wd302att/webosdoctorp302hstnhatt.jar"
-A304_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/touchpad/p304rod10182011/wd304att/webosdoctorp304hstnhatt.jar"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
+A302_JAR_URL="/webosdoctor/rom/touchpad/p302rod10102011/wd302att/webosdoctorp302hstnhatt.jar"
+A304_JAR_URL="/webosdoctor/rom/touchpad/p304rod10182011/wd304att/webosdoctorp304hstnhatt.jar"
 
 A302_FILE="webosdoctorp302hstnhatt-3.0.2.jar"
 A304_FILE="webosdoctorp304hstnhatt-3.0.4.jar"
@@ -65,8 +71,8 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${A302_FILE} ] && $wget -c ${A302_JAR_URL} -O downloads/${A302_FILE}
-[ ! -f downloads/${A304_FILE} ] && $wget -c ${A304_JAR_URL} -O downloads/${A304_FILE}
+[ ! -f downloads/${A302_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A302_JAR_URL}" -O downloads/${A302_FILE}
+[ ! -f downloads/${A304_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A304_JAR_URL}" -O downloads/${A304_FILE}
 
 [ $(md5sum downloads/${A302_FILE} | cut -d \  -f 1) != ${A302_MD5} ] && \
         echo "${A302_FILE} did not download properly.  Please run this script again." && \

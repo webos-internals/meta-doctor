@@ -5,8 +5,14 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W220_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar"
-A223_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/manta/p223r0d09272011/wdmantaatt/webosdoctorp223mantaatt.jar"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
+W220_JAR_URL="/webosdoctor/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar"
+A223_JAR_URL="/webosdoctor/rom/manta/p223r0d09272011/wdmantaatt/webosdoctorp223mantaatt.jar"
 
 W220_FILE="webosdoctorp220manta-wr-2.2.0.jar"
 A223_FILE="webosdoctorp223mantaatt-2.2.3.jar"
@@ -79,8 +85,8 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${W220_FILE} ] && $wget -c ${W220_JAR_URL} -O downloads/${W220_FILE}
-[ ! -f downloads/${A223_FILE} ] && $wget -c ${A223_JAR_URL} -O downloads/${A223_FILE}
+[ ! -f downloads/${W220_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W220_JAR_URL}" -O downloads/${W220_FILE}
+[ ! -f downloads/${A223_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A223_JAR_URL}" -O downloads/${A223_FILE}
 
 [ $(md5sum downloads/${W220_FILE} | cut -d \  -f 1) != ${W220_MD5} ] && \
         echo "${W220_FILE} did not download properly.  Please run this script again." && \

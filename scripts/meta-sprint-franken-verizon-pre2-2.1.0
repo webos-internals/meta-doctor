@@ -6,8 +6,8 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-CDMA_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-W210_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p210sfr03082011/wrep210rod/webosdoctorp103ueuna-wr.jar"
+CDMA_JAR_URL="/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+W210_JAR_URL="/webosdoctor/rom/pre2/p210sfr03082011/wrep210rod/webosdoctorp103ueuna-wr.jar"
 
 CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
 W210_FILE="webosdoctorp103ueuna-wr-2.1.0.jar"
@@ -79,8 +79,8 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
-[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
+[ ! -f downloads/${CDMA_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${CDMA_JAR_URL}" -O downloads/${CDMA_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W210_JAR_URL}" -O downloads/${W210_FILE}
 
 [ $(md5sum downloads/${CDMA_FILE} | cut -d \  -f 1) != ${CDMA_MD5} ] && \
         echo "${CDMA_FILE} did not download properly.  Please run this script again." && \

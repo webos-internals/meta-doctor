@@ -7,10 +7,16 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W224_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
-V201_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-V1451_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px1451r0d05182011/ver1z0np1451rod/webosdoctorp121ewwverizonwireless.jar"
-A212_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
+W224_JAR_URL="/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+V201_JAR_URL="/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+V1451_JAR_URL="/webosdoctor/rom/pixiplus/px1451r0d05182011/ver1z0np1451rod/webosdoctorp121ewwverizonwireless.jar"
+A212_JAR_URL="/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
 
 P210_FILE="webosdoctorp200pixi-sprint-2.1.0.jar"
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
@@ -84,10 +90,10 @@ mkdir -p downloads
 
 # $make clobber
 
-[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
-[ ! -f downloads/${V201_FILE} ] && $wget -c ${V201_JAR_URL} -O downloads/${V201_FILE}
-[ ! -f downloads/${V1451_FILE} ] && $wget -c ${V1451_JAR_URL} -O downloads/${V1451_FILE}
-[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+[ ! -f downloads/${W224_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W224_JAR_URL}" -O downloads/${W224_FILE}
+[ ! -f downloads/${V201_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${V201_JAR_URL}" -O downloads/${V201_FILE}
+[ ! -f downloads/${V1451_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${V1451_JAR_URL}" -O downloads/${V1451_FILE}
+[ ! -f downloads/${A212_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A212_JAR_URL}" -O downloads/${A212_FILE}
 
 [ -f ./downloads/${S210_FILE} ] || { echo "Not prepared for Super webOS 2.1.0 build" ; echo "Please run the Build Doctor first" ; exit ; }
 [ $(md5sum downloads/${W224_FILE} | cut -d \  -f 1) != ${W224_MD5} ] && \
