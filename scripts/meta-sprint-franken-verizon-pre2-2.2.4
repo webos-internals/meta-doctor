@@ -7,8 +7,14 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-CDMA_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
-W224_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
+CDMA_JAR_URL="/webosdoctor/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar"
+W224_JAR_URL="/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar"
 
 CDMA_FILE="webosdoctorp102verizonwireless-2.1.0.jar"
 W224_FILE="webosdoctorp224pre2-wr-2.2.4.jar"
@@ -78,8 +84,8 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
-[ ! -f downloads/${W224_FILE} ] && $wget -c ${W224_JAR_URL} -O downloads/${W224_FILE}
+[ ! -f downloads/${CDMA_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${CDMA_JAR_URL}" -O downloads/${CDMA_FILE}
+[ ! -f downloads/${W224_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W224_JAR_URL}" -O downloads/${W224_FILE}
 
 [ $(md5sum downloads/${CDMA_FILE} | cut -d \  -f 1) != ${CDMA_MD5} ] && \
         echo "${CDMA_FILE} did not download properly.  Please run this script again." && \

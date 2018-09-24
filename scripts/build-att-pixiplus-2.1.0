@@ -7,10 +7,16 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W210_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
-V1451_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px1451r0d05182011/ver1z0np1451rod/webosdoctorp121ewwverizonwireless.jar"
-A145_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px145r0d10112010/attp145rod/webosdoctorp121ewwatt.jar"
-A212_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
+W210_JAR_URL="/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
+V1451_JAR_URL="/webosdoctor/rom/pixiplus/px1451r0d05182011/ver1z0np1451rod/webosdoctorp121ewwverizonwireless.jar"
+A145_JAR_URL="/webosdoctor/rom/pixiplus/px145r0d10112010/attp145rod/webosdoctorp121ewwatt.jar"
+A212_JAR_URL="/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
 
 P210_FILE="webosdoctorp121ewwatt-2.1.0.jar"
 W210_FILE="webosdoctorp101ueu-wr-2.1.0.jar"
@@ -106,10 +112,10 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
-[ ! -f downloads/${V1451_FILE} ] && $wget -c ${V1451_JAR_URL} -O downloads/${V1451_FILE}
-[ ! -f downloads/${A145_FILE} ]  && $wget -c ${A145_JAR_URL}  -O downloads/${A145_FILE}
-[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W210_JAR_URL}" -O downloads/${W210_FILE}
+[ ! -f downloads/${V1451_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${V1451_JAR_URL}" -O downloads/${V1451_FILE}
+[ ! -f downloads/${A145_FILE} ]  && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A145_JAR_URL}"  -O downloads/${A145_FILE}
+[ ! -f downloads/${A212_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A212_JAR_URL}" -O downloads/${A212_FILE}
 
 [ $(md5sum downloads/${W210_FILE} | cut -d \  -f 1) != ${W210_MD5} ] && \
         echo "${W210_FILE} did not download properly.  Please run this script again." && \

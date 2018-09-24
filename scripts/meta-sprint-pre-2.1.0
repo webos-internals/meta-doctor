@@ -6,10 +6,16 @@
 
 [ -d scripts ] || { echo "Run the script from the meta-doctor directory, not the scripts directory" ; exit ; }
 
-W145_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
-CDMA_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
-W210_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
-A212_JAR_URL="http://downloads.help.palm.com/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
+# Doctor server Domain and wget options are now centralized in /meta-doctor/scripts/doctor-source
+# in the variables: "DOCTOR_SOURCE_DOMAIN" and "DOCTOR_SOURCE_WGET_OPTS" (Array)
+# brought in with the "source" command below and used in these scripts.
+
+source ./scripts/doctor-source
+
+W145_JAR_URL="/webosdoctor/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar"
+CDMA_JAR_URL="/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar"
+W210_JAR_URL="/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar"
+A212_JAR_URL="/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar"
 
 W145_FILE="webosdoctorp100ewwsprint-1.4.5.jar"
 CDMA_FILE="webosdoctorp102verizonwireless-2.0.1.jar"
@@ -104,10 +110,10 @@ echo
 
 mkdir -p downloads
 
-[ ! -f downloads/${W145_FILE} ] && $wget -c ${W145_JAR_URL} -O downloads/${W145_FILE}
-[ ! -f downloads/${CDMA_FILE} ] && $wget -c ${CDMA_JAR_URL} -O downloads/${CDMA_FILE}
-[ ! -f downloads/${W210_FILE} ] && $wget -c ${W210_JAR_URL} -O downloads/${W210_FILE}
-[ ! -f downloads/${A212_FILE} ] && $wget -c ${A212_JAR_URL} -O downloads/${A212_FILE}
+[ ! -f downloads/${W145_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W145_JAR_URL}" -O downloads/${W145_FILE}
+[ ! -f downloads/${CDMA_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${CDMA_JAR_URL}" -O downloads/${CDMA_FILE}
+[ ! -f downloads/${W210_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${W210_JAR_URL}" -O downloads/${W210_FILE}
+[ ! -f downloads/${A212_FILE} ] && $wget "${DOCTOR_SOURCE_WGET_OPTS[@]}" "${DOCTOR_SOURCE_DOMAIN}${A212_JAR_URL}" -O downloads/${A212_FILE}
 
 [ $(md5sum downloads/${W145_FILE} | cut -d \  -f 1) != ${W145_MD5} ] && \
 	echo "${W145_FILE} did not download properly.  Please run this script again." && \

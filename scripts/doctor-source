@@ -1,0 +1,209 @@
+#!/bin/bash
+# This file holds variables to be loaded into meta-doctor scripts
+# to provide a single file that can be used to change the source
+# of Doctors for all scripts.
+# As of 17 September 2017 webOS Doctor jar files can still be
+# pulled from "Palm" servers (downloads.help.palm.com), but a 
+# mirror is also currently available at palm.si (downloads.help.palm.si)
+#
+# Providing the DOCTOR_SOURCE_DOMAIN and DOCTOR_SOURCE_WGET_OPTS
+# variables in this sub-script hopes to simplify future adjustments that 
+# may be required.
+
+# Default wget option for meta-doctor scripts - Do Not comment-out this initial assignment
+DOCTOR_SOURCE_WGET_OPTS=( -c )
+
+# "Palm" server at 195.22.200.42, last checked Sept. 2017
+DOCTOR_SOURCE_DOMAIN="http://195.22.200.42"
+
+# Palm server does not have normal DNS resolution, so the HOST header needs to be supplied
+# Comment-out the line below or modify it to provide alternate wget options.
+DOCTOR_SOURCE_WGET_OPTS=(-c '--header=Host: downloads.help.palm.com')
+
+###########################################
+## START OF EXAMPLE FOR ALTERNATE MIRROR ##
+###########################################
+#
+# palm.si server, last checked Sept. 2017
+# Un-comment line below to switch to palm.si source.
+#DOCTOR_SOURCE_DOMAIN = "http://downloads.help.palm.si"
+#
+# downloads.help.palm.si will resolve normally, but if required, the line
+# below could be un-commented to supply a custom Host header and/or other wget options
+#DOCTOR_SOURCE_WGET_OPTS=(-c '--header=Host: downloads.help.palm.si')
+#
+#########################################
+## END OF EXAMPLE FOR ALTERNATE MIRROR ##
+#########################################
+
+# Here we generate the leading portion of the wget arguments: DOCTOR_SOURCE_OPTS_AND_DOMAIN
+# If DOCTOR_SOURCE_HOST has been defined we include the --header option.
+# If DOCTOR_SOURCE_HOST has NOT been defined we only include the domain.
+# DOCTOR_SOURCE_OPTS_AND_DOMAIN will then be used by meta-doctor scripts.
+#if [ -n "${DOCTOR_SOURCE_HOST+1}" ]; then
+#  DOCTOR_SOURCE_OPTS_AND_DOMAIN="--header \"Host: ${DOCTOR_SOURCE_HOST}\" ${DOCTOR_SOURCE_DOMAIN}"
+#else
+#  DOCTOR_SOURCE_OPTS_AND_DOMAIN=${DOCTOR_SOURCE_DOMAIN}
+#fi
+
+##############################################
+## START OF ORIGINAL PALM URL DOCUMENTATION ##
+##############################################
+## FROM http://www.webos-internals.org/wiki/WebOS_Doctor_Versions
+##############################################
+# TOUCHPADS
+# ############################################
+# > Wifi Only - HSTNH-I29C
+# version 3.0.0 http://downloads.help.palm.com/webosdoctor/rom/touchpad/wd300wifi/webosdoctorp300hstnhwifi.jar
+# version 3.0.2 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p302r0d08012011/wifip302rod/webosdoctorp302hstnhwifi.jar
+# version 3.0.4 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p304rod10182011/wd304wifi/webosdoctorp304hstnhwifi.jar
+# version 3.0.5 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p305rod01122012/wd305wifi/webosdoctorp305hstnhwifi.jar
+# > AT&T 3G - HSTNH-I30C
+# version 3.0.2-66 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p302rod09232011/wd302att/webosdoctorp302hstnhatt.jar
+# version 3.0.2-74 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p302rod10102011/wd302att/webosdoctorp302hstnhatt.jar
+# version 3.0.4 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p304rod10182011/wd304att/webosdoctorp304hstnhatt.jar
+# version 3.0.4-78 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p304rod11152011/wd304att/webosdoctorp304hstnhatt.jar
+# version 3.0.5 http://downloads.help.palm.com/webosdoctor/rom/touchpad/p305rod01122012/wd305att/webosdoctorp305hstnhatt.jar
+# ############################################
+# PHONES
+# ############################################
+# > Sprint
+# >> Pre - P100EWW: P5PE0XXXXXXX
+# * Only Versions 1.4.1.1 & 1.4.5 are available on 20 Sept 2017 from Palm URLs *
+# version 1.2.1 http://downloads.help.palm.com/webosdoctor/rom/p121r0d10092009/sr1ntp121rod/webosdoctorp100ewwsprint.jar
+# version 1.3.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p131r0d11172009/sr1ntp131rod/webosdoctorp100ewwsprint.jar
+# version 1.3.5 http://downloads.help.palm.com/webosdoctor/rom/pre/p135r0d12302009/sr1ntp135rod/webosdoctorp100ewwsprint.jar
+# version 1.3.5.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p1351r0d01082010/sr1ntp1351rod/webosdoctorp100ewwsprint.jar
+# version 1.4.0 http://downloads.help.palm.com/webosdoctor/rom/pre/p14r0d02252010/sr1ntp140rod/webosdoctorp100ewwsprint.jar
+# version 1.4.1.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p1411r0d03312010/sr1ntp1411rod/webosdoctorp100ewwsprint.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pre/p145r0d08102010/spr1ntp145rod/webosdoctorp100ewwsprint.jar
+# > Sprint
+# >> Pixi - P120EWW: P6P20XXXXXXX
+# * Only Versions 1.4.1.1 & 1.4.5 are available on 20 Sept 2017 from Palm URLs *
+# version 1.3.1 http://downloads.help.palm.com/webosdoctor/rom/pixi/px131r0d11172009/sr1ntp131rod/webosdoctorp200ewwsprint.jar
+# version 1.3.2 http://downloads.help.palm.com/webosdoctor/rom/pixi/px132r0d12032009/sr1ntp132rod/webosdoctorp200ewwsprint.jar
+# version 1.3.5 http://downloads.help.palm.com/webosdoctor/rom/pixi/px135r0d12302009/sr1ntp135rod/webosdoctorp200ewwsprint.jar
+# version 1.3.5.1 http://downloads.help.palm.com/webosdoctor/rom/pixi/px1351r0d01082010/sr1ntp1351rod/webosdoctorp120ewwsprint.jar
+# version 1.4.0 http://downloads.help.palm.com/webosdoctor/rom/pixi/px14r0d02252010/sr1ntp140rod/webosdoctorp200ewwsprint.jar
+# version 1.4.1.1 http://downloads.help.palm.com/webosdoctor/rom/pixi/px1411r0d03312010/sr1ntp1411rod/webosdoctorp200ewwsprint.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pixi/px145r0d08102010/spr1ntp145rod/webosdoctorp200ewwsprint.jar
+# (Palm changed p200eww to p120eww in version 1.3.5.1) (Palm changed p120eww back to p200eww in version 1.4.0) 
+# > Bell Mobility
+# >> Pre - P100EWW: P5BE0XXXXXXX
+# * Only Versions 1.4.1 & 1.4.5 are available on 20 Sept 2017 from Palm URLs *
+# version 1.2.1 http://downloads.help.palm.com/webosdoctor/rom/p121r0d10092009/b11ep121rod/webosdoctorp100ewwbellmo.jar
+# version 1.3.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p131r0d11172009/b11ep131rod/webosdoctorp100ewwbellmo.jar
+# version 1.3.5.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p1351r0d01082010/b11ep1351rod/webosdoctorp100ewwbellmo.jar
+# version 1.4.0 http://downloads.help.palm.com/webosdoctor/rom/pre/p14r0d02252010/b11ep140rod/webosdoctorp100ewwbellmo.jar
+# version 1.4.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p141r0d03312010/b11ep141rod/webosdoctorp100ewwbellmo.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pre/p145r0d07142010/b11ep145rod/webosdoctorp100ewwbellmo.jar
+# > O2 Germany, UK and Ireland / Movistar Spain
+# >> Pre -  P100UEU: P5FU0XXXXXXX (Pre on the Movistar network), P100UEU: P5HUGXXXXXXX (Pre on the o2 network)
+# * Only Versions 1.4.1 & 1.4.5 are available on 20 Sept 2017 from Palm URLs *
+# version 1.1.3 http://downloads.help.palm.com/webosdoctor/rom/p113r0d10122009/wr640xdfgy12z/webosdoctorp100eww-wr.jar
+# version 1.3.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p131r0d11172009/wrep131rod/webosdoctorp100ueu-wr.jar
+# version 1.3.5.2 http://downloads.help.palm.com/webosdoctor/rom/pre/p1352r0d01182010/wrep1352rod/webosdoctorp100ueu-wr.jar
+# version 1.4.0 http://downloads.help.palm.com/webosdoctor/rom/pre/p14r0d02252010/wrep140rod/webosdoctorp100ueu-wr.jar
+# version 1.4.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p141r0d03312010/eudep141rod/webosdoctorp100ueu-wr.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pre/p145r0d06302010/eudep145rod/webosdoctorp100ueu-wr.jar
+# > O2 Germany, UK and Ireland / Movistar Spain
+# >> Pre Plus
+# version 1.4.1 http://downloads.help.palm.com/webosdoctor/rom/preplus/p141r0d04272010/wrep141rod/webosdoctorp101ueu-wr.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/preplus/p145r0d06302010/eudep145rod/webosdoctorp101ueu-wr.jar
+# version 2.1.0 (DE) http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar
+# version 2.1.0 http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar
+# > O2 Germany, UK and Ireland / Movistar Spain
+# >> Pixi Plus - P121UEU: P8GUGXXXXXXX (Pixi Plus)
+# version 1.4.1 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px141r0d04282010/wrep141rod/webosdoctorp121ewweu-wr.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px145r0d06302010/wrep145rod/webosdoctorp121ewweu-wr.jar
+# > O2 Germany, UK and Ireland / Movistar Spain
+# >> Veer - P160UEU: W3UE1XXXXXXX (Veer)
+# version 2.1.1 http://downloads.help.palm.com/webosdoctor/rom/veer/p211r0d06292011/wrp211rod/webosdoctorp160unawr.jar
+# > Vodafone Europe
+# >> Pixi Plus - P121UEU: P8GUGXXXXXXX (Pixi Plus)
+# version 1.4.1.2 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px1412r0d04282010/wrep1412rod/webosdoctorp121ewweu-wr.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px145r0d06302010/wrep145rod/webosdoctorp121ewweu-wr.jar
+# > Vodafone Europe
+# >> Pre Plus - P101UEU: P7NUGXXXXXXX (Pre Plus on the Vodafone network)
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/preplus/p145r0d06302010/eudep145rod/webosdoctorp101ueu-wr.jar
+# version 2.1.0 http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d02212011/eudep210rod/webosdoctorp101ueude-wr.jar
+# > SFR France
+# >> Pre Plus - P101UEU: P7JUAXXXXXXX (Pre Plus on the SFR network)
+# version 1.4.1 http://downloads.help.palm.com/webosdoctor/rom/preplus/p141r0d04272010/wrep141rod/webosdoctorp101ueu-wr.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/preplus/p145r0d06302010/eudep145rod/webosdoctorp101ueu-wr.jar
+# version 2.1.0 http://downloads.help.palm.com/webosdoctor/rom/preplus/p210r0d03142011/eudep210rod/webosdoctorp101ueu-wr.jar
+# > SFR France
+# >> Pixi Plus
+# version 1.4.1 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px141r0d04272010/wrep141rod/webosdoctorp121ueu-wr.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px145r0d06302010/wrep145rod/webosdoctorp121ewweu-wr.jar
+# > SFR France
+# >> Pre 2
+# version 2.0.0 http://downloads.help.palm.com/webosdoctor/rom/pre2/p20r0d11012010/wrep20rod/webosdoctorp103ueu-wr.jar
+# version 2.0.1 http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d11242010/wrep201rod/webosdoctorp102ueuna-wr.jar
+# version 2.1.0 http://downloads.help.palm.com/webosdoctor/rom/pre2/p210sfr03082011/wrep210rod/webosdoctorp103ueuna-wr.jar
+# version 2.2.4 http://downloads.help.palm.com/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar
+# > Telcel GSM, Mexico
+# >> Pre - P100UNA: P5XU0XXXXXXX (Pre on the Telcel network)
+# * Only Version 1.4.0 is available on 20 Sept 2017 from Palm URLs *
+# version 1.2.5 http://downloads.help.palm.com/webosdoctor/rom/pre/p125r0d11252009/tce11p125rod/webosdoctorp100ewwtelcel.jar
+# version 1.3.5.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p1351r0d01082010/tce11p1351rod/webosdoctorp100ewwtelcel.jar
+# version 1.4.0 http://downloads.help.palm.com/webosdoctor/rom/pre/p14r0d02252010/tce11p140rod/webosdoctorp100ewwtelcel.jar (P100UNA/ROW)
+# > Verizon Wireless
+# >> Pre Plus - P101EWW: P7VE0XXXXXXX (Pre Plus on the Verizon network)
+# * Version 1.3.5.1 is NOT available on 20 Sept 2017 from Palm URLs *
+# version 1.3.5.1 http://downloads.help.palm.com/webosdoctor/rom/pre/p1351r0d01082010/ver1z0np1351rod/webosdoctorp101ewwverizonwireless.jar
+# version 1.4.0 http://downloads.help.palm.com/webosdoctor/rom/pre/p14r0d02252010/ver1z0np140rod/webosdoctorp101ewwverizonwireless.jar
+# version 1.4.1.1 http://downloads.help.palm.com/webosdoctor/rom/preplus/p1411r0d04282010/ver1z0np1411rod/webosdoctorp101ewwverizonwireless.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/preplus/p145r0d09132010/ver1z0np145rod/webosdoctorp101ewwverizonwireless.jar
+# version 1.4.5.1 http://downloads.help.palm.com/webosdoctor/rom/preplus/p1451r0d05182011/ver1z0np1451rod/webosdoctorp101ewwverizonwireless.jar
+# > Verizon Wireless
+# >> Pixi Plus - P121EWW: P8V20XXXXXXX (Pixi Plus on the Verizon network)
+# * Version 1.3.5.1 is NOT available on 20 Sept 2017 from Palm URLs *
+# version 1.3.5.1 http://downloads.help.palm.com/webosdoctor/rom/pixi/px1351r0d01082010/ver1z0np1351rod/webosdoctorp121ewwverizonwireless.jar
+# version 1.4.0 http://downloads.help.palm.com/webosdoctor/rom/pixi/px14r0d02252010/ver1z0np140rod/webosdoctorp121ewwverizonwireless.jar
+# version 1.4.1.1 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px1411r0d04282010/ver1z0np1411rod/webosdoctorp121ewwverizonwireless.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px145r0d08302010/ver1z0np145rod/webosdoctorp121ewwverizonwireless.jar
+# version 1.4.5.1 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px1451r0d05182011/ver1z0np1451rod/webosdoctorp121ewwverizonwireless.jar
+# > Verizon Wireless
+# >> Pre 2 - P102EWW: PGVE0XXXXXXX (Pre 2 on the Verizon network)
+# version 2.0.1 http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d02172011/ver1z0np201rod/webosdoctorp102verizonwireless.jar
+# version 2.1.0 http://downloads.help.palm.com/webosdoctor/rom/pre2/p210r0d08162011/ver1z0np210rod/webosdoctorp102verizonwireless.jar
+# > Verizon Wireless
+# >> Pre 3 - HSTNH-F30CV: MDVPWXXXXXXX (Pre 3 on the verizon network)
+# version 2.2.3 http://downloads.help.palm.com/webosdoctor/rom/manta/p223r0d09292011/wdmantaverizon/webosdoctorp223mantaverizon.jar
+# version 2.2.4 http://downloads.help.palm.com/webosdoctor/rom/manta/p224r0d12192011/wdmantaverizon/webosdoctorp224mantaverizon.jar
+# > AT&T
+# >> Pre Plus - P101UNA : P7CG0XXXXXXX (Pre Plus on the AT&T network)
+# version 1.4.2 http://downloads.help.palm.com/webosdoctor/rom/preplus/p142r0d05162010/attp142rod/webosdoctorp101ewwatt.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/preplus/p145r0d09132010/attp145rod/webosdoctorp101ewwatt.jar
+# > AT&T
+# >> Pixi Plus - P121UNA: P8WU0XXXXXXX (Pixi Plus on the AT&T network)
+# version 1.4.3 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px143r0d06062010/attp143rod/webosdoctorp121ewwatt.jar
+# version 1.4.5 http://downloads.help.palm.com/webosdoctor/rom/pixiplus/px145r0d10112010/attp145rod/webosdoctorp121ewwatt.jar
+# > AT&T
+# >> Veer - P160UNA: W1BD6XXXXXXX (Veer on the AT&T network)
+# version 2.1.2 http://downloads.help.palm.com/webosdoctor/rom/veer/p212r0d05132011/attp212rod/webosdoctorp160unaatt.jar
+# > AT&T
+# >> Pre 3  -HSTNH-F30CN: W3BD1XXXXXXX
+# version 2.2.3 http://downloads.help.palm.com/webosdoctor/rom/manta/p223r0d09272011/wdmantaatt/webosdoctorp223mantaatt.jar
+# version 2.2.4 http://downloads.help.palm.com/webosdoctor/rom/manta/p224r0d12192011/wdmantaatt/webosdoctorp224mantaatt.jar
+# > Rogers
+# >> Pre 2
+# version 2.0.1 http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d11242010/wrep201rod/webosdoctorp102ueuna-wr.jar
+# version 2.1.0 http://downloads.help.palm.com/webosdoctor/rom/pre2/p210r0d03082011/wrep210rod/webosdoctorp104ueu-wr.jar (P102UEU/P102UNA,ROW)
+# version 2.2.4 http://downloads.help.palm.com/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar (P102UEU/P102UNA,ROW)
+# > Unlocked
+# >> Pre 2 - P102UEU: PG4U0XXXXXXX (Europe network), P102UNA: PG9U0XXXXXXX (North America network)
+# version 2.0.0 http://downloads.help.palm.com/webosdoctor/rom/pre2/p20r0d11012010/wrep20rod/webosdoctorp103ueu-wr.jar (P102UEU only)
+# version 2.0.0 http://downloads.help.palm.com/webosdoctor/rom/pre2/p20r0d11182010/wrep20rod/webosdoctorp103ueu-wr.jar (P102UEU & P102UNA)
+# version 2.0.1 http://downloads.help.palm.com/webosdoctor/rom/pre2/p201r0d11242010/wrep201rod/webosdoctorp102ueuna-wr.jar (P102UEU & P102UNA)
+# version 2.1.0 http://downloads.help.palm.com/webosdoctor/rom/pre2/p210sfr03082011/wrep210rod/webosdoctorp103ueuna-wr.jar (P102UEU/P102UNA,ROW)
+# version 2.2.4 http://downloads.help.palm.com/webosdoctor/rom/pre2/p224rod12052011/wrep224rod/webosdoctorp224pre2wr.jar (P102UEU/P102UNA,ROW)
+# (Palm changed p103ueu to p102ueuna in 2.0.1) (Palm changed p102ueuna to p103ueuna in 2.1.0) (Palm changed p103ueuna to p224pre2 in 2.2.4) 
+# > Unlocked
+# >> Pre 3 - HSTNH-F30CE: W3RE1XXXXXXX (Pre 3 Unlocked - Europe network - ROW)
+# version 2.2.0 http://downloads.help.palm.com/webosdoctor/rom/manta/p220r0d08222011/wdmantarow/webosdoctorp220mantawr.jar
+# version 2.2.4 http://downloads.help.palm.com/webosdoctor/rom/manta/p224r0d12192011/wdmantawr/webosdoctorp224mantawr.jar
+############################################
+## END OF ORIGINAL PALM URL DOCUMENTATION ##
+############################################
