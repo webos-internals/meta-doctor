@@ -353,6 +353,7 @@ endif
 OLDIPKGS = com.palm.app.firstuse palmbuildinfo
 OLDDIRS = ./boot ./lib/modules
 DELIPKGS = ${DELETE_ROOTFS_IPKGS}
+DEFUNCTAPPS = com.palm.app.backup com.palm.app.firstuse com.palm.app.updates com.palm.app.enyo-findapps com.palm.app.maps com.palm.app.vpn
 NEWIPKGS = ${OLDIPKGS} ${EXTRA_ROOTFS_IPKGS}
 NEWDIRS = ${OLDDIRS} ./var/luna/preferences ./var/gadget ./var/home/root ./var/preferences ./var/palm/data
 
@@ -668,6 +669,18 @@ ifeq (${BYPASS_FIRST_USE_APP},1)
 	  if [ -f $$f ] ; then \
 	    sed -i.orig -e 's/"visible": "false"/"visible": "true"/' $$f ; rm -f $$f.orig ; \
 	  fi ; \
+	done
+endif
+ifeq (${DISABLE_DEFUNCT_APPS},1)
+	for defunctapp in ${DEFUNCTAPPS} ; do \
+		sed -i.orig -e 's/"visible": "false"/"visible": "true"/' \
+			build/${PATIENT}/rootfs/usr/palm/applications/$$defunctapp/appinfo.json
+		rm -f build/${PATIENT}/rootfs/usr/palm/applications/$$defunctapp/appinfo.json.orig
+		for f in build/${PATIENT}/rootfs/usr/palm/applications/$$defunctapp/resources/*/appinfo.json ; do \
+			if [ -f $$f ] ; then \
+				sed -i.orig -e 's/"visible": "false"/"visible": "true"/' $$f ; rm -f $$f.orig ; \
+			fi ; \
+		done
 	done
 endif
 ifeq (${ENABLE_DEVELOPER_MODE},1)

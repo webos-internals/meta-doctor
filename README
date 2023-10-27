@@ -29,6 +29,9 @@ installation and testing of applications on the device without needing
 to type the developer mode activation code. There are no known
 security implications of leaving a phone in developer mode.
 
+DISABLE_DEFUNCT_APPS this will disable (hide) no longer functioning default 
+apps such as Backup, FirstUse and Updates.
+
 ENABLE_BETA_FEEDS installs a flag file which tells Preware to
 automatically install beta feeds for all WebOS Internals packages.
 ENABLE_ALPHA_FEEDS installs the corresponding flag for the alpha
