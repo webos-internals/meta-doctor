@@ -48,7 +48,7 @@
 # ADD_EXTRA_CARRIERS    = 1
 # VAR_PARTITION_SIZE    = 2GB
 # SWAP_PARTITION_SIZE   = 512MB
-# EXT3FS_PARTITION_SIZE = 2GB
+# EXT3FS_PARTITION_SIZE = 4GB
 
 # Select "pre", "preplus", "pixi", "pixiplus", "pre2", "pre3", "veer", "touchpad", or "touchpadgo".
 DEVICE = undefined
@@ -57,7 +57,7 @@ DEVICE = undefined
 CARRIER = undefined
 
 # Supply a different boot logo if you wish.
-CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
+#CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 
 ######################################
 ## END OF AREA FOR END USER CHANGES ##
@@ -67,7 +67,7 @@ CUSTOM_BOOTLOGO = scripts/WebOS-Internals.tga
 ## START OF AREA FOR ROD'S USE ONLY ##
 ######################################
 
-ifeq (${LOGNAME},rwhitby)
+#ifeq (${LOGNAME},rwhitby)
 # DEVICE = pre3
 # CARRIER = wr
 ifeq (${VERSION},1.4.5)
@@ -108,13 +108,13 @@ DISABLE_UPLOAD_DAEMON = 1
 ENABLE_ALPHA_FEEDS  = 1
 ENABLE_BETA_FEEDS  = 1
 # EXT3FS_PARTITION_SIZE = 2GB
-# DISABLE_UPDATE_DAEMON = 1
+DISABLE_UPDATE_DAEMON = 1
 # DISABLE_MODEM_UPDATE  = 1
 # REMOVE_MODEL_CHECK    = 1
-# REMOVE_CARRIER_CHECK  = 1
+REMOVE_CARRIER_CHECK  = 1
 # REMOVE_BUILD_NAME    = 1
-# REMOVE_LOCATION_HOST  = 1
-# REMOVE_UPDATE_SITE    = 1
+REMOVE_LOCATION_HOST  = 1
+REMOVE_UPDATE_SITE    = 1
 
 # CUSTOM_WEBOS_TARBALL = webOS.tar
 # CUSTOM_CARRIER_TARBALL = wr.tar
@@ -138,7 +138,7 @@ ENABLE_BETA_FEEDS  = 1
 # CUSTOM_INSTALLER = nova-installer-image-castle.uImage
 # CUSTOM_KERNEL_DIR = rootfs
 # CUSTOM_ROOTFS = nova-cust-image-castle.rootfs.tar.gz
-endif
+#endif
 
 ####################################
 ## END OF AREA FOR ROD'S USE ONLY ##
@@ -151,7 +151,7 @@ endif
 CARRIER_TARBALL = ${CARRIER}.tar
 
 # Latest supported version is:
-# VERSION = 2.2.0
+# VERSION = 3.0.6
 
 ifeq (${DEVICE},pre)
 CODENAME = castle
